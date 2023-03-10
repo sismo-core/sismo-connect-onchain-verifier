@@ -1,0 +1,4 @@
+[submodule "lib/hydra-s1-zkps"]
+	path = lib/hydra-s1-zkps
+	url = https://github.com/sismo-core/hydra-s1-zkps
+	branch = 2.0.0-beta4
