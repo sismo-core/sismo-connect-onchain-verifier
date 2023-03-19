@@ -10,64 +10,58 @@ contract ZKConnectVerifier {
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
     error InvalidZKConnectVersion(bytes32 version);
-    error InvalidNamespace(bytes32 namespace);
+    error InvalidNamespace(bytes16 namespace);
+    error InvalidAppId(bytes16 appId);
 
-    function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest, bytes16 namespace)
-        public
-        returns (ZkConnectVerifiedResult memory result)
-    {
+    function verify(
+        bytes16 appId,
+        ZkConnectResponse memory zkConnectResponse,
+        DataRequest memory dataRequest,
+        bytes16 namespace
+    ) public returns (ZkConnectVerifiedResult memory result) {
         if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
             revert InvalidZKConnectVersion(zkConnectResponse.version);
+        }
+        if (zkConnectResponse.appId != appId) {
+            revert InvalidAppId(zkConnectResponse.appId);
         }
         if (zkConnectResponse.namespace != namespace) {
             revert InvalidNamespace(zkConnectResponse.namespace);
         }
 
-        VerifiedStatement[] memory verifiedStatements =
-            new VerifiedStatement[](zkConnectResponse.verifiableStatements.length);
+        ZkConnectProof[] memory proofs = new ZkConnectProof[](zkConnectResponse.proofs.length);
 
         uint256 vaultId = 0;
-        for (uint256 i = 0; i < zkConnectResponse.verifiableStatements.length; i++) {
-            VerifiableStatement memory statement = zkConnectResponse.verifiableStatements[i];
-            _checkVerifiableStatementMatchesDataRequest(statement, dataRequest);
-            (vaultId, verifiedStatements[i]) =
-                _verifyProof(zkConnectResponse.appId, zkConnectResponse.namespace, statement);
+        // todo compute the total amount of verifiedStatements
+        VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](3);
+        for (uint256 i = 0; i < proofs.length; i++) {
+            ZkConnectProof memory proof = proofs[i];
+            Statement[] memory statements = proof.statements;
+            VerifiedStatement[] memory verifiedStatementFromProof = new VerifiedStatement[](statements.length);
+
+            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof);
+
+            for (uint256 j = 0; j < verifiedStatementFromProof.length; j++) {
+                verifiedStatements[i + j] = verifiedStatementFromProof[j];
+            }
         }
 
+        _checkVerifiedStatementsMatchDataRequest(verifiedStatements, dataRequest);
+
         return ZkConnectVerifiedResult({
-            appId: zkConnectResponse.appId,
-            namespace: zkConnectResponse.namespace,
+            appId: appId,
+            namespace: namespace,
             version: zkConnectResponse.version,
             verifiedStatements: verifiedStatements,
             vaultId: vaultId
         });
     }
 
-    function _verifyProof(bytes16 appId, bytes16 namespace, VerifiableStatement memory statement)
-        public
-        returns (uint256, VerifiedStatement memory)
-    {
-        (uint256 vaultId, uint256 proofId) = _verifiers[statement.provingScheme].verify(appId, namespace, statement);
-        return (
-            vaultId,
-            VerifiedStatement({
-                groupId: statement.groupId,
-                groupTimestamp: statement.groupTimestamp,
-                requestedValue: statement.requestedValue,
-                comparator: statement.comparator,
-                provingScheme: statement.provingScheme,
-                extraData: statement.extraData,
-                value: statement.value,
-                proof: statement.proof,
-                proofId: proofId
-            })
-        );
-    }
-
-    function _checkVerifiableStatementMatchesDataRequest(
-        VerifiableStatement memory statement,
+    function _checkVerifiedStatementsMatchDataRequest(
+        VerifiedStatement[] memory verifiedStatements,
         DataRequest memory dataRequest
     ) public {
+        // Statement[] memory statements = proof.statements;
         // if (statement.groupId != request.groupId) {
         //     return false;
         // }

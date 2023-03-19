@@ -35,35 +35,38 @@ enum LogicalOperator {
     OR
 }
 
-struct VerifiableStatement {
+struct Statement {
     bytes16 groupId;
     bytes16 groupTimestamp;
     uint256 requestedValue;
-    StatementComparator comparator;
-    bytes32 provingScheme;
-    bytes extraData;
     uint256 value;
-    bytes proof;
+    bytes extraData;
+    StatementComparator comparator;
+}
+
+struct ZkConnectProof {
+    Statement[] statements;
+    bytes32 provingScheme;
+    bytes proofData;
+    bytes extraData;
 }
 
 struct VerifiedStatement {
     bytes16 groupId;
     bytes16 groupTimestamp;
     uint256 requestedValue;
+    uint256 value;
     StatementComparator comparator;
     bytes32 provingScheme;
-    bytes extraData;
-    uint256 value;
-    bytes proof;
     uint256 proofId;
+    bytes extraData;
 }
 
 struct ZkConnectResponse {
     bytes16 appId;
     bytes16 namespace;
     bytes32 version;
-    bytes authProof;
-    VerifiableStatement[] verifiableStatements;
+    ZkConnectProof[] proofs;
 }
 
 struct ZkConnectVerifiedResult {

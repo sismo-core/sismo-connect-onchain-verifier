@@ -31,28 +31,51 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
 
     error InvalidProof();
 
+    error ProofContainsTooManyStatements(uint256 numberOfStatements);
+    error InvalidVersion(bytes32 version);
+
     error InvalidExtraData();
     error InvalidRequestedValue();
 
-    function verify(bytes16 appId, bytes16 namespace, VerifiableStatement memory statement)
+    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof)
         public
         override
-        returns (uint256 vaultId, uint256 proofId)
+        returns (uint256 vaultId, VerifiedStatement[] memory)
     {
-        HydraS2SnarkProof memory snarkProof = abi.decode(statement.proof, (HydraS2SnarkProof));
+        // HydraS2 Proving scheme only accept 1 statement per proof
+        if (proof.statements.length > 1) {
+            revert ProofContainsTooManyStatements(proof.statements.length);
+        }
+        if (proof.provingScheme != HYDRA_S2_VERSION) {
+            revert InvalidVersion(proof.provingScheme);
+        }
+
+        Statement memory statement = proof.statements[0];
+
+        HydraS2SnarkProof memory snarkProof = abi.decode(proof.proofData, (HydraS2SnarkProof));
 
         _checkPublicInputs(appId, namespace, statement, snarkProof.inputs);
         _checkSnarkProof(snarkProof);
 
-        return (snarkProof.inputs[10], snarkProof.inputs[6]);
+        VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](1);
+        verifiedStatements[0] = VerifiedStatement({
+            groupId: statement.groupId,
+            groupTimestamp: statement.groupTimestamp,
+            requestedValue: statement.requestedValue,
+            value: statement.value,
+            comparator: statement.comparator,
+            provingScheme: proof.provingScheme,
+            proofId: snarkProof.inputs[6],
+            extraData: statement.extraData
+        });
+
+        return (snarkProof.inputs[10], verifiedStatements);
     }
 
-    function _checkPublicInputs(
-        bytes16 appId,
-        bytes16 namespace,
-        VerifiableStatement memory statement,
-        uint256[14] memory inputs
-    ) internal pure {
+    function _checkPublicInputs(bytes16 appId, bytes16 namespace, Statement memory statement, uint256[14] memory inputs)
+        internal
+        pure
+    {
         if (uint256(keccak256(statement.extraData)) != inputs[1]) {
             revert InvalidExtraData();
         }
