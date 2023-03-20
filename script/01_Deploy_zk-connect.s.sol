@@ -13,6 +13,8 @@ contract DeployZkConnect is Script {
 
         zkConnectVerifier = new ZkConnectVerifier();
 
+        console2.log("zkConnectVerifier Deployed:", address(zkConnectVerifier));
+
         vm.stopBroadcast();
     }
 }

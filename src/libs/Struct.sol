@@ -38,7 +38,6 @@ enum LogicalOperator {
 struct Statement {
     bytes16 groupId;
     bytes16 groupTimestamp;
-    uint256 requestedValue;
     uint256 value;
     bytes extraData;
     StatementComparator comparator;
@@ -54,7 +53,6 @@ struct ZkConnectProof {
 struct VerifiedStatement {
     bytes16 groupId;
     bytes16 groupTimestamp;
-    uint256 requestedValue;
     uint256 value;
     StatementComparator comparator;
     bytes32 provingScheme;

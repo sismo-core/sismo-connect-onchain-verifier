@@ -3,8 +3,9 @@ pragma solidity ^0.8.17;
 
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import "./libs/Struct.sol";
+import "forge-std/console.sol";
 
-contract ZKConnectVerifier {
+contract ZkConnectVerifier {
     bytes32 immutable ZK_CONNECT_VERSION = "zk-connect-v1";
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
@@ -12,6 +13,9 @@ contract ZKConnectVerifier {
     error InvalidZKConnectVersion(bytes32 version);
     error InvalidNamespace(bytes16 namespace);
     error InvalidAppId(bytes16 appId);
+    error ProvingSchemeNotSupported(bytes32 provingScheme);
+
+    event VerifierSet(bytes32, address);
 
     function verify(
         bytes16 appId,
@@ -29,16 +33,17 @@ contract ZKConnectVerifier {
             revert InvalidNamespace(zkConnectResponse.namespace);
         }
 
-        ZkConnectProof[] memory proofs = new ZkConnectProof[](zkConnectResponse.proofs.length);
-
         uint256 vaultId = 0;
         // todo compute the total amount of verifiedStatements
-        VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](3);
-        for (uint256 i = 0; i < proofs.length; i++) {
-            ZkConnectProof memory proof = proofs[i];
+        VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](1);
+        for (uint256 i = 0; i < zkConnectResponse.proofs.length; i++) {
+            ZkConnectProof memory proof = zkConnectResponse.proofs[i];
             Statement[] memory statements = proof.statements;
             VerifiedStatement[] memory verifiedStatementFromProof = new VerifiedStatement[](statements.length);
 
+            if (_verifiers[proof.provingScheme] == IBaseVerifier(address(0))) {
+                revert ProvingSchemeNotSupported(proof.provingScheme);
+            }
             (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof);
 
             for (uint256 j = 0; j < verifiedStatementFromProof.length; j++) {
@@ -55,6 +60,15 @@ contract ZKConnectVerifier {
             verifiedStatements: verifiedStatements,
             vaultId: vaultId
         });
+    }
+
+    function setVerifier(bytes32 provingScheme, address verifierAddress) public {
+        _setVerifier(provingScheme, verifierAddress);
+    }
+
+    function _setVerifier(bytes32 provingScheme, address verifierAddress) internal {
+        _verifiers[provingScheme] = IBaseVerifier(verifierAddress);
+        emit VerifierSet(provingScheme, verifierAddress);
     }
 
     function _checkVerifiedStatementsMatchDataRequest(

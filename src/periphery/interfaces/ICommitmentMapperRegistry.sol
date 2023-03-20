@@ -4,18 +4,6 @@ pragma solidity ^0.8.14;
 interface ICommitmentMapperRegistry {
     event UpdatedCommitmentMapperEdDSAPubKey(uint256[2] newEdDSAPubKey);
 
-    error PubKeyNotValid(uint256[2] pubKey);
-
-    /**
-     * @dev Initializes the contract, to be called by the proxy delegating calls to this implementation
-     * @param owner Owner of the contract, can update public key and address
-     * @param commitmentMapperEdDSAPubKey EdDSA public key of the commitment mapper
-     * @param commitmentMapperAddress Address of the commitment mapper
-     * @notice The reinitializer modifier is needed to configure modules that are added through upgrades and that require initialization.
-     */
-    function initialize(address owner, uint256[2] memory commitmentMapperEdDSAPubKey, address commitmentMapperAddress)
-        external;
-
     /**
      * @dev Updates the EdDSA public key
      * @param newEdDSAPubKey new EdDSA pubic key
