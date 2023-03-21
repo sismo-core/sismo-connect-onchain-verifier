@@ -6,6 +6,7 @@ import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/Hydr
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
 import "../libs/Struct.sol";
+import "../libs/Constants.sol";
 import "forge-std/console.sol";
 
 struct HydraS2SnarkProof {
@@ -44,8 +45,14 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
     error DestinationMismatch(address expectedDestination, address inputDestination);
     error CommitmentMapperPubKeyMismatch(uint256 expectedX, uint256 expectedY, uint256 inputX, uint256 inputY);
 
+    error StatementComparatorMismatch(uint256 statementComparatorFromProof, StatementComparator expectedStatementComparator);
+    error MismatchRequestIdentifier(uint256 requestIdentifierFromProof, uint256 expectedRequestIdentifier);
     error InvalidExtraData();
     error InvalidRequestedValue();
+    error DestinationVerificationNeedsToBeEnabled();
+    error SourceVerificationNeedsToBeEnabled();
+    error AccountsTreeValueMismatch(uint256 accountsTreeValueFromProof, uint256 expectedAccountsTreeValue);
+    error AppIdMismatch(bytes16 appIdFromProof, bytes16 expectedAppId);
 
     constructor(address commitmentMapperRegistry, address availableRootsRegistry) {
         COMMITMENT_MAPPER_REGISTRY = ICommitmentMapperRegistry(commitmentMapperRegistry);
@@ -86,20 +93,65 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         internal
         view
     {
-        // if (uint256(keccak256(statement.extraData)) != inputs[1]) {
-        //     revert InvalidExtraData();
-        // }
+        address destinationIdentifier = address(uint160(inputs[0]));
+        uint256 extraData = inputs[1];
+        uint256 commitmentMapperPubKeyX = inputs[2];
+        uint256 commitmentMapperPubKeyY = inputs[3];
+        uint256 registryTreeRoot = inputs[4];
+        uint256 requestIdentifier = inputs[5];
+        uint256 proofIdentifier = inputs[6];
+        uint256 statementValue = inputs[7];
+        uint256 accountsTreeValue = inputs[8];
+        uint256 statementComparator = inputs[9];
+        uint256 vaultIdentifier = inputs[10];
+        uint256 vaultNamespace = inputs[11];
+        bool sourceVerificationEnabled = inputs[12] == 1;
+        bool destinationVerificationEnabled = inputs[13] == 1;
+
+
+        // statementComparator
+        bool isStatementComparatorFromProofEqualToOne = statementComparator == 1;
+        bool isStatementComparatorFromStatementEqualToEQ = statement.comparator == StatementComparator.EQ;
+        if (isStatementComparatorFromProofEqualToOne != isStatementComparatorFromStatementEqualToEQ) {
+            revert StatementComparatorMismatch(statementComparator, statement.comparator);
+        }
+        // statementValue
+        if (statementValue != statement.value) {
+            revert InvalidRequestedValue();
+        }
+        // requestIdentifier
+        uint256 expectedRequestIdentifier = _encodeRequestIdentifier(appId, statement.groupId, statement.groupTimestamp, namespace);
+        if (requestIdentifier != expectedRequestIdentifier) {
+            revert MismatchRequestIdentifier(requestIdentifier, expectedRequestIdentifier);
+        }
+        // commitmentMapperPubKey
         uint256[2] memory commitmentMapperPubKey = COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
-        if (inputs[2] != commitmentMapperPubKey[0] || inputs[3] != commitmentMapperPubKey[1]) {
+        if (commitmentMapperPubKeyX != commitmentMapperPubKey[0] || commitmentMapperPubKeyY != commitmentMapperPubKey[1]) {
             revert CommitmentMapperPubKeyMismatch(
-                commitmentMapperPubKey[0], commitmentMapperPubKey[1], inputs[2], inputs[3]
+                commitmentMapperPubKey[0], commitmentMapperPubKey[1], commitmentMapperPubKeyX, commitmentMapperPubKeyY
             );
         }
-        if (!AVAILABLE_ROOTS_REGISTRY.isRootAvailable(inputs[4])) {
-            revert RegistryRootMismatch(inputs[4]);
+        // destinationVerificationEnabled
+        // if (destinationVerificationEnabled == false) {
+        //     revert DestinationVerificationNeedsToBeEnabled();
+        // }
+        // sourceVerificationEnabled
+        if (sourceVerificationEnabled == false) {
+            revert SourceVerificationNeedsToBeEnabled();
         }
-        if (statement.value != inputs[7]) {
-            revert InvalidRequestedValue();
+        // isRootAvailable
+        if (!AVAILABLE_ROOTS_REGISTRY.isRootAvailable(registryTreeRoot)) {
+            revert RegistryRootMismatch(registryTreeRoot);
+        }
+        // accountsTreeValue
+        uint256 groupSnapshotId = _encodeAccountsTreeValue(statement.groupId, statement.groupTimestamp);
+        if (accountsTreeValue != groupSnapshotId) {
+            revert AccountsTreeValueMismatch(accountsTreeValue, groupSnapshotId);
+        }
+        // proofIdentifier
+        bytes16 appIdFromProof = bytes16(uint128(vaultNamespace));
+        if (appIdFromProof != bytes16(appId)) {
+            revert AppIdMismatch(appIdFromProof, appId);
         }
     }
 
@@ -107,5 +159,15 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         if (!verifyProof(snarkProof.a, snarkProof.b, snarkProof.c, snarkProof.inputs)) {
             revert InvalidProof();
         }
+    }
+
+    function _encodeRequestIdentifier(bytes16 appId, bytes16 groupId, bytes16 groupTimestamp, bytes16 namespace) private pure returns (uint256) {
+        bytes32 groupSnapshotId = bytes32(abi.encodePacked(groupId, groupTimestamp));
+        bytes32 serviceId = bytes32(abi.encodePacked(appId, namespace));
+        return uint256(keccak256(abi.encodePacked(serviceId, groupSnapshotId))) % SNARK_FIELD;
+    }
+
+    function _encodeAccountsTreeValue(bytes16 groupId, bytes16 groupTimestamp) private pure returns (uint256) {
+        return uint256(bytes32(abi.encodePacked(groupId, groupTimestamp))) % SNARK_FIELD;
     }
 }
