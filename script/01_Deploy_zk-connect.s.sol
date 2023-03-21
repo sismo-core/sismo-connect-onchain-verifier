@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import "../src/ZkConnectVerifier.sol";
+import {ZkConnectVerifier} from "../src/ZkConnectVerifier.sol";
 
 contract DeployZkConnect is Script {
     ZkConnectVerifier zkConnectVerifier;
