@@ -54,26 +54,22 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
 
     function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof)
         public
+        view
         override
-        returns (uint256 vaultId, VerifiedStatement[] memory)
+        returns (uint256 vaultId, VerifiedStatement memory)
     {
-        // HydraS2 Proving scheme only accept 1 statement per proof
-        if (proof.statements.length > 1) {
-            revert ProofContainsTooManyStatements(proof.statements.length);
-        }
         if (proof.provingScheme != HYDRA_S2_VERSION) {
             revert InvalidVersion(proof.provingScheme);
         }
 
-        Statement memory statement = proof.statements[0];
+        Statement memory statement = proof.statement;
 
         HydraS2SnarkProof memory snarkProof = abi.decode(proof.proofData, (HydraS2SnarkProof));
 
         _checkPublicInputs(appId, namespace, statement, snarkProof.inputs);
         _checkSnarkProof(snarkProof);
 
-        VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](1);
-        verifiedStatements[0] = VerifiedStatement({
+        VerifiedStatement memory verifiedStatement = VerifiedStatement({
             groupId: statement.groupId,
             groupTimestamp: statement.groupTimestamp,
             value: statement.value,
@@ -83,7 +79,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
             extraData: statement.extraData
         });
 
-        return (snarkProof.inputs[10], verifiedStatements);
+        return (snarkProof.inputs[10], verifiedStatement);
     }
 
     function _checkPublicInputs(bytes16 appId, bytes16 namespace, Statement memory statement, uint256[14] memory inputs)

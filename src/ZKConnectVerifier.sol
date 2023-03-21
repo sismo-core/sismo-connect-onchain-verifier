@@ -34,21 +34,18 @@ contract ZkConnectVerifier {
         }
 
         uint256 vaultId = 0;
+        VerifiedStatement memory verifiedStatementFromProof;
         // todo compute the total amount of verifiedStatements
-        VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](1);
+        VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](zkConnectResponse.proofs.length);
         for (uint256 i = 0; i < zkConnectResponse.proofs.length; i++) {
             ZkConnectProof memory proof = zkConnectResponse.proofs[i];
-            Statement[] memory statements = proof.statements;
-            VerifiedStatement[] memory verifiedStatementFromProof = new VerifiedStatement[](statements.length);
 
+            
             if (_verifiers[proof.provingScheme] == IBaseVerifier(address(0))) {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
             (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof);
-
-            for (uint256 j = 0; j < verifiedStatementFromProof.length; j++) {
-                verifiedStatements[i + j] = verifiedStatementFromProof[j];
-            }
+            verifiedStatements[i] = verifiedStatementFromProof;
         }
 
         _checkVerifiedStatementsMatchDataRequest(verifiedStatements, dataRequest);
