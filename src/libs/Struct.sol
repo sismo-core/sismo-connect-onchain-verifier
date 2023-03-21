@@ -44,7 +44,7 @@ struct Statement {
 }
 
 struct ZkConnectProof {
-    Statement[] statements;
+    Statement statement;
     bytes32 provingScheme;
     bytes proofData;
     bytes extraData;
