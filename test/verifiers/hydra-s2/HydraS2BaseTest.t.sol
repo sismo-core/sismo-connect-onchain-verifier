@@ -26,4 +26,24 @@ contract HydraS2BaseTest is BaseTest {
         commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(hydraS2Proofs.getEdDSAPubKey());
         availableRootsRegistry.registerRoot(hydraS2Proofs.getRoot());
     }
+
+    function createDataRequest(bytes16 appId, bytes16 groupId, bytes16 groupTimestamp, bytes16 namespace) 
+        public 
+        pure 
+        returns (DataRequest memory) 
+    {
+       StatementRequest[] memory statementRequests = new StatementRequest[](1);
+        statementRequests[0] = StatementRequest({
+            groupId: groupId,
+            groupTimestamp: groupTimestamp,
+            requestedValue: 0,
+            comparator: StatementComparator.GTE,
+            provingScheme: "hydra-s2.1",
+            extraData: ""
+        });
+        DataRequest memory dataRequest =
+            DataRequest({statementRequests: statementRequests, operator: LogicalOperator.AND});
+
+        return (dataRequest);
+    }
 }

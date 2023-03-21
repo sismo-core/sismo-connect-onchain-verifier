@@ -4,18 +4,18 @@ pragma solidity ^0.8.17;
 import "src/libs/Struct.sol";
 
 contract HydraS2Proofs {
-    function getEdDSAPubKey() public view returns (uint256[2] memory) {
+    function getEdDSAPubKey() public pure returns (uint256[2] memory) {
         return [
             0x7f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb9,
             0x20706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa
         ];
     }
 
-    function getRoot() public view returns (uint256) {
+    function getRoot() public pure returns (uint256) {
         return 0x1d4a72bd1c1e4f9ab68c3c4c55afd3e582685a18b9ec09fc96136619d2513fe8;
     }
 
-    function getZkConnectResponse1() public view returns (ZkConnectResponse memory) {
+    function getZkConnectResponse1() public pure returns (ZkConnectResponse memory) {
         Statement memory statement = Statement({
             groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
             value: 1,
@@ -36,7 +36,8 @@ contract HydraS2Proofs {
             appId: 0x112a692a2005259c25f6094161007967,
             namespace: bytes16(keccak256('main')),
             version: bytes32("zk-connect-v1"),
-            proofs: proofs
+            proofs: proofs,
+            destination: 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE
         });
     }
 }

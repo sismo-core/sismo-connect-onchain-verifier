@@ -6,6 +6,7 @@ struct ZkConnectRequest {
     bytes16 appId;
     bytes16 namespace;
     bytes32 version;
+    address destination;
 }
 
 struct DataRequest {
@@ -64,6 +65,7 @@ struct ZkConnectResponse {
     bytes16 appId;
     bytes16 namespace;
     bytes32 version;
+    address destination;
     ZkConnectProof[] proofs;
 }
 
@@ -72,5 +74,6 @@ struct ZkConnectVerifiedResult {
     bytes16 namespace;
     bytes32 version;
     uint256 vaultId;
+    address destination;
     VerifiedStatement[] verifiedStatements;
 }

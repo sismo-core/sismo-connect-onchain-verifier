@@ -42,7 +42,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
     error ProofContainsTooManyStatements(uint256 numberOfStatements);
     error InvalidVersion(bytes32 version);
     error RegistryRootMismatch(uint256 inputRoot);
-    error DestinationMismatch(address expectedDestination, address inputDestination);
+    error DestinationMismatch(address destinationFromProof, address expectedDestination);
     error CommitmentMapperPubKeyMismatch(uint256 expectedX, uint256 expectedY, uint256 inputX, uint256 inputY);
 
     error StatementComparatorMismatch(uint256 statementComparatorFromProof, StatementComparator expectedStatementComparator);
@@ -59,7 +59,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         AVAILABLE_ROOTS_REGISTRY = IAvailableRootsRegistry(availableRootsRegistry);
     }
 
-    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof)
+    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof, address destination)
         public
         view
         override
@@ -134,6 +134,10 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         // destinationVerificationEnabled
         // if (destinationVerificationEnabled == false) {
         //     revert DestinationVerificationNeedsToBeEnabled();
+        // }
+        // destinationIdentifier
+        // if (destinationIdentifier != destination) {
+        //     revert DestinationMismatch(destinationIdentifier, destination);
         // }
         // sourceVerificationEnabled
         if (sourceVerificationEnabled == false) {
