@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "../libs/utils/Struct.sol";
 
 interface IBaseVerifier {
-    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof, address destination)
+    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof, bytes memory signedMessage)
         external
         returns (uint256 vaultId, VerifiedStatement memory);
 }

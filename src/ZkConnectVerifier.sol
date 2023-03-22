@@ -39,7 +39,7 @@ contract ZkConnectVerifier {
         }
 
         uint256 vaultId = 0;
-        address destination = zkConnectResponse.destination;
+        bytes memory signedMessage = zkConnectResponse.signedMessage;
         VerifiedStatement memory verifiedStatementFromProof;
         VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](zkConnectResponse.proofs.length);
         for (uint256 i = 0; i < zkConnectResponse.proofs.length; i++) {
@@ -48,7 +48,7 @@ contract ZkConnectVerifier {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
             _checkStatementMatchDataRequest(proof, dataRequest);
-            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof, destination);
+            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof, signedMessage);
             verifiedStatements[i] = verifiedStatementFromProof;
         }
 
@@ -57,7 +57,7 @@ contract ZkConnectVerifier {
             namespace: namespace,
             version: zkConnectResponse.version,
             verifiedStatements: verifiedStatements,
-            destination: destination,
+            signedMessage: signedMessage,
             vaultId: vaultId
         });
     }
