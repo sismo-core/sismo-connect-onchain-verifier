@@ -33,11 +33,17 @@ contract HydraS2Proofs {
             extraData: ""
         });
 
+        AuthProof memory authProof = AuthProof({
+            proofData : hex"",
+            provingScheme: bytes32("hydra-s2.1")
+        });
+
         return abi.encode(ZkConnectResponse({
             appId: 0x112a692a2005259c25f6094161007967,
             namespace: bytes16(keccak256('main')),
             version: bytes32("zk-connect-v1"),
             proofs: proofs,
+            authProof: authProof,
             signedMessage: hex"00"
         }));
     }

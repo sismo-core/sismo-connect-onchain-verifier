@@ -4,7 +4,7 @@ pragma solidity ^0.8.14;
 import {Context} from '@openzeppelin/contracts/utils/Context.sol';
 import {ZkConnectVerifier} from 'src/ZkConnectVerifier.sol';
 import {IAddressesProvider} from 'src/periphery/interfaces/IAddressesProvider.sol';
-import {ZkConnectResponse, DataRequest, StatementRequest, StatementComparator, LogicalOperator } from 'src/libs/utils/Struct.sol';
+import {ZkConnectResponse, ZkConnectVerifiedResult, DataRequest, StatementRequest, StatementComparator, LogicalOperator } from 'src/libs/utils/Struct.sol';
 
 contract ZkConnect is Context {
   ZkConnectVerifier private _zkConnectVerifier;
@@ -42,7 +42,10 @@ contract ZkConnect is Context {
         return (dataRequest);
     }
 
-  function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest, bytes16 namespace) public {
+  function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest, bytes16 namespace) 
+    public 
+    returns (ZkConnectVerifiedResult memory) 
+  {
     if (zkConnectResponseEncoded.length == 0) {
       revert ZkConnectResponseIsEmpty();
     }
@@ -60,15 +63,14 @@ contract ZkConnect is Context {
       revert NamespaceMismatch(zkConnectResponse.namespace, namespace);
     }
 
-
-    _zkConnectVerifier.verify(appId, zkConnectResponse, dataRequest, namespace);
+    return _zkConnectVerifier.verify(zkConnectResponse, dataRequest);
   }
 
-  function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest) public {
-    verify(zkConnectResponseEncoded, dataRequest, bytes16(keccak256("main")));
+  function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest) public returns (ZkConnectVerifiedResult memory) {
+    return verify(zkConnectResponseEncoded, dataRequest, bytes16(keccak256("main")));
   }
 
-  function verify(bytes memory zkConnectResponseEncoded) public {
-    verify(zkConnectResponseEncoded, DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND}));
+  function verify(bytes memory zkConnectResponseEncoded) public returns (ZkConnectVerifiedResult memory) {
+    return verify(zkConnectResponseEncoded, DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND}));
   }
 }

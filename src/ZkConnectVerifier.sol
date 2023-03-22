@@ -10,27 +10,42 @@ contract ZkConnectVerifier {
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
-    error InvalidZKConnectVersion(bytes32 version);
-    error InvalidNamespace(bytes16 namespace);
-    error InvalidAppId(bytes16 appId);
+    error ProofsAndStatementRequestsAreUnequalInLength();
     error ProvingSchemeNotSupported(bytes32 provingScheme);
     error StatementRequestNotFound(bytes16 groupId, bytes16 groupTimestamp);
     error StatementComparatorMismatch(StatementComparator comparator, StatementComparator expectedComparator);
     error StatementExtraDataMismatch(bytes extraData, bytes expectedExtraData);
     error StatementProvingSchemeMismatch(bytes32 provingScheme, bytes32 expectedProvingScheme);
     error StatementValueMismatch(StatementComparator comparator, uint256 value, uint256 expectedValue);
+    error AuthProofIsEmpty();
 
     event VerifierSet(bytes32, address);
 
     function verify(
-        bytes16 appId,
         ZkConnectResponse memory zkConnectResponse,
-        DataRequest memory dataRequest,
-        bytes16 namespace
-    ) public returns (ZkConnectVerifiedResult memory result) {
-
+        DataRequest memory dataRequest
+    ) public returns (ZkConnectVerifiedResult memory) {
         uint256 vaultId = 0;
+        bytes16 appId = zkConnectResponse.appId;
+        bytes16 namespace = zkConnectResponse.namespace;
         bytes memory signedMessage = zkConnectResponse.signedMessage;
+
+        if (zkConnectResponse.proofs.length != dataRequest.statementRequests.length) {
+            revert ProofsAndStatementRequestsAreUnequalInLength();
+        }
+
+        if (zkConnectResponse.proofs.length == 0 &&  dataRequest.statementRequests.length == 0) {
+            vaultId = _verifyAuthProof(appId, zkConnectResponse.authProof);
+            return ZkConnectVerifiedResult({
+            appId: appId,
+            namespace: namespace,
+            version: zkConnectResponse.version,
+            verifiedStatements: new VerifiedStatement[](0),
+            signedMessage: signedMessage,
+            vaultId: vaultId
+        });
+        }
+        
         VerifiedStatement memory verifiedStatementFromProof;
         VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](zkConnectResponse.proofs.length);
         for (uint256 i = 0; i < zkConnectResponse.proofs.length; i++) {
@@ -60,6 +75,15 @@ contract ZkConnectVerifier {
     function _setVerifier(bytes32 provingScheme, address verifierAddress) internal {
         _verifiers[provingScheme] = IBaseVerifier(verifierAddress);
         emit VerifierSet(provingScheme, verifierAddress);
+    }
+
+    function _verifyAuthProof(bytes16 appId, AuthProof memory authProof) internal returns (uint256 vaultId) {
+
+        if (keccak256(authProof.proofData) == keccak256(bytes(""))) {
+            revert AuthProofIsEmpty();
+        }
+
+        return _verifiers[authProof.provingScheme].verifyAuthProof(appId, authProof);
     }
 
     function _checkStatementMatchDataRequest(
