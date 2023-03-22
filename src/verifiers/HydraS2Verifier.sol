@@ -5,8 +5,8 @@ import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
-import "../libs/Struct.sol";
-import "../libs/Constants.sol";
+import "../libs/utils/Struct.sol";
+import "../libs/utils/Constants.sol";
 import "forge-std/console.sol";
 
 struct HydraS2SnarkProof {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-import "src/libs/Struct.sol";
+import "src/libs/utils/Struct.sol";
 
 contract HydraS2Proofs {
     function getEdDSAPubKey() public pure returns (uint256[2] memory) {

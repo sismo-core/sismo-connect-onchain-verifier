@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {HydraS2BaseTest} from "./HydraS2BaseTest.t.sol";
-import "src/libs/Struct.sol";
+import "src/libs/utils/Struct.sol";
 
 contract ZkConnectTest is HydraS2BaseTest {
     function test_ZkConnect() public {

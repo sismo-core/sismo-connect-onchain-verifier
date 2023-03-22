@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
-import "./libs/Struct.sol";
+import "./libs/utils/Struct.sol";
 import "forge-std/console.sol";
 
 contract ZkConnectVerifier {
