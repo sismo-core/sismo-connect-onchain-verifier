@@ -36,6 +36,27 @@ contract ZkConnect is Context {
         }
         ZkConnectResponse memory zkConnectResponse = abi.decode(zkConnectResponseEncoded, (ZkConnectResponse));
 
+        return verify(zkConnectResponse, dataRequest, namespace);
+    }
+
+    function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest)
+        public
+        returns (ZkConnectVerifiedResult memory)
+    {
+        return verify(zkConnectResponseEncoded, dataRequest, bytes16(keccak256("main")));
+    }
+
+    function verify(bytes memory zkConnectResponseEncoded) public returns (ZkConnectVerifiedResult memory) {
+        return verify(
+            zkConnectResponseEncoded,
+            DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND})
+        );
+    }
+
+    function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest, bytes16 namespace)
+        public
+        returns (ZkConnectVerifiedResult memory)
+    {
         if (zkConnectResponse.version != _zkConnectVerifier.ZK_CONNECT_VERSION()) {
             revert InvalidZkConnectVersion(zkConnectResponse.version, _zkConnectVerifier.ZK_CONNECT_VERSION());
         }
@@ -51,16 +72,16 @@ contract ZkConnect is Context {
         return _zkConnectVerifier.verify(zkConnectResponse, dataRequest);
     }
 
-    function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest)
+    function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest)
         public
         returns (ZkConnectVerifiedResult memory)
     {
-        return verify(zkConnectResponseEncoded, dataRequest, bytes16(keccak256("main")));
+        return verify(zkConnectResponse, dataRequest, bytes16(keccak256("main")));
     }
 
-    function verify(bytes memory zkConnectResponseEncoded) public returns (ZkConnectVerifiedResult memory) {
+    function verify(ZkConnectResponse memory zkConnectResponse) public returns (ZkConnectVerifiedResult memory) {
         return verify(
-            zkConnectResponseEncoded,
+            zkConnectResponse,
             DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND})
         );
     }
