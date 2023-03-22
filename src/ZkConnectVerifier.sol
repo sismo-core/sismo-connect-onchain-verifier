@@ -35,7 +35,7 @@ contract ZkConnectVerifier {
         }
 
         if (zkConnectResponse.proofs.length == 0 && dataRequest.statementRequests.length == 0) {
-            vaultId = _verifyAuthProof(appId, zkConnectResponse.authProof);
+            vaultId = _verifyAuthProof(appId, zkConnectResponse.authProof, zkConnectResponse.signedMessage);
             return ZkConnectVerifiedResult({
                 appId: appId,
                 namespace: namespace,
@@ -78,12 +78,13 @@ contract ZkConnectVerifier {
         emit VerifierSet(provingScheme, verifierAddress);
     }
 
-    function _verifyAuthProof(bytes16 appId, AuthProof memory authProof) internal returns (uint256 vaultId) {
+    function _verifyAuthProof(bytes16 appId, AuthProof memory authProof, bytes memory signedMessage) internal returns (uint256 vaultId) {
+
         if (keccak256(authProof.proofData) == keccak256(bytes(""))) {
             revert AuthProofIsEmpty();
         }
 
-        return _verifiers[authProof.provingScheme].verifyAuthProof(appId, authProof);
+        return _verifiers[authProof.provingScheme].verifyAuthProof(appId, authProof, signedMessage);
     }
 
     function _checkStatementMatchDataRequest(ZkConnectProof memory proof, DataRequest memory dataRequest) public pure {
