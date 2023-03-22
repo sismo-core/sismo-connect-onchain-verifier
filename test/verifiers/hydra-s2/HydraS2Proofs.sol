@@ -35,7 +35,7 @@ contract HydraS2Proofs {
             extraData: ""
         });
 
-        AuthProof memory authProof = AuthProof({proofData: hex"", provingScheme: bytes32("hydra-s2.1")});
+        AuthProof memory authProof = AuthProof({proofData: hex"", provingScheme: ""});
 
         return abi.encode(
             ZkConnectResponse({
