@@ -4,3 +4,4 @@ forge-std/=lib/forge-std/src/
 script/=script/
 src/=src/
 test/=test/
+solmate/=lib/solmate/src/
