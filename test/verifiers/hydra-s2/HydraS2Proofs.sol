@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import "src/libs/utils/Struct.sol";
-import "src/libs/utils/StatementLib.sol";
+import "src/libs/utils/StatementRequestLib.sol";
 
 contract HydraS2Proofs {
     function getEdDSAPubKey() public pure returns (uint256[2] memory) {

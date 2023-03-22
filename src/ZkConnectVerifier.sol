@@ -6,7 +6,7 @@ import "./libs/utils/Struct.sol";
 import "forge-std/console.sol";
 
 contract ZkConnectVerifier {
-    bytes32 immutable public ZK_CONNECT_VERSION = "zk-connect-v1";
+    bytes32 public immutable ZK_CONNECT_VERSION = "zk-connect-v1";
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
@@ -21,10 +21,10 @@ contract ZkConnectVerifier {
 
     event VerifierSet(bytes32, address);
 
-    function verify(
-        ZkConnectResponse memory zkConnectResponse,
-        DataRequest memory dataRequest
-    ) public returns (ZkConnectVerifiedResult memory) {
+    function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest)
+        public
+        returns (ZkConnectVerifiedResult memory)
+    {
         uint256 vaultId = 0;
         bytes16 appId = zkConnectResponse.appId;
         bytes16 namespace = zkConnectResponse.namespace;
@@ -34,18 +34,18 @@ contract ZkConnectVerifier {
             revert ProofsAndStatementRequestsAreUnequalInLength();
         }
 
-        if (zkConnectResponse.proofs.length == 0 &&  dataRequest.statementRequests.length == 0) {
+        if (zkConnectResponse.proofs.length == 0 && dataRequest.statementRequests.length == 0) {
             vaultId = _verifyAuthProof(appId, zkConnectResponse.authProof);
             return ZkConnectVerifiedResult({
-            appId: appId,
-            namespace: namespace,
-            version: zkConnectResponse.version,
-            verifiedStatements: new VerifiedStatement[](0),
-            signedMessage: signedMessage,
-            vaultId: vaultId
-        });
+                appId: appId,
+                namespace: namespace,
+                version: zkConnectResponse.version,
+                verifiedStatements: new VerifiedStatement[](0),
+                signedMessage: signedMessage,
+                vaultId: vaultId
+            });
         }
-        
+
         VerifiedStatement memory verifiedStatementFromProof;
         VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](zkConnectResponse.proofs.length);
         for (uint256 i = 0; i < zkConnectResponse.proofs.length; i++) {
@@ -54,7 +54,8 @@ contract ZkConnectVerifier {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
             _checkStatementMatchDataRequest(proof, dataRequest);
-            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof, signedMessage);
+            (vaultId, verifiedStatementFromProof) =
+                _verifiers[proof.provingScheme].verify(appId, namespace, proof, signedMessage);
             verifiedStatements[i] = verifiedStatementFromProof;
         }
 
@@ -78,7 +79,6 @@ contract ZkConnectVerifier {
     }
 
     function _verifyAuthProof(bytes16 appId, AuthProof memory authProof) internal returns (uint256 vaultId) {
-
         if (keccak256(authProof.proofData) == keccak256(bytes(""))) {
             revert AuthProofIsEmpty();
         }
@@ -86,10 +86,7 @@ contract ZkConnectVerifier {
         return _verifiers[authProof.provingScheme].verifyAuthProof(appId, authProof);
     }
 
-    function _checkStatementMatchDataRequest(
-        ZkConnectProof memory proof,
-        DataRequest memory dataRequest
-    ) public pure {
+    function _checkStatementMatchDataRequest(ZkConnectProof memory proof, DataRequest memory dataRequest) public pure {
         Statement memory statement = proof.statement;
         bytes16 groupId = statement.groupId;
         bytes16 groupTimestamp = statement.groupTimestamp;
@@ -108,16 +105,12 @@ contract ZkConnectVerifier {
             revert StatementRequestNotFound(groupId, groupTimestamp);
         }
 
-        if (statement.comparator != statementRequest.comparator ) {
+        if (statement.comparator != statementRequest.comparator) {
             revert StatementComparatorMismatch(statement.comparator, statementRequest.comparator);
         }
 
         if (keccak256(statement.extraData) != keccak256(statementRequest.extraData)) {
             revert StatementExtraDataMismatch(statement.extraData, statementRequest.extraData);
-        }
-
-        if (provingScheme != statementRequest.provingScheme) {
-            revert StatementProvingSchemeMismatch(provingScheme, statementRequest.provingScheme);
         }
 
         if (statement.comparator == StatementComparator.EQ) {
