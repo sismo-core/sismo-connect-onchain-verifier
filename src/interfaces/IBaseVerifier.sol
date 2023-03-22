@@ -7,4 +7,6 @@ interface IBaseVerifier {
     function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof, bytes memory signedMessage)
         external
         returns (uint256 vaultId, VerifiedStatement memory);
+
+    function verifyAuthProof(bytes16 appId, AuthProof memory authProof) external returns (uint256);
 }

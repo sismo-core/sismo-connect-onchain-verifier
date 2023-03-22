@@ -66,7 +66,13 @@ struct ZkConnectResponse {
     bytes16 namespace;
     bytes32 version;
     ZkConnectProof[] proofs;
+    AuthProof authProof;
     bytes signedMessage;
+}
+
+struct AuthProof {
+    bytes32 provingScheme;
+    bytes proofData;
 }
 
 struct ZkConnectVerifiedResult {

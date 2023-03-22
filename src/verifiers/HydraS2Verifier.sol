@@ -89,6 +89,25 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         return (snarkProof.inputs[10], verifiedStatement);
     }
 
+    function verifyAuthProof(bytes16 appId, AuthProof memory authProof) public view returns (uint256) {
+        if (authProof.provingScheme != HYDRA_S2_VERSION) {
+            revert InvalidVersion(authProof.provingScheme);
+        }
+
+        HydraS2SnarkProof memory snarkProof = abi.decode(authProof.proofData, (HydraS2SnarkProof));
+
+        uint256 vaultId = snarkProof.inputs[11];
+        bytes16 appIdFromProof = bytes16(uint128(snarkProof.inputs[11]));
+        if (appIdFromProof != appId) {
+            revert AppIdMismatch(appIdFromProof, appId);
+        }
+
+        _checkSnarkProof(snarkProof);
+
+        return vaultId;
+    }
+        
+
     function _checkPublicInputs(bytes16 appId, bytes16 namespace, Statement memory statement, uint256[14] memory inputs, bytes memory signedMessage)
         internal
         view

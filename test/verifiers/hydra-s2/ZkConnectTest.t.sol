@@ -15,6 +15,7 @@ contract ZkConnectTest is HydraS2BaseTest {
         bytes memory zkResponseEncoded = hydraS2Proofs.getZkConnectResponse1();
 
         (DataRequest memory dataRequest) = zkConnect.createDataRequest(groupId, groupTimestamp, bytes16(keccak256(namespace)));
-        zkConnect.verify(zkResponseEncoded, dataRequest, bytes16(keccak256(namespace)));
+        ZkConnectVerifiedResult memory zkConnectVerifiedResult = zkConnect.verify(zkResponseEncoded, dataRequest, bytes16(keccak256(namespace)));
+        console.log("zkConnectVerifiedResult.vaultId: %s", zkConnectVerifiedResult.vaultId);
     }
 }
