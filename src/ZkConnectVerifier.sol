@@ -28,15 +28,6 @@ contract ZkConnectVerifier {
         DataRequest memory dataRequest,
         bytes16 namespace
     ) public returns (ZkConnectVerifiedResult memory result) {
-        if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
-            revert InvalidZKConnectVersion(zkConnectResponse.version);
-        }
-        if (zkConnectResponse.appId != appId) {
-            revert InvalidAppId(zkConnectResponse.appId);
-        }
-        if (zkConnectResponse.namespace != namespace) {
-            revert InvalidNamespace(zkConnectResponse.namespace);
-        }
 
         uint256 vaultId = 0;
         bytes memory signedMessage = zkConnectResponse.signedMessage;
