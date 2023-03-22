@@ -7,15 +7,19 @@ import {IAddressesProvider} from 'src/periphery/interfaces/IAddressesProvider.so
 import {ZkConnectResponse, DataRequest, StatementRequest, StatementComparator, LogicalOperator } from 'src/libs/utils/Struct.sol';
 
 contract ZkConnect is Context {
-  uint256 public constant ZK_CONNECT_VERSION = 1;
-  ZkConnectVerifier private zkConnectVerifier;
+  ZkConnectVerifier private _zkConnectVerifier;
   bytes16 public appId;
   address public addressesProvider;
+
+  error ZkConnectResponseIsEmpty();
+  error InvalidZkConnectVersion(bytes32 receivedVersion, bytes32 expectedVersion);
+  error AppIdMismatch(bytes16 receivedAppId, bytes16 expectedAppId);
+  error NamespaceMismatch(bytes16 receivedNamespace, bytes16 expectedNamespace);
 
   constructor (bytes16 _appId, address _addressesProvider) {
     appId = _appId;
     addressesProvider = _addressesProvider;
-    zkConnectVerifier = ZkConnectVerifier(IAddressesProvider(addressesProvider).get(string("zkConnectVerifier")));
+    _zkConnectVerifier = ZkConnectVerifier(IAddressesProvider(addressesProvider).get(string("zkConnectVerifier")));
   }
 
   function createDataRequest(bytes16 groupId, bytes16 groupTimestamp, bytes16 namespace) 
@@ -39,7 +43,24 @@ contract ZkConnect is Context {
     }
 
   function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest, bytes16 namespace) public {
+    if (zkConnectResponseEncoded.length == 0) {
+      revert ZkConnectResponseIsEmpty();
+    }
     ZkConnectResponse memory zkConnectResponse = abi.decode(zkConnectResponseEncoded, (ZkConnectResponse));
-    zkConnectVerifier.verify(appId, zkConnectResponse, dataRequest, namespace);
+
+    if (zkConnectResponse.version != _zkConnectVerifier.ZK_CONNECT_VERSION()) {
+      revert InvalidZkConnectVersion(zkConnectResponse.version, _zkConnectVerifier.ZK_CONNECT_VERSION());
+    }
+
+    if (zkConnectResponse.appId != appId) {
+      revert AppIdMismatch(zkConnectResponse.appId, appId);
+    }
+
+    if (zkConnectResponse.namespace != namespace) {
+      revert NamespaceMismatch(zkConnectResponse.namespace, namespace);
+    }
+
+
+    _zkConnectVerifier.verify(appId, zkConnectResponse, dataRequest, namespace);
   }
 }

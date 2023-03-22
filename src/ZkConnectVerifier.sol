@@ -6,7 +6,7 @@ import "./libs/utils/Struct.sol";
 import "forge-std/console.sol";
 
 contract ZkConnectVerifier {
-    bytes32 immutable ZK_CONNECT_VERSION = "zk-connect-v1";
+    bytes32 immutable public ZK_CONNECT_VERSION = "zk-connect-v1";
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
