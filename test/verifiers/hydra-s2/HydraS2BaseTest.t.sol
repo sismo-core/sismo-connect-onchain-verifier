@@ -27,7 +27,7 @@ contract HydraS2BaseTest is BaseTest {
         availableRootsRegistry.registerRoot(hydraS2Proofs.getRoot());
     }
 
-    function createDataRequest(bytes16 appId, bytes16 groupId, bytes16 groupTimestamp, bytes16 namespace) 
+    function createDataRequest(bytes16 groupId, bytes16 groupTimestamp, bytes16 namespace) 
         public 
         pure 
         returns (DataRequest memory) 

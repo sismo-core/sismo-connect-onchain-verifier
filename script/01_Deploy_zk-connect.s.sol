@@ -11,7 +11,7 @@ contract DeployZkConnect is Script {
     function run() external {
         vm.startBroadcast();
 
-        zkConnectVerifier = new ZkConnectVerifier();
+        zkConnectVerifier = new ZkConnectVerifier(0x112a692a2005259c25f6094161007967);
 
         console2.log("zkConnectVerifier Deployed:", address(zkConnectVerifier));
 

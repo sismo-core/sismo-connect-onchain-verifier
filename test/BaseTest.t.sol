@@ -12,6 +12,7 @@ contract BaseTest is Test {
     ZkConnectVerifier zkConnectVerifier;
 
     function setUp() public virtual {
-        zkConnectVerifier = new ZkConnectVerifier();
+        bytes16 appId = 0x112a692a2005259c25f6094161007967;
+        zkConnectVerifier = new ZkConnectVerifier(appId);
     }
 }
