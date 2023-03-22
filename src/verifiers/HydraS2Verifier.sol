@@ -5,8 +5,8 @@ import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
-import "../libs/Struct.sol";
-import "../libs/Constants.sol";
+import "../libs/utils/Struct.sol";
+import "../libs/utils/Constants.sol";
 import "forge-std/console.sol";
 
 struct HydraS2SnarkProof {
@@ -47,7 +47,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
 
     error StatementComparatorMismatch(uint256 statementComparatorFromProof, StatementComparator expectedStatementComparator);
     error MismatchRequestIdentifier(uint256 requestIdentifierFromProof, uint256 expectedRequestIdentifier);
-    error InvalidExtraData();
+    error InvalidExtraData(bytes32 extraDataFromProof, bytes32 expectedExtraData);
     error InvalidRequestedValue();
     error DestinationVerificationNeedsToBeEnabled();
     error SourceVerificationNeedsToBeEnabled();
@@ -59,7 +59,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         AVAILABLE_ROOTS_REGISTRY = IAvailableRootsRegistry(availableRootsRegistry);
     }
 
-    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof, address destination)
+    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof, bytes memory signedMessage)
         public
         view
         override
@@ -73,7 +73,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
 
         HydraS2SnarkProof memory snarkProof = abi.decode(proof.proofData, (HydraS2SnarkProof));
 
-        _checkPublicInputs(appId, namespace, statement, snarkProof.inputs);
+        _checkPublicInputs(appId, namespace, statement, snarkProof.inputs, signedMessage);
         _checkSnarkProof(snarkProof);
 
         VerifiedStatement memory verifiedStatement = VerifiedStatement({
@@ -89,7 +89,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         return (snarkProof.inputs[10], verifiedStatement);
     }
 
-    function _checkPublicInputs(bytes16 appId, bytes16 namespace, Statement memory statement, uint256[14] memory inputs)
+    function _checkPublicInputs(bytes16 appId, bytes16 namespace, Statement memory statement, uint256[14] memory inputs, bytes memory signedMessage)
         internal
         view
     {
@@ -131,14 +131,6 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
                 commitmentMapperPubKey[0], commitmentMapperPubKey[1], commitmentMapperPubKeyX, commitmentMapperPubKeyY
             );
         }
-        // destinationVerificationEnabled
-        // if (destinationVerificationEnabled == false) {
-        //     revert DestinationVerificationNeedsToBeEnabled();
-        // }
-        // destinationIdentifier
-        // if (destinationIdentifier != destination) {
-        //     revert DestinationMismatch(destinationIdentifier, destination);
-        // }
         // sourceVerificationEnabled
         if (sourceVerificationEnabled == false) {
             revert SourceVerificationNeedsToBeEnabled();
@@ -157,6 +149,10 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         if (appIdFromProof != bytes16(appId)) {
             revert AppIdMismatch(appIdFromProof, appId);
         }
+        // extraData
+        // if (extraData != uint256(keccak256(signedMessage))) {
+        //     revert InvalidExtraData(bytes32(extraData), keccak256(signedMessage));
+        // }
     }
 
     function _checkSnarkProof(HydraS2SnarkProof memory snarkProof) internal view {

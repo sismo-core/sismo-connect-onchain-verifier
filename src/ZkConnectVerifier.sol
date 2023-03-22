@@ -2,11 +2,11 @@
 pragma solidity ^0.8.17;
 
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
-import "./libs/Struct.sol";
+import "./libs/utils/Struct.sol";
 import "forge-std/console.sol";
 
 contract ZkConnectVerifier {
-    bytes32 immutable ZK_CONNECT_VERSION = "zk-connect-v1";
+    bytes32 immutable public ZK_CONNECT_VERSION = "zk-connect-v1";
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
@@ -14,6 +14,11 @@ contract ZkConnectVerifier {
     error InvalidNamespace(bytes16 namespace);
     error InvalidAppId(bytes16 appId);
     error ProvingSchemeNotSupported(bytes32 provingScheme);
+    error StatementRequestNotFound(bytes16 groupId, bytes16 groupTimestamp);
+    error StatementComparatorMismatch(StatementComparator comparator, StatementComparator expectedComparator);
+    error StatementExtraDataMismatch(bytes extraData, bytes expectedExtraData);
+    error StatementProvingSchemeMismatch(bytes32 provingScheme, bytes32 expectedProvingScheme);
+    error StatementValueMismatch(StatementComparator comparator, uint256 value, uint256 expectedValue);
 
     event VerifierSet(bytes32, address);
 
@@ -23,38 +28,27 @@ contract ZkConnectVerifier {
         DataRequest memory dataRequest,
         bytes16 namespace
     ) public returns (ZkConnectVerifiedResult memory result) {
-        if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
-            revert InvalidZKConnectVersion(zkConnectResponse.version);
-        }
-        if (zkConnectResponse.appId != appId) {
-            revert InvalidAppId(zkConnectResponse.appId);
-        }
-        if (zkConnectResponse.namespace != namespace) {
-            revert InvalidNamespace(zkConnectResponse.namespace);
-        }
 
         uint256 vaultId = 0;
-        address destination = zkConnectResponse.destination;
+        bytes memory signedMessage = zkConnectResponse.signedMessage;
         VerifiedStatement memory verifiedStatementFromProof;
-        // todo compute the total amount of verifiedStatements
         VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](zkConnectResponse.proofs.length);
         for (uint256 i = 0; i < zkConnectResponse.proofs.length; i++) {
             ZkConnectProof memory proof = zkConnectResponse.proofs[i];
             if (_verifiers[proof.provingScheme] == IBaseVerifier(address(0))) {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
-            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof, destination);
+            _checkStatementMatchDataRequest(proof, dataRequest);
+            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof, signedMessage);
             verifiedStatements[i] = verifiedStatementFromProof;
         }
-
-        _checkVerifiedStatementsMatchDataRequest(verifiedStatements, dataRequest);
 
         return ZkConnectVerifiedResult({
             appId: appId,
             namespace: namespace,
             version: zkConnectResponse.version,
             verifiedStatements: verifiedStatements,
-            destination: destination,
+            signedMessage: signedMessage,
             vaultId: vaultId
         });
     }
@@ -68,42 +62,68 @@ contract ZkConnectVerifier {
         emit VerifierSet(provingScheme, verifierAddress);
     }
 
-    function _checkVerifiedStatementsMatchDataRequest(
-        VerifiedStatement[] memory verifiedStatements,
+    function _checkStatementMatchDataRequest(
+        ZkConnectProof memory proof,
         DataRequest memory dataRequest
-    ) public {
-        // Statement[] memory statements = proof.statements;
-        // if (statement.groupId != request.groupId) {
-        //     return false;
-        // }
-        // if (statement.groupTimestamp != request.groupTimestamp) {
-        //     return false;
-        // }
-        // if (statement.requestedValue != request.requestedValue) {
-        //     return false;
-        // }
-        // if (statement.comparator != request.comparator) {
-        //     return false;
-        // }
-        // if (statement.provingScheme != request.provingScheme) {
-        //     return false;
-        // }
-        // if (statement.extraData != request.extraData) {
-        //     return false;
-        // }
+    ) public pure {
+        Statement memory statement = proof.statement;
+        bytes16 groupId = statement.groupId;
+        bytes16 groupTimestamp = statement.groupTimestamp;
+        bytes32 provingScheme = proof.provingScheme;
 
-        // if (statement.comparator == StatementComparator.GTE) {
-        //     return statement.value >= statement.requestedValue;
-        // } else if (statement.comparator == StatementComparator.GT) {
-        //     return statement.value > statement.requestedValue;
-        // } else if (statement.comparator == StatementComparator.EQ) {
-        //     return statement.value == statement.requestedValue;
-        // } else if (statement.comparator == StatementComparator.LT) {
-        //     return statement.value < statement.requestedValue;
-        // } else if (statement.comparator == StatementComparator.LTE) {
-        //     return statement.value <= statement.requestedValue;
-        // } else {
-        //     return false;
-        // }
+        bool isStatementRequestFound = false;
+        StatementRequest memory statementRequest;
+        for (uint256 i = 0; i < dataRequest.statementRequests.length; i++) {
+            statementRequest = dataRequest.statementRequests[i];
+            if (statementRequest.groupId == groupId && statementRequest.groupTimestamp == groupTimestamp) {
+                isStatementRequestFound = true;
+            }
+        }
+
+        if (!isStatementRequestFound) {
+            revert StatementRequestNotFound(groupId, groupTimestamp);
+        }
+
+        if (statement.comparator != statementRequest.comparator ) {
+            revert StatementComparatorMismatch(statement.comparator, statementRequest.comparator);
+        }
+
+        if (keccak256(statement.extraData) != keccak256(statementRequest.extraData)) {
+            revert StatementExtraDataMismatch(statement.extraData, statementRequest.extraData);
+        }
+
+        if (provingScheme != statementRequest.provingScheme) {
+            revert StatementProvingSchemeMismatch(provingScheme, statementRequest.provingScheme);
+        }
+
+        if (statement.comparator == StatementComparator.EQ) {
+            if (statement.value != statementRequest.requestedValue) {
+                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
+            }
+        }
+
+        if (statement.comparator == StatementComparator.GT) {
+            if (statement.value <= statementRequest.requestedValue) {
+                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
+            }
+        }
+
+        if (statement.comparator == StatementComparator.GTE) {
+            if (statement.value < statementRequest.requestedValue) {
+                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
+            }
+        }
+
+        if (statement.comparator == StatementComparator.LT) {
+            if (statement.value >= statementRequest.requestedValue) {
+                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
+            }
+        }
+
+        if (statement.comparator == StatementComparator.LTE) {
+            if (statement.value > statementRequest.requestedValue) {
+                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
+            }
+        }
     }
 }
