@@ -89,7 +89,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         return (snarkProof.inputs[10], verifiedStatement);
     }
 
-    function verifyAuthProof(bytes16 appId, AuthProof memory authProof) public view returns (uint256) {
+    function verifyAuthProof(bytes16 appId, AuthProof memory authProof, bytes memory signedMessage) public view returns (uint256) {
         if (authProof.provingScheme != HYDRA_S2_VERSION) {
             revert InvalidVersion(authProof.provingScheme);
         }
@@ -97,10 +97,14 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         HydraS2SnarkProof memory snarkProof = abi.decode(authProof.proofData, (HydraS2SnarkProof));
 
         uint256 vaultId = snarkProof.inputs[11];
+        uint256 extraData = snarkProof.inputs[1];
         bytes16 appIdFromProof = bytes16(uint128(snarkProof.inputs[11]));
         if (appIdFromProof != appId) {
             revert AppIdMismatch(appIdFromProof, appId);
         }
+        // if (extraData != uint256(keccak256(signedMessage))) {
+        //     revert InvalidExtraData(bytes32(extraData), keccak256(signedMessage));
+        // }
 
         _checkSnarkProof(snarkProof);
 
