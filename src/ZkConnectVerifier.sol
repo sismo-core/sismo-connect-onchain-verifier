@@ -16,8 +16,9 @@ contract ZkConnectVerifier {
     error ProvingSchemeNotSupported(bytes32 provingScheme);
     error StatementRequestNotFound(bytes16 groupId, bytes16 groupTimestamp);
     error StatementComparatorMismatch(StatementComparator comparator, StatementComparator expectedComparator);
-    error StatementValueMismatch(StatementComparator comparator, uint256 value, uint256 expectedValue);
     error StatementExtraDataMismatch(bytes extraData, bytes expectedExtraData);
+    error StatementProvingSchemeMismatch(bytes32 provingScheme, bytes32 expectedProvingScheme);
+    error StatementValueMismatch(StatementComparator comparator, uint256 value, uint256 expectedValue);
 
     event VerifierSet(bytes32, address);
 
@@ -40,14 +41,13 @@ contract ZkConnectVerifier {
         uint256 vaultId = 0;
         address destination = zkConnectResponse.destination;
         VerifiedStatement memory verifiedStatementFromProof;
-        // todo compute the total amount of verifiedStatements
         VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](zkConnectResponse.proofs.length);
         for (uint256 i = 0; i < zkConnectResponse.proofs.length; i++) {
             ZkConnectProof memory proof = zkConnectResponse.proofs[i];
             if (_verifiers[proof.provingScheme] == IBaseVerifier(address(0))) {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
-            _checkStatementMatchDataRequest(proof.statement, dataRequest);
+            _checkStatementMatchDataRequest(proof, dataRequest);
             (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof, destination);
             verifiedStatements[i] = verifiedStatementFromProof;
         }
@@ -72,11 +72,13 @@ contract ZkConnectVerifier {
     }
 
     function _checkStatementMatchDataRequest(
-        Statement memory statement,
+        ZkConnectProof memory proof,
         DataRequest memory dataRequest
     ) public pure {
+        Statement memory statement = proof.statement;
         bytes16 groupId = statement.groupId;
         bytes16 groupTimestamp = statement.groupTimestamp;
+        bytes32 provingScheme = proof.provingScheme;
 
         bool isStatementRequestFound = false;
         StatementRequest memory statementRequest;
@@ -97,6 +99,10 @@ contract ZkConnectVerifier {
 
         if (keccak256(statement.extraData) != keccak256(statementRequest.extraData)) {
             revert StatementExtraDataMismatch(statement.extraData, statementRequest.extraData);
+        }
+
+        if (provingScheme != statementRequest.provingScheme) {
+            revert StatementProvingSchemeMismatch(provingScheme, statementRequest.provingScheme);
         }
 
         if (statement.comparator == StatementComparator.EQ) {
