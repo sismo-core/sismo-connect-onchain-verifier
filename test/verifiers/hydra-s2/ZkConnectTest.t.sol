@@ -12,7 +12,9 @@ contract ZkConnectTest is HydraS2BaseTest {
         bytes memory namespace = bytes("main");
         address destination = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
 
+        bytes memory zkResponseEncoded = hydraS2Proofs.getZkConnectResponse1();
+
         (DataRequest memory dataRequest) = zkConnect.createDataRequest(groupId, groupTimestamp, bytes16(keccak256(namespace)));
-        zkConnect.verify(hydraS2Proofs.getZkConnectResponse1(), dataRequest, bytes16(keccak256(namespace)));
+        zkConnect.verify(zkResponseEncoded, dataRequest, bytes16(keccak256(namespace)));
     }
 }

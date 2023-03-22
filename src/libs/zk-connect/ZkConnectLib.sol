@@ -38,7 +38,8 @@ contract ZkConnect is Context {
         return (dataRequest);
     }
 
-  function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest, bytes16 namespace) public {
+  function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest, bytes16 namespace) public {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(zkConnectResponseEncoded, (ZkConnectResponse));
     zkConnectVerifier.verify(appId, zkConnectResponse, dataRequest, namespace);
   }
 }
