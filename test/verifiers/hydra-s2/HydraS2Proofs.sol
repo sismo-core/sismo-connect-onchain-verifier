@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Struct.sol";
 import "forge-std/console.sol";
+import "src/libs/utils/Struct.sol";
+import "src/libs/utils/StatementLib.sol";
 
 contract HydraS2Proofs {
     function getEdDSAPubKey() public pure returns (uint256[2] memory) {
@@ -16,7 +17,8 @@ contract HydraS2Proofs {
         return 0x1d4a72bd1c1e4f9ab68c3c4c55afd3e582685a18b9ec09fc96136619d2513fe8;
     }
 
-    function getZkConnectResponse1() public pure returns (bytes memory) {
+    // simple zkConnect with 1 statement
+    function getZkConnectResponse1() public returns (bytes memory) {
         Statement memory statement = Statement({
             groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
             value: 1,
@@ -33,19 +35,18 @@ contract HydraS2Proofs {
             extraData: ""
         });
 
-        AuthProof memory authProof = AuthProof({
-            proofData : hex"",
-            provingScheme: bytes32("hydra-s2.1")
-        });
+        AuthProof memory authProof = AuthProof({proofData: hex"", provingScheme: bytes32("hydra-s2.1")});
 
-        return abi.encode(ZkConnectResponse({
-            appId: 0x112a692a2005259c25f6094161007967,
-            namespace: bytes16(keccak256('main')),
-            version: bytes32("zk-connect-v1"),
-            proofs: proofs,
-            authProof: authProof,
-            signedMessage: hex"00"
-        }));
+        return abi.encode(
+            ZkConnectResponse({
+                appId: 0x112a692a2005259c25f6094161007967,
+                namespace: bytes16(keccak256("main")),
+                version: bytes32("zk-connect-v1"),
+                proofs: proofs,
+                authProof: authProof,
+                signedMessage: hex"00"
+            })
+        );
     }
 }
 

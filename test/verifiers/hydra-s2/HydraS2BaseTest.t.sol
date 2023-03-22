@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import {BaseTest} from "test/BaseTest.t.sol";
 import "src/verifiers/HydraS2Verifier.sol";
-import "./proofs/HydraS2Proofs.sol";
+import "./HydraS2Proofs.sol";
 import "test/mocks/CommitmentMapperRegistryMock.sol";
 import "test/mocks/AvailableRootsRegistryMock.sol";
 
