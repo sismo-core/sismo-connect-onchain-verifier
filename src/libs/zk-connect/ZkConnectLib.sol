@@ -63,4 +63,12 @@ contract ZkConnect is Context {
 
     _zkConnectVerifier.verify(appId, zkConnectResponse, dataRequest, namespace);
   }
+
+  function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest) public {
+    verify(zkConnectResponseEncoded, dataRequest, bytes16(keccak256("main")));
+  }
+
+  function verify(bytes memory zkConnectResponseEncoded) public {
+    verify(zkConnectResponseEncoded, DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND}));
+  }
 }
