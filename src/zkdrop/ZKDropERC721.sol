@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import {ZkConnect, DataRequest, DataRequestLib, ZkConnectVerifiedResult} from "../libs/SismoLib.sol";
+import {
+    ZkConnect, DataRequest, DataRequestLib, ZkConnectResponse, ZkConnectVerifiedResult
+} from "../libs/SismoLib.sol";
 import {ERC721} from "solmate/tokens/ERC721.sol";
 
 contract ZKDropERC721 is ERC721, ZkConnect {
@@ -17,7 +19,7 @@ contract ZKDropERC721 is ERC721, ZkConnect {
         _setBaseTokenUri(baseTokenURI);
     }
 
-    function claimWithZkConnect(bytes memory zkConnectResponse) public {
+    function claimWithZkConnect(ZkConnectResponse memory zkConnectResponse) public {
         ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify(zkConnectResponse, dataRequest);
 
         address to = abi.decode(zkConnectVerifiedResult.signedMessage, (address));
@@ -26,7 +28,7 @@ contract ZKDropERC721 is ERC721, ZkConnect {
         _mint(to, tokenId);
     }
 
-    function transferWithZkConnect(bytes memory zkConnectResponse) public {
+    function transferWithZkConnect(ZkConnectResponse memory zkConnectResponse) public {
         ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify(zkConnectResponse, dataRequest);
 
         address to = abi.decode(zkConnectVerifiedResult.signedMessage, (address));
