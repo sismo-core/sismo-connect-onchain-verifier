@@ -11,7 +11,7 @@ contract ZkConnectTest is HydraS2BaseTest {
     bytes16 immutable appId = 0x112a692a2005259c25f6094161007967;
 
     function test_ZkConnectLib() public {
-        ZkConnect zkConnect = new ZkConnect(appId, address(addressesProvider));
+        ZkConnect zkConnect = new ZkConnect(appId);
 
         bytes memory zkResponseEncoded = hydraS2Proofs.getZkConnectResponse1();
         ZkConnectVerifiedResult memory zkConnectVerifiedResult = zkConnect.verify(zkResponseEncoded, dataRequest);

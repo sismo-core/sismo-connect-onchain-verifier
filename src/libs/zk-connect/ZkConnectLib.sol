@@ -9,19 +9,22 @@ import {ZkConnectVerifier} from "src/ZkConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 
 contract ZkConnect is Context {
+    uint256 public constant ZK_CONNECT_LIB_VERSION = 1;
+
+    IAddressesProvider public immutable ADDRESSES_PROVIDER =
+        IAddressesProvider(0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05);
+
     ZkConnectVerifier private _zkConnectVerifier;
     bytes16 public appId;
-    address public addressesProvider;
 
     error ZkConnectResponseIsEmpty();
     error InvalidZkConnectVersion(bytes32 receivedVersion, bytes32 expectedVersion);
     error AppIdMismatch(bytes16 receivedAppId, bytes16 expectedAppId);
     error NamespaceMismatch(bytes16 receivedNamespace, bytes16 expectedNamespace);
 
-    constructor(bytes16 _appId, address _addressesProvider) {
+    constructor(bytes16 _appId) {
         appId = _appId;
-        addressesProvider = _addressesProvider;
-        _zkConnectVerifier = ZkConnectVerifier(IAddressesProvider(addressesProvider).get(string("zkConnectVerifier")));
+        _zkConnectVerifier = ZkConnectVerifier(ADDRESSES_PROVIDER.get(string("zkConnectVerifier")));
     }
 
     function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest, bytes16 namespace)
