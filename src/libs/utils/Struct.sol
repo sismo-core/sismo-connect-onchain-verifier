@@ -19,7 +19,6 @@ struct StatementRequest {
     bytes16 groupTimestamp;
     uint256 requestedValue;
     StatementComparator comparator;
-    bytes32 provingScheme;
     bytes extraData;
 }
 

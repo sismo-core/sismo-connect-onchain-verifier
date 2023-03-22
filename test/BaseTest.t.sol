@@ -14,15 +14,10 @@ contract BaseTest is Test {
 
     AddressesProviderMock addressesProvider;
     ZkConnectVerifier zkConnectVerifier;
-    ZkConnect zkConnect;
-
-    bytes16 immutable appId = 0x112a692a2005259c25f6094161007967;
 
     function setUp() public virtual {
         addressesProvider = new AddressesProviderMock();
         zkConnectVerifier = new ZkConnectVerifier();
-        addressesProvider.set(address(zkConnectVerifier),string("zkConnectVerifier"));
-        
-        zkConnect = new ZkConnect(appId, address(addressesProvider));
+        addressesProvider.set(address(zkConnectVerifier), string("zkConnectVerifier"));
     }
 }
