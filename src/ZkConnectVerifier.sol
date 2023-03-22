@@ -7,7 +7,6 @@ import "forge-std/console.sol";
 
 contract ZkConnectVerifier {
     bytes32 immutable ZK_CONNECT_VERSION = "zk-connect-v1";
-    bytes16 private _appId;
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
@@ -18,11 +17,8 @@ contract ZkConnectVerifier {
 
     event VerifierSet(bytes32, address);
 
-    constructor(bytes16 appId) {
-      _appId = appId;
-    }
-
     function verify(
+        bytes16 appId,
         ZkConnectResponse memory zkConnectResponse,
         DataRequest memory dataRequest,
         bytes16 namespace
@@ -30,7 +26,7 @@ contract ZkConnectVerifier {
         if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
             revert InvalidZKConnectVersion(zkConnectResponse.version);
         }
-        if (zkConnectResponse.appId != _appId) {
+        if (zkConnectResponse.appId != appId) {
             revert InvalidAppId(zkConnectResponse.appId);
         }
         if (zkConnectResponse.namespace != namespace) {
@@ -47,14 +43,14 @@ contract ZkConnectVerifier {
             if (_verifiers[proof.provingScheme] == IBaseVerifier(address(0))) {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
-            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(_appId, namespace, proof, destination);
+            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(appId, namespace, proof, destination);
             verifiedStatements[i] = verifiedStatementFromProof;
         }
 
         _checkVerifiedStatementsMatchDataRequest(verifiedStatements, dataRequest);
 
         return ZkConnectVerifiedResult({
-            appId: _appId,
+            appId: appId,
             namespace: namespace,
             version: zkConnectResponse.version,
             verifiedStatements: verifiedStatements,
