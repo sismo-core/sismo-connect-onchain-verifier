@@ -10,7 +10,7 @@ contract ZkConnectVerifier {
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
-    error ProofsAndStatementRequestsAreUnequalInLength();
+    error ProofsAndStatementRequestsAreUnequalInLength(uint256 proofsLength, uint256 statementRequestsLength);
     error ProvingSchemeNotSupported(bytes32 provingScheme);
     error StatementRequestNotFound(bytes16 groupId, bytes16 groupTimestamp);
     error StatementComparatorMismatch(StatementComparator comparator, StatementComparator expectedComparator);
@@ -31,7 +31,9 @@ contract ZkConnectVerifier {
         bytes memory signedMessage = zkConnectResponse.signedMessage;
 
         if (zkConnectResponse.proofs.length != dataRequest.statementRequests.length) {
-            revert ProofsAndStatementRequestsAreUnequalInLength();
+            revert ProofsAndStatementRequestsAreUnequalInLength(
+                zkConnectResponse.proofs.length, dataRequest.statementRequests.length
+            );
         }
 
         if (zkConnectResponse.proofs.length == 0 && dataRequest.statementRequests.length == 0) {

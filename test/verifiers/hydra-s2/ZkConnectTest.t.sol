@@ -10,9 +10,7 @@ contract ZkConnectTest is HydraS2BaseTest {
     function test_ZkConnect() public {
         bytes16 groupId = 0xe9ed316946d3d98dfcd829a53ec9822e;
 
-        bytes memory zkResponseEncoded = hydraS2Proofs.getZkConnectResponse1();
-        ZkConnectResponse memory zkConnectResponse = abi.decode(zkResponseEncoded, (ZkConnectResponse));
-
+        ZkConnectResponse memory zkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
         DataRequest memory dataRequest = DataRequestLib.build(groupId);
 
         ZkConnectVerifiedResult memory zkConnectVerifiedResult =
