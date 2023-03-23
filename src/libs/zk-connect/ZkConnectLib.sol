@@ -18,7 +18,6 @@ contract ZkConnect is Context {
     bytes16 public appId;
 
     error ZkConnectResponseIsEmpty();
-    error InvalidZkConnectVersion(bytes32 receivedVersion, bytes32 expectedVersion);
     error AppIdMismatch(bytes16 receivedAppId, bytes16 expectedAppId);
     error NamespaceMismatch(bytes16 receivedNamespace, bytes16 expectedNamespace);
 
@@ -36,7 +35,6 @@ contract ZkConnect is Context {
             revert ZkConnectResponseIsEmpty();
         }
         ZkConnectResponse memory zkConnectResponse = abi.decode(zkConnectResponseEncoded, (ZkConnectResponse));
-
         return verify(zkConnectResponse, zkConnectRequestContent, namespace);
     }
 
@@ -57,10 +55,6 @@ contract ZkConnect is Context {
         ZkConnectRequestContent memory zkConnectRequestContent,
         bytes16 namespace
     ) public returns (ZkConnectVerifiedResult memory) {
-        if (zkConnectResponse.version != _zkConnectVerifier.ZK_CONNECT_VERSION()) {
-            revert InvalidZkConnectVersion(zkConnectResponse.version, _zkConnectVerifier.ZK_CONNECT_VERSION());
-        }
-
         if (zkConnectResponse.appId != appId) {
             revert AppIdMismatch(zkConnectResponse.appId, appId);
         }

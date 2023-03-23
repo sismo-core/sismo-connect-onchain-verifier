@@ -31,7 +31,11 @@ library ZkConnectRequestContentLib {
     }
 
     function build(bytes16 groupId, bytes16 groupTimestamp) public returns (ZkConnectRequestContent memory) {
-        return build({groupId: groupId, groupTimestamp: groupTimestamp});
+        DataRequest[] memory dataRequests = new DataRequest[](1);
+        Claim memory claim = ClaimRequestLib.build(groupId, groupTimestamp);
+        Auth memory auth;
+        dataRequests[0] = DataRequest({claimRequest: claim, authRequest: auth, messageSignatureRequest: ""});
+        return build({dataRequests: dataRequests, operator: LogicalOperator.AND});
     }
 
     function build(bytes16 groupId, uint256 requestedValue) public returns (ZkConnectRequestContent memory) {

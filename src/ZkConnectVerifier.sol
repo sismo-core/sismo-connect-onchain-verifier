@@ -10,6 +10,7 @@ contract ZkConnectVerifier {
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
+    error InvalidZkConnectVersion(bytes32 receivedVersion, bytes32 expectedVersion);
     error ProofNeedsAuthOrClaim();
     error ProofsAndDataRequestsAreUnequalInLength(uint256 proofsLength, uint256 dataRequestsLength);
     error ProvingSchemeNotSupported(bytes32 provingScheme);
@@ -26,6 +27,10 @@ contract ZkConnectVerifier {
         public
         returns (ZkConnectVerifiedResult memory)
     {
+        if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
+            revert InvalidZkConnectVersion(zkConnectResponse.version, ZK_CONNECT_VERSION);
+        }
+
         bytes16 appId = zkConnectResponse.appId;
         bytes16 namespace = zkConnectResponse.namespace;
 
@@ -96,7 +101,6 @@ contract ZkConnectVerifier {
         Claim memory claim = proof.claim;
         bytes16 groupId = claim.groupId;
         bytes16 groupTimestamp = claim.groupTimestamp;
-        bytes32 provingScheme = proof.provingScheme;
 
         bool isClaimRequestFound = false;
         Claim memory claimRequest;

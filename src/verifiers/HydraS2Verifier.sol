@@ -39,7 +39,6 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
 
     error InvalidProof();
 
-    error ProofContainsTooManyStatements(uint256 numberOfStatements);
     error InvalidVersion(bytes32 version);
     error RegistryRootMismatch(uint256 inputRoot);
     error DestinationMismatch(address destinationFromProof, address expectedDestination);
@@ -48,7 +47,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
     error ClaimTypeMismatch(uint256 claimTypeFromProof, ClaimType expectedClaimType);
     error MismatchRequestIdentifier(uint256 requestIdentifierFromProof, uint256 expectedRequestIdentifier);
     error InvalidExtraData(bytes32 extraDataFromProof, bytes32 expectedExtraData);
-    error InvalidRequestedValue();
+    error InvalidClaimValue();
     error DestinationVerificationNeedsToBeEnabled();
     error SourceVerificationNeedsToBeEnabled();
     error AccountsTreeValueMismatch(uint256 accountsTreeValueFromProof, uint256 expectedAccountsTreeValue);
@@ -134,14 +133,14 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         uint256 commitmentMapperPubKeyY = inputs[3];
         uint256 registryTreeRoot = inputs[4];
         uint256 requestIdentifier = inputs[5];
-        uint256 proofIdentifier = inputs[6];
+        // proofIdentifier inputs[6]
         uint256 claimValue = inputs[7]; // statementValue in circuits
         uint256 accountsTreeValue = inputs[8];
         uint256 claimType = inputs[9]; // statementComparator in circuits
-        uint256 vaultIdentifier = inputs[10];
+        // vaultIdentifier inputs[10]
         uint256 vaultNamespace = inputs[11];
         bool sourceVerificationEnabled = inputs[12] == 1;
-        bool destinationVerificationEnabled = inputs[13] == 1;
+        // destinationVerificationEnabled inputs[13]
 
         // claimType
         bool isClaimTypeFromProofEqualToOne = claimType == 1;
@@ -151,7 +150,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         }
         // claimValue
         if (claimValue != claim.value) {
-            revert InvalidRequestedValue();
+            revert InvalidClaimValue();
         }
         // requestIdentifier
         uint256 expectedRequestIdentifier =
@@ -187,8 +186,8 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
             revert AppIdMismatch(appIdFromProof, appId);
         }
         // extraData
-        // if (extraData != uint256(keccak256(signedMessage))) {
-        //     revert InvalidExtraData(bytes32(extraData), keccak256(signedMessage));
+        // if (extraData != uint256(keccak256(zkConnectProof.signedMessage))) {
+        //     revert InvalidExtraData(bytes32(extraData), keccak256(zkConnectProof.signedMessage));
         // }
     }
 

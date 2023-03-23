@@ -18,7 +18,7 @@ contract HydraS2Proofs {
     }
 
     // simple zkConnect with 1 statement
-    function getZkConnectResponse1() public returns (ZkConnectResponse memory) {
+    function getZkConnectResponse1() public pure returns (ZkConnectResponse memory) {
         Claim memory claim = Claim({
             groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
             groupTimestamp: bytes16("latest"),
