@@ -8,25 +8,57 @@ pragma solidity ^0.8.14;
  * @notice Interface for (Merkle) Roots Registry
  */
 interface IAvailableRootsRegistry {
-    event RegisteredRoot(uint256 root);
-    event UnRegisteredRoot(uint256 root);
+    event RegisteredRootForAttester(address attester, uint256 root);
+    event RegisteredRootForAll(uint256 root);
+    event UnregisteredRootForAttester(address attester, uint256 root);
+    event UnregisteredRootForAll(uint256 root);
+
+    error CannotRegisterForZeroAddress();
+    error CannotUnregisterForZeroAddress();
+
+    /**
+     * @dev Initializes the contract, to be called by the proxy delegating calls to this implementation
+     * @param owner Owner of the contract, can update public key and address
+     * @notice The reinitializer modifier is needed to configure modules that are added through upgrades and that require initialization.
+     */
+    function initialize(address owner) external;
+
+    /**
+     * @dev Register a root available for an attester
+     * @param attester Attester which will have the root available
+     * @param root Root to register
+     */
+    function registerRootForAttester(address attester, uint256 root) external;
+
+    /**
+     * @dev Unregister a root for an attester
+     * @param attester Attester which will no longer have the root available
+     * @param root Root to unregister
+     */
+    function unregisterRootForAttester(address attester, uint256 root) external;
 
     /**
      * @dev Registers a root, available for all contracts
      * @param root Root to register
      */
-
-    function registerRoot(uint256 root) external;
+    function registerRootForAll(uint256 root) external;
 
     /**
      * @dev Unregister a root, available for all contracts
      * @param root Root to unregister
      */
-    function unregisterRoot(uint256 root) external;
+    function unregisterRootForAll(uint256 root) external;
 
     /**
      * @dev returns whether a root is available for a caller (msg.sender)
      * @param root root to check whether it is registered for me or not
      */
-    function isRootAvailable(uint256 root) external view returns (bool);
+    function isRootAvailableForMe(uint256 root) external view returns (bool);
+
+    /**
+     * @dev Initializes the contract, to be called by the proxy delegating calls to this implementation
+     * @param attester Owner of the contract, can update public key and address
+     * @param root Owner of the contract, can update public key and address
+     */
+    function isRootAvailableForAttester(address attester, uint256 root) external view returns (bool);
 }

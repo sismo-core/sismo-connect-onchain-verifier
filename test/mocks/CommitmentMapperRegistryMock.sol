@@ -5,12 +5,23 @@ import {ICommitmentMapperRegistry} from "src/periphery/interfaces/ICommitmentMap
 
 contract CommitmentMapperRegistryMock is ICommitmentMapperRegistry {
     uint256[2] public edDSAPubKey;
+    address private _commitmentMapperAddress;
 
-    function updateCommitmentMapperEdDSAPubKey(uint256[2] memory newEdDSAPubKey) external override {
+    function initialize(address, uint256[2] memory, address) external {}
+
+    function updateCommitmentMapperEdDSAPubKey(uint256[2] memory newEdDSAPubKey) external {
         edDSAPubKey = newEdDSAPubKey;
     }
 
-    function getEdDSAPubKey() external view override returns (uint256[2] memory) {
+    function updateCommitmentMapperAddress(address newAddress) external {
+        _commitmentMapperAddress = newAddress;
+    }
+
+    function getEdDSAPubKey() external view returns (uint256[2] memory) {
         return edDSAPubKey;
+    }
+
+    function getAddress() external view override returns (address) {
+        return _commitmentMapperAddress;
     }
 }

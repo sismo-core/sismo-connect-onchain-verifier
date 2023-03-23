@@ -6,15 +6,29 @@ import {IAvailableRootsRegistry} from "src/periphery/interfaces/IAvailableRootsR
 contract AvailableRootsRegistryMock is IAvailableRootsRegistry {
     mapping(uint256 => bool) public _roots;
 
-    function isRootAvailable(uint256 root) external view returns (bool) {
+    function initialize(address) external {}
+
+    function isRootAvailableForMe(uint256 root) external view returns (bool) {
         return _roots[root];
     }
 
-    function registerRoot(uint256 root) external {
+    function registerRootForAll(uint256 root) external {
         _roots[root] = true;
     }
 
-    function unregisterRoot(uint256 root) external {
+    function unregisterRootForAll(uint256 root) external {
         _roots[root] = false;
+    }
+
+    function registerRootForAttester(address, uint256 root) external {
+        _roots[root] = true;
+    }
+
+    function unregisterRootForAttester(address, uint256 root) external {
+        _roots[root] = false;
+    }
+
+    function isRootAvailableForAttester(address, uint256 root) external view returns (bool) {
+        return _roots[root];
     }
 }
