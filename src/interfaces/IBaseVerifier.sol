@@ -8,5 +8,7 @@ interface IBaseVerifier {
         external
         returns (uint256 vaultId, VerifiedStatement memory);
 
-    function verifyAuthProof(bytes16 appId, AuthProof memory authProof, bytes memory signedMessage) external returns (uint256);
+    function verifyAuthProof(bytes16 appId, AuthProof memory authProof, bytes memory signedMessage)
+        external
+        returns (uint256);
 }

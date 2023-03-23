@@ -78,8 +78,10 @@ contract ZkConnectVerifier {
         emit VerifierSet(provingScheme, verifierAddress);
     }
 
-    function _verifyAuthProof(bytes16 appId, AuthProof memory authProof, bytes memory signedMessage) internal returns (uint256 vaultId) {
-
+    function _verifyAuthProof(bytes16 appId, AuthProof memory authProof, bytes memory signedMessage)
+        internal
+        returns (uint256 vaultId)
+    {
         if (keccak256(authProof.proofData) == keccak256(bytes(""))) {
             revert AuthProofIsEmpty();
         }
