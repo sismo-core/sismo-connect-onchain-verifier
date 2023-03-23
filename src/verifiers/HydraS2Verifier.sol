@@ -15,6 +15,7 @@ struct HydraS2SnarkProof {
     uint256[2] c;
     uint256[14] inputs;
 }
+
 // destinationIdentifier;
 // extraData;
 // commitmentMapperPubKey.X;
@@ -45,7 +46,10 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
     error DestinationMismatch(address destinationFromProof, address expectedDestination);
     error CommitmentMapperPubKeyMismatch(uint256 expectedX, uint256 expectedY, uint256 inputX, uint256 inputY);
 
-    error StatementComparatorMismatch(uint256 statementComparatorFromProof, StatementComparator expectedStatementComparator);
+    error StatementComparatorMismatch(
+        uint256 statementComparatorFromProof,
+        StatementComparator expectedStatementComparator
+    );
     error MismatchRequestIdentifier(uint256 requestIdentifierFromProof, uint256 expectedRequestIdentifier);
     error InvalidExtraData(bytes32 extraDataFromProof, bytes32 expectedExtraData);
     error InvalidRequestedValue();
@@ -59,12 +63,12 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         AVAILABLE_ROOTS_REGISTRY = IAvailableRootsRegistry(availableRootsRegistry);
     }
 
-    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof, bytes memory signedMessage)
-        public
-        view
-        override
-        returns (uint256 vaultId, VerifiedStatement memory)
-    {
+    function verify(
+        bytes16 appId,
+        bytes16 namespace,
+        ZkConnectProof memory proof,
+        bytes memory signedMessage
+    ) public view override returns (uint256 vaultId, VerifiedStatement memory) {
         if (proof.provingScheme != HYDRA_S2_VERSION) {
             revert InvalidVersion(proof.provingScheme);
         }
@@ -110,12 +114,14 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
 
         return vaultId;
     }
-        
 
-    function _checkPublicInputs(bytes16 appId, bytes16 namespace, Statement memory statement, uint256[14] memory inputs, bytes memory signedMessage)
-        internal
-        view
-    {
+    function _checkPublicInputs(
+        bytes16 appId,
+        bytes16 namespace,
+        Statement memory statement,
+        uint256[14] memory inputs,
+        bytes memory signedMessage
+    ) internal view {
         address destinationIdentifier = address(uint160(inputs[0]));
         uint256 extraData = inputs[1];
         uint256 commitmentMapperPubKeyX = inputs[2];
@@ -131,7 +137,6 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         bool sourceVerificationEnabled = inputs[12] == 1;
         bool destinationVerificationEnabled = inputs[13] == 1;
 
-
         // statementComparator
         bool isStatementComparatorFromProofEqualToOne = statementComparator == 1;
         bool isStatementComparatorFromStatementEqualToEQ = statement.comparator == StatementComparator.EQ;
@@ -143,15 +148,25 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
             revert InvalidRequestedValue();
         }
         // requestIdentifier
-        uint256 expectedRequestIdentifier = _encodeRequestIdentifier(appId, statement.groupId, statement.groupTimestamp, namespace);
+        uint256 expectedRequestIdentifier = _encodeRequestIdentifier(
+            appId,
+            statement.groupId,
+            statement.groupTimestamp,
+            namespace
+        );
         if (requestIdentifier != expectedRequestIdentifier) {
             revert MismatchRequestIdentifier(requestIdentifier, expectedRequestIdentifier);
         }
         // commitmentMapperPubKey
         uint256[2] memory commitmentMapperPubKey = COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
-        if (commitmentMapperPubKeyX != commitmentMapperPubKey[0] || commitmentMapperPubKeyY != commitmentMapperPubKey[1]) {
+        if (
+            commitmentMapperPubKeyX != commitmentMapperPubKey[0] || commitmentMapperPubKeyY != commitmentMapperPubKey[1]
+        ) {
             revert CommitmentMapperPubKeyMismatch(
-                commitmentMapperPubKey[0], commitmentMapperPubKey[1], commitmentMapperPubKeyX, commitmentMapperPubKeyY
+                commitmentMapperPubKey[0],
+                commitmentMapperPubKey[1],
+                commitmentMapperPubKeyX,
+                commitmentMapperPubKeyY
             );
         }
         // sourceVerificationEnabled
@@ -184,7 +199,12 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         }
     }
 
-    function _encodeRequestIdentifier(bytes16 appId, bytes16 groupId, bytes16 groupTimestamp, bytes16 namespace) private pure returns (uint256) {
+    function _encodeRequestIdentifier(
+        bytes16 appId,
+        bytes16 groupId,
+        bytes16 groupTimestamp,
+        bytes16 namespace
+    ) private pure returns (uint256) {
         bytes32 groupSnapshotId = bytes32(abi.encodePacked(groupId, groupTimestamp));
         bytes32 serviceId = bytes32(abi.encodePacked(appId, namespace));
         return uint256(keccak256(abi.encodePacked(serviceId, groupSnapshotId))) % SNARK_FIELD;

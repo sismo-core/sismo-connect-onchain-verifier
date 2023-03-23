@@ -21,10 +21,10 @@ contract ZkConnectVerifier {
 
     event VerifierSet(bytes32, address);
 
-    function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest)
-        public
-        returns (ZkConnectVerifiedResult memory)
-    {
+    function verify(
+        ZkConnectResponse memory zkConnectResponse,
+        DataRequest memory dataRequest
+    ) public returns (ZkConnectVerifiedResult memory) {
         uint256 vaultId = 0;
         bytes16 appId = zkConnectResponse.appId;
         bytes16 namespace = zkConnectResponse.namespace;
@@ -35,15 +35,16 @@ contract ZkConnectVerifier {
         }
 
         if (zkConnectResponse.proofs.length == 0 && dataRequest.statementRequests.length == 0) {
-            vaultId = _verifyAuthProof(appId, zkConnectResponse.authProof, zkConnectResponse.signedMessage);
-            return ZkConnectVerifiedResult({
-                appId: appId,
-                namespace: namespace,
-                version: zkConnectResponse.version,
-                verifiedStatements: new VerifiedStatement[](0),
-                signedMessage: signedMessage,
-                vaultId: vaultId
-            });
+            vaultId = _verifyAuthProof(appId, zkConnectResponse.authProof);
+            return
+                ZkConnectVerifiedResult({
+                    appId: appId,
+                    namespace: namespace,
+                    version: zkConnectResponse.version,
+                    verifiedStatements: new VerifiedStatement[](0),
+                    signedMessage: signedMessage,
+                    vaultId: vaultId
+                });
         }
 
         VerifiedStatement memory verifiedStatementFromProof;
@@ -54,19 +55,24 @@ contract ZkConnectVerifier {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
             _checkStatementMatchDataRequest(proof, dataRequest);
-            (vaultId, verifiedStatementFromProof) =
-                _verifiers[proof.provingScheme].verify(appId, namespace, proof, signedMessage);
+            (vaultId, verifiedStatementFromProof) = _verifiers[proof.provingScheme].verify(
+                appId,
+                namespace,
+                proof,
+                signedMessage
+            );
             verifiedStatements[i] = verifiedStatementFromProof;
         }
 
-        return ZkConnectVerifiedResult({
-            appId: appId,
-            namespace: namespace,
-            version: zkConnectResponse.version,
-            verifiedStatements: verifiedStatements,
-            signedMessage: signedMessage,
-            vaultId: vaultId
-        });
+        return
+            ZkConnectVerifiedResult({
+                appId: appId,
+                namespace: namespace,
+                version: zkConnectResponse.version,
+                verifiedStatements: verifiedStatements,
+                signedMessage: signedMessage,
+                vaultId: vaultId
+            });
     }
 
     function setVerifier(bytes32 provingScheme, address verifierAddress) public {

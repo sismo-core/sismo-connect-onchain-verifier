@@ -11,23 +11,25 @@ library StatementRequestLib {
         StatementComparator comparator,
         bytes memory extraData
     ) public returns (StatementRequest memory) {
-        return StatementRequest({
-            groupId: groupId,
-            groupTimestamp: bytes16("latest"),
-            requestedValue: 1,
-            comparator: StatementComparator.GTE,
-            extraData: extraData
-        });
+        return
+            StatementRequest({
+                groupId: groupId,
+                groupTimestamp: bytes16("latest"),
+                requestedValue: 1,
+                comparator: StatementComparator.GTE,
+                extraData: extraData
+            });
     }
 
     function build(bytes16 groupId) public returns (StatementRequest memory) {
-        return build({
-            groupId: groupId,
-            groupTimestamp: bytes16("latest"),
-            requestedValue: 1,
-            comparator: StatementComparator.GTE,
-            extraData: ""
-        });
+        return
+            build({
+                groupId: groupId,
+                groupTimestamp: bytes16("latest"),
+                requestedValue: 1,
+                comparator: StatementComparator.GTE,
+                extraData: ""
+            });
     }
 
     function build(bytes16 groupId, bytes16 groupTimestamp) public returns (StatementRequest memory) {

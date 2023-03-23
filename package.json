@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "prettier": "prettier --write **.sol"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.6",
+    "prettier-plugin-solidity": "^1.1.3"
+  }
+}

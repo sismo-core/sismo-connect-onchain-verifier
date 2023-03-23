@@ -18,7 +18,7 @@ contract HydraS2Proofs {
     }
 
     // simple zkConnect with 1 statement
-    function getZkConnectResponse1() public returns (bytes memory) {
+    function getZkConnectResponse1() public pure returns (ZkConnectResponse memory) {
         Statement memory statement = Statement({
             groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
             value: 1,
@@ -35,9 +35,9 @@ contract HydraS2Proofs {
             extraData: ""
         });
 
-        AuthProof memory authProof = AuthProof({proofData: hex"", provingScheme: ""});
+        AuthProof memory authProof = AuthProof("", "");
 
-        return abi.encode(
+        return
             ZkConnectResponse({
                 appId: 0x112a692a2005259c25f6094161007967,
                 namespace: bytes16(keccak256("main")),
@@ -45,8 +45,11 @@ contract HydraS2Proofs {
                 proofs: proofs,
                 authProof: authProof,
                 signedMessage: hex"00"
-            })
-        );
+            });
+    }
+
+    function getZkConnectResponse1AsBytes() public pure returns (bytes memory) {
+        return abi.encode(getZkConnectResponse1());
     }
 }
 

@@ -5,10 +5,10 @@ import "src/libs/utils/Struct.sol";
 import "./StatementRequestLib.sol";
 
 library DataRequestLib {
-    function build(StatementRequest[] memory statementRequests, LogicalOperator operator)
-        public
-        returns (DataRequest memory dataRequest)
-    {
+    function build(
+        StatementRequest[] memory statementRequests,
+        LogicalOperator operator
+    ) public returns (DataRequest memory dataRequest) {
         return DataRequest({statementRequests: statementRequests, operator: operator});
     }
 

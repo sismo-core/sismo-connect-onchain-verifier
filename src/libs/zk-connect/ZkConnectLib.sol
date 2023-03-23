@@ -27,10 +27,11 @@ contract ZkConnect is Context {
         _zkConnectVerifier = ZkConnectVerifier(ADDRESSES_PROVIDER.get(string("zkConnectVerifier")));
     }
 
-    function verify(bytes memory zkConnectResponseEncoded, DataRequest memory dataRequest, bytes16 namespace)
-        public
-        returns (ZkConnectVerifiedResult memory)
-    {
+    function verify(
+        bytes memory zkConnectResponseEncoded,
+        DataRequest memory dataRequest,
+        bytes16 namespace
+    ) public returns (ZkConnectVerifiedResult memory) {
         if (zkConnectResponseEncoded.length == 0) {
             revert ZkConnectResponseIsEmpty();
         }
@@ -58,7 +59,10 @@ contract ZkConnect is Context {
         returns (ZkConnectVerifiedResult memory)
     {
         if (zkConnectResponse.version != _zkConnectVerifier.ZK_CONNECT_VERSION()) {
-            revert InvalidZkConnectVersion(zkConnectResponse.version, _zkConnectVerifier.ZK_CONNECT_VERSION());
+            revert InvalidZkConnectVersion({
+                receivedVersion: zkConnectResponse.version,
+                expectedVersion: _zkConnectVerifier.ZK_CONNECT_VERSION()
+            });
         }
 
         if (zkConnectResponse.appId != appId) {
@@ -72,17 +76,22 @@ contract ZkConnect is Context {
         return _zkConnectVerifier.verify(zkConnectResponse, dataRequest);
     }
 
-    function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest)
-        public
-        returns (ZkConnectVerifiedResult memory)
-    {
-        return verify(zkConnectResponse, dataRequest, bytes16(keccak256("main")));
+    function verify(
+        bytes memory zkConnectResponseEncoded,
+        DataRequest memory dataRequest
+    ) public returns (ZkConnectVerifiedResult memory) {
+        return verify(zkConnectResponseEncoded, dataRequest, bytes16(keccak256("main")));
     }
 
-    function verify(ZkConnectResponse memory zkConnectResponse) public returns (ZkConnectVerifiedResult memory) {
-        return verify(
-            zkConnectResponse,
-            DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND})
-        );
+    function verify(bytes memory zkConnectResponseEncoded) public returns (ZkConnectVerifiedResult memory) {
+        return
+            verify(
+                zkConnectResponseEncoded,
+                DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND})
+            );
+    }
+
+    function getZkConnectVersion() public view returns (bytes32) {
+        return _zkConnectVerifier.ZK_CONNECT_VERSION();
     }
 }

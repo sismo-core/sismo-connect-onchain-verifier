@@ -1,6 +1,7 @@
 # Compiler files
 cache/
 out/
+node_modules/
 
 # Dotenv file
 .env
