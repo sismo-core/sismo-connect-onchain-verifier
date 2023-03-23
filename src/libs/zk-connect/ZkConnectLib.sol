@@ -85,4 +85,8 @@ contract ZkConnect is Context {
             DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND})
         );
     }
+
+    function getZkConnectVersion() public view returns (bytes32) {
+        return _zkConnectVerifier.ZK_CONNECT_VERSION();
+    }
 }
