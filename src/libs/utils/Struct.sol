@@ -1,33 +1,42 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-struct ZkConnectRequest {
-    DataRequest dataRequest;
-    bytes16 appId;
-    bytes16 namespace;
-    bytes32 version;
-    bytes message;
-}
-
 struct DataRequest {
-    StatementRequest[] statementRequests;
-    LogicalOperator operator;
+    Auth authRequest;
+    Claim claimRequest;
+    bytes messageSignatureRequest;
 }
 
-struct StatementRequest {
+struct Claim {
     bytes16 groupId;
     bytes16 groupTimestamp;
-    uint256 requestedValue;
-    StatementComparator comparator;
+    ClaimType claimType;
+    uint256 value;
     bytes extraData;
 }
 
-enum StatementComparator {
+struct Auth {
+    AuthType authType;
+    bool anonMode;
+    uint256 userId;
+    bytes extraData;
+}
+
+enum ClaimType {
     GTE,
     GT,
     EQ,
     LT,
-    LTE
+    LTE,
+    USER_SELECT
+}
+
+enum AuthType {
+    NONE,
+    ANON,
+    GITHUB,
+    TWITTER,
+    EVM_ACCOUNT
 }
 
 enum LogicalOperator {
@@ -35,50 +44,45 @@ enum LogicalOperator {
     OR
 }
 
-struct Statement {
-    bytes16 groupId;
-    bytes16 groupTimestamp;
-    uint256 value;
-    bytes extraData;
-    StatementComparator comparator;
-}
-
-struct ZkConnectProof {
-    Statement statement;
-    bytes32 provingScheme;
-    bytes proofData;
-    bytes extraData;
-}
-
-struct VerifiedStatement {
-    bytes16 groupId;
-    bytes16 groupTimestamp;
-    uint256 value;
-    StatementComparator comparator;
-    bytes32 provingScheme;
-    uint256 proofId;
-    bytes extraData;
-}
-
 struct ZkConnectResponse {
     bytes16 appId;
     bytes16 namespace;
     bytes32 version;
     ZkConnectProof[] proofs;
-    AuthProof authProof;
-    bytes signedMessage;
 }
 
-struct AuthProof {
+struct ZkConnectProof {
+    Claim claim;
+    Auth auth;
+    bytes signedMessage;
     bytes32 provingScheme;
     bytes proofData;
+    bytes extraData;
 }
 
 struct ZkConnectVerifiedResult {
     bytes16 appId;
     bytes16 namespace;
     bytes32 version;
-    uint256 vaultId;
-    VerifiedStatement[] verifiedStatements;
+    ZkConnectProof[] proofs;
+    Claim[] verifiedClaims;
+    Auth[] verifiedAuths;
     bytes signedMessage;
+}
+
+struct VerifiedClaim {
+    bytes16 groupId;
+    bytes16 groupTimestamp;
+    ClaimType claimType;
+    uint256 value;
+    bytes extraData;
+    uint256 proofId;
+}
+
+struct VerifiedAuth {
+    AuthType authType;
+    bool anonMode;
+    uint256 userId;
+    bytes extraData;
+    uint256 proofId;
 }
