@@ -57,6 +57,7 @@ contract ZkConnectVerifier {
             }
 
             if (proof.auth.isValid) {
+                _checkAuthMatchContentRequest(proof, zkConnectRequestContent);
                 verifiedAuth = _verifiers[proof.provingScheme].verifyAuthProof(appId, proof);
                 verifiedAuths[i] = verifiedAuth;
             } else {
@@ -190,7 +191,7 @@ contract ZkConnectVerifier {
     function _checkLogicalOperators(
         ZkConnectResponse memory zkConnectResponse,
         ZkConnectRequestContent memory zkConnectRequestContent
-    ) public view {
+    ) public pure {
         if (zkConnectRequestContent.operators[0] == LogicalOperator.AND) {
             if (zkConnectResponse.proofs.length != zkConnectRequestContent.dataRequests.length) {
                 revert ProofsAndDataRequestsAreUnequalInLength(
