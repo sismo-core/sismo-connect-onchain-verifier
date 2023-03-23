@@ -4,13 +4,11 @@ pragma solidity ^0.8.17;
 import "src/libs/utils/Struct.sol";
 
 library ClaimRequestLib {
-    function build(
-        bytes16 groupId,
-        bytes16 groupTimestamp,
-        uint256 value,
-        ClaimType claimType,
-        bytes memory extraData
-    ) public pure returns (Claim memory) {
+    function build(bytes16 groupId, bytes16 groupTimestamp, uint256 value, ClaimType claimType, bytes memory extraData)
+        public
+        pure
+        returns (Claim memory)
+    {
         return Claim({
             groupId: groupId,
             groupTimestamp: groupTimestamp,
@@ -26,13 +24,7 @@ library ClaimRequestLib {
         uint256 value = 1;
         ClaimType comparator = ClaimType.GTE;
         bytes memory extraData = "";
-        return build(
-            groupId,
-            groupTimestamp,
-            value,
-            comparator,
-            extraData
-        );
+        return build(groupId, groupTimestamp, value, comparator, extraData);
     }
 
     function build(bytes16 groupId, bytes16 groupTimestamp) public returns (Claim memory) {

@@ -26,7 +26,7 @@ library ZkConnectRequestContentLib {
         DataRequest[] memory dataRequests = new DataRequest[](1);
         Claim memory claim = ClaimRequestLib.build(groupId);
         Auth memory auth;
-        dataRequests[0] = DataRequest({claimRequest: claim, authRequest: auth, messageSignatureRequest: "" });
+        dataRequests[0] = DataRequest({claimRequest: claim, authRequest: auth, messageSignatureRequest: ""});
         return build({dataRequests: dataRequests, operator: LogicalOperator.AND});
     }
 
