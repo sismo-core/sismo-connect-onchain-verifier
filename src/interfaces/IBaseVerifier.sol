@@ -6,7 +6,7 @@ import "../libs/utils/Struct.sol";
 interface IBaseVerifier {
     function verifyClaim(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof)
         external
-        returns (uint256 proofId);
+        returns (VerifiedClaim memory);
 
-    function verifyAuthProof(bytes16 appId, ZkConnectProof memory proof) external returns (uint256 proofId);
+    function verifyAuthProof(bytes16 appId, ZkConnectProof memory proof) external returns (VerifiedAuth memory);
 }

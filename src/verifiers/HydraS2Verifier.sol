@@ -24,7 +24,7 @@ struct HydraS2SnarkProof {
 // proofIdentifier;
 // statementValue;
 // accountsTreeValue;
-// statementComparator;
+// claimType;
 // vaultIdentifier;
 // vaultNamespace;
 // sourceVerificationEnabled;
@@ -45,9 +45,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
     error DestinationMismatch(address destinationFromProof, address expectedDestination);
     error CommitmentMapperPubKeyMismatch(uint256 expectedX, uint256 expectedY, uint256 inputX, uint256 inputY);
 
-    error StatementComparatorMismatch(
-        uint256 statementComparatorFromProof, StatementComparator expectedStatementComparator
-    );
+    error ClaimTypeMismatch(uint256 claimTypeFromProof, ClaimType expectedClaimType);
     error MismatchRequestIdentifier(uint256 requestIdentifierFromProof, uint256 expectedRequestIdentifier);
     error InvalidExtraData(bytes32 extraDataFromProof, bytes32 expectedExtraData);
     error InvalidRequestedValue();
@@ -61,68 +59,74 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         AVAILABLE_ROOTS_REGISTRY = IAvailableRootsRegistry(availableRootsRegistry);
     }
 
-    function verify(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof, bytes memory signedMessage)
+    function verifyClaim(bytes16 appId, bytes16 namespace, ZkConnectProof memory zkConnectProof)
         public
         view
         override
-        returns (uint256 vaultId, VerifiedStatement memory)
+        returns (VerifiedClaim memory)
     {
-        if (proof.provingScheme != HYDRA_S2_VERSION) {
-            revert InvalidVersion(proof.provingScheme);
+        if (zkConnectProof.provingScheme != HYDRA_S2_VERSION) {
+            revert InvalidVersion(zkConnectProof.provingScheme);
         }
 
-        Statement memory statement = proof.statement;
+        Claim memory claim = zkConnectProof.claim;
 
-        HydraS2SnarkProof memory snarkProof = abi.decode(proof.proofData, (HydraS2SnarkProof));
+        HydraS2SnarkProof memory snarkProof = abi.decode(zkConnectProof.proofData, (HydraS2SnarkProof));
 
-        _checkPublicInputs(appId, namespace, statement, snarkProof.inputs, signedMessage);
+        _checkPublicInputs(appId, namespace, claim, snarkProof.inputs, zkConnectProof);
         _checkSnarkProof(snarkProof);
 
-        VerifiedStatement memory verifiedStatement = VerifiedStatement({
-            groupId: statement.groupId,
-            groupTimestamp: statement.groupTimestamp,
-            value: statement.value,
-            comparator: statement.comparator,
-            provingScheme: proof.provingScheme,
+        VerifiedClaim memory verifiedClaim = VerifiedClaim({
+            groupId: claim.groupId,
+            groupTimestamp: claim.groupTimestamp,
+            value: claim.value,
+            claimType: claim.claimType,
             proofId: snarkProof.inputs[6],
-            extraData: statement.extraData
+            extraData: claim.extraData,
+            isValid: true
         });
 
-        return (snarkProof.inputs[10], verifiedStatement);
+        return verifiedClaim;
     }
 
-    function verifyAuthProof(bytes16 appId, AuthProof memory authProof, bytes memory signedMessage)
+    function verifyAuthProof(bytes16 appId, ZkConnectProof memory zkConnectProof)
         public
         view
-        returns (uint256)
+        returns (VerifiedAuth memory)
     {
-        if (authProof.provingScheme != HYDRA_S2_VERSION) {
-            revert InvalidVersion(authProof.provingScheme);
+        if (zkConnectProof.provingScheme != HYDRA_S2_VERSION) {
+            revert InvalidVersion(zkConnectProof.provingScheme);
         }
 
-        HydraS2SnarkProof memory snarkProof = abi.decode(authProof.proofData, (HydraS2SnarkProof));
+        HydraS2SnarkProof memory snarkProof = abi.decode(zkConnectProof.proofData, (HydraS2SnarkProof));
 
-        uint256 vaultId = snarkProof.inputs[11];
         uint256 extraData = snarkProof.inputs[1];
         bytes16 appIdFromProof = bytes16(uint128(snarkProof.inputs[11]));
         if (appIdFromProof != appId) {
             revert AppIdMismatch(appIdFromProof, appId);
         }
-        // if (extraData != uint256(keccak256(signedMessage))) {
-        //     revert InvalidExtraData(bytes32(extraData), keccak256(signedMessage));
+        // if (extraData != uint256(keccak256(zkConnectProof.signedMessage))) {
+        //     revert InvalidExtraData(bytes32(extraData), keccak256(zkConnectProof.signedMessage));
         // }
 
         _checkSnarkProof(snarkProof);
-
-        return vaultId;
+        Auth memory auth = zkConnectProof.auth;
+        return VerifiedAuth({
+            authType: auth.authType,
+            anonMode: auth.anonMode,
+            userId: auth.userId,
+            extraData: auth.extraData,
+            proofId: snarkProof.inputs[6],
+            isValid: true
+        });
     }
 
     function _checkPublicInputs(
         bytes16 appId,
         bytes16 namespace,
-        Statement memory statement,
+        Claim memory claim,
         uint256[14] memory inputs,
-        bytes memory signedMessage
+        ZkConnectProof memory zkConnectProof
     ) internal view {
         address destinationIdentifier = address(uint160(inputs[0]));
         uint256 extraData = inputs[1];
@@ -131,27 +135,27 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
         uint256 registryTreeRoot = inputs[4];
         uint256 requestIdentifier = inputs[5];
         uint256 proofIdentifier = inputs[6];
-        uint256 statementValue = inputs[7];
+        uint256 claimValue = inputs[7]; // statementValue in circuits
         uint256 accountsTreeValue = inputs[8];
-        uint256 statementComparator = inputs[9];
+        uint256 claimType = inputs[9]; // statementComparator in circuits
         uint256 vaultIdentifier = inputs[10];
         uint256 vaultNamespace = inputs[11];
         bool sourceVerificationEnabled = inputs[12] == 1;
         bool destinationVerificationEnabled = inputs[13] == 1;
 
-        // statementComparator
-        bool isStatementComparatorFromProofEqualToOne = statementComparator == 1;
-        bool isStatementComparatorFromStatementEqualToEQ = statement.comparator == StatementComparator.EQ;
-        if (isStatementComparatorFromProofEqualToOne != isStatementComparatorFromStatementEqualToEQ) {
-            revert StatementComparatorMismatch(statementComparator, statement.comparator);
+        // claimType
+        bool isClaimTypeFromProofEqualToOne = claimType == 1;
+        bool isClaimTypeFromClaimEqualToEQ = claim.claimType == ClaimType.EQ;
+        if (isClaimTypeFromProofEqualToOne != isClaimTypeFromClaimEqualToEQ) {
+            revert ClaimTypeMismatch(claimType, claim.claimType);
         }
-        // statementValue
-        if (statementValue != statement.value) {
+        // claimValue
+        if (claimValue != claim.value) {
             revert InvalidRequestedValue();
         }
         // requestIdentifier
         uint256 expectedRequestIdentifier =
-            _encodeRequestIdentifier(appId, statement.groupId, statement.groupTimestamp, namespace);
+            _encodeRequestIdentifier(appId, claim.groupId, claim.groupTimestamp, namespace);
         if (requestIdentifier != expectedRequestIdentifier) {
             revert MismatchRequestIdentifier(requestIdentifier, expectedRequestIdentifier);
         }
@@ -173,7 +177,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
             revert RegistryRootMismatch(registryTreeRoot);
         }
         // accountsTreeValue
-        uint256 groupSnapshotId = _encodeAccountsTreeValue(statement.groupId, statement.groupTimestamp);
+        uint256 groupSnapshotId = _encodeAccountsTreeValue(claim.groupId, claim.groupTimestamp);
         if (accountsTreeValue != groupSnapshotId) {
             revert AccountsTreeValueMismatch(accountsTreeValue, groupSnapshotId);
         }

@@ -2,12 +2,17 @@
 pragma solidity ^0.8.14;
 
 import {
-    ZkConnect, DataRequest, ClaimRequestLib, ZkConnectResponse, ZkConnectVerifiedResult
+    ZkConnect,
+    ZkConnectRequestContentLib,
+    ClaimRequestLib,
+    ZkConnectRequestContent,
+    ZkConnectResponse,
+    ZkConnectVerifiedResult
 } from "../libs/SismoLib.sol";
 import {ERC721} from "solmate/tokens/ERC721.sol";
 
 contract ZKDropERC721 is ERC721, ZkConnect {
-    DataRequest public dataRequest;
+    ZkConnectRequestContent private zkConnectRequestContent;
 
     string private _baseTokenURI;
 
@@ -15,24 +20,24 @@ contract ZKDropERC721 is ERC721, ZkConnect {
         ERC721(name, symbol)
         ZkConnect(appId)
     {
-        dataRequest = DataRequestLib.build(groupId);
+        zkConnectRequestContent = ZkConnectRequestContentLib.build(groupId);
         _setBaseTokenUri(baseTokenURI);
     }
 
     function claimWithZkConnect(ZkConnectResponse memory zkConnectResponse) public {
-        ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify(zkConnectResponse, dataRequest);
+        ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify(zkConnectResponse, zkConnectRequestContent);
 
-        address to = abi.decode(zkConnectVerifiedResult.signedMessage, (address));
-        uint256 tokenId = zkConnectVerifiedResult.vaultId;
+        address to = abi.decode(zkConnectVerifiedResult.signedMessages[0], (address));
+        uint256 tokenId = zkConnectVerifiedResult.verifiedAuths[0].userId;
 
         _mint(to, tokenId);
     }
 
     function transferWithZkConnect(ZkConnectResponse memory zkConnectResponse) public {
-        ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify(zkConnectResponse, dataRequest);
+        ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify(zkConnectResponse, zkConnectRequestContent);
 
-        address to = abi.decode(zkConnectVerifiedResult.signedMessage, (address));
-        uint256 tokenId = zkConnectVerifiedResult.vaultId;
+        address to = abi.decode(zkConnectVerifiedResult.signedMessages[0], (address));
+        uint256 tokenId = zkConnectVerifiedResult.verifiedAuths[0].userId;
         address from = ownerOf(tokenId);
 
         // _transferFrom(from, to, tokenId);
