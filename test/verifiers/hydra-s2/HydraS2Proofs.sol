@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import "src/libs/utils/Struct.sol";
-import "src/libs/utils/StatementRequestLib.sol";
+import "src/libs/utils/ClaimRequestLib.sol";
 
 contract HydraS2Proofs {
     function getEdDSAPubKey() public pure returns (uint256[2] memory) {
@@ -19,17 +19,22 @@ contract HydraS2Proofs {
 
     // simple zkConnect with 1 statement
     function getZkConnectResponse1() public returns (ZkConnectResponse memory) {
-        Statement memory statement = Statement({
+        Claim memory claim = Claim({
             groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
-            value: 1,
             groupTimestamp: bytes16("latest"),
-            comparator: StatementComparator.GTE,
+            value: 1,
+            claimType: ClaimType.GTE,
             extraData: ""
         });
 
+        // empty auth
+        Auth memory auth;
+
         ZkConnectProof[] memory proofs = new ZkConnectProof[](1);
         proofs[0] = ZkConnectProof({
-            statement: statement,
+            claim: claim,
+            auth: auth,
+            signedMessage: "",
             provingScheme: bytes32("hydra-s2.1"),
             proofData: hex"162fba0e2b357e6190d05471c08a4f4da6d0831bcefd8f7787d732d3156698d4119664dd2bfcc0d9b0d3513947fa1e20f9f73847c89ddc9f336476eea1106d03070eca2658f85ee8f9845aac26de7ad4ffccc78713f7dd2efb9024e0ef8750090c1f8c411c43ab85f6fe6cfbe53d1c5c3e90e322027bc12975fd96f02566cf1e12f139fd40095f34f8e0603cbe43efc2f03f32c638a94f8fb5f55f2252f48f0112bcbedd222aa50a515826acf4bda6fe381fa651f5b719c0510b81316bd4d1e02c65015a5fa1ae041d5682b490abdc864970b1c3178adbbd7d024ebbc9b06bae3002d7663bc44ebb4ac8567f0e6968dab8e4f479ffb45dc939d4b624392ee1e40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb920706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa1d4a72bd1c1e4f9ab68c3c4c55afd3e582685a18b9ec09fc96136619d2513fe821a63725868405196971cad8f2e46ed111118a9869929d0f87c154c9c60d015f044f025508bb2ec3ad43852788f4f9f74c37ece5e1958c59b4558e7b098768510000000000000000000000000000000000000000000000000000000000000001285bf79dc20d58e71b9712cb38c420b9cb91d3438c8e3dbaf07829b03ffffffc000000000000000000000000000000000000000000000000000000000000000028c8b31cfdb3021f44a90006d40ee6ff1d1080103a6704b0ba79f0493281599f00000000000000000000000000000000112a692a2005259c25f609416100796700000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
             extraData: ""
@@ -41,9 +46,7 @@ contract HydraS2Proofs {
             appId: 0x112a692a2005259c25f6094161007967,
             namespace: bytes16(keccak256("main")),
             version: bytes32("zk-connect-v1"),
-            proofs: proofs,
-            authProof: authProof,
-            signedMessage: hex"00"
+            proofs: proofs
         });
     }
 }

@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
+struct ZkConnectRequestContent {
+    DataRequest[] dataRequests;
+    LogicalOperator[] operators;
+}
+
 struct DataRequest {
     Auth authRequest;
     Claim claimRequest;
@@ -13,6 +18,7 @@ struct Claim {
     ClaimType claimType;
     uint256 value;
     bytes extraData;
+    bool isValid;
 }
 
 struct Auth {
@@ -20,6 +26,7 @@ struct Auth {
     bool anonMode;
     uint256 userId;
     bytes extraData;
+    bool isValid;
 }
 
 enum ClaimType {
@@ -64,10 +71,9 @@ struct ZkConnectVerifiedResult {
     bytes16 appId;
     bytes16 namespace;
     bytes32 version;
-    ZkConnectProof[] proofs;
-    Claim[] verifiedClaims;
-    Auth[] verifiedAuths;
-    bytes signedMessage;
+    VerifiedClaim[] verifiedClaims;
+    VerifiedAuth[] verifiedAuths;
+    bytes[] signedMessages;
 }
 
 struct VerifiedClaim {
@@ -77,6 +83,7 @@ struct VerifiedClaim {
     uint256 value;
     bytes extraData;
     uint256 proofId;
+    bool isValid;
 }
 
 struct VerifiedAuth {
@@ -85,4 +92,5 @@ struct VerifiedAuth {
     uint256 userId;
     bytes extraData;
     uint256 proofId;
+    bool isValid;
 }

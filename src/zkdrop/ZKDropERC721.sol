@@ -2,7 +2,7 @@
 pragma solidity ^0.8.14;
 
 import {
-    ZkConnect, DataRequest, DataRequestLib, ZkConnectResponse, ZkConnectVerifiedResult
+    ZkConnect, DataRequest, ClaimRequestLib, ZkConnectResponse, ZkConnectVerifiedResult
 } from "../libs/SismoLib.sol";
 import {ERC721} from "solmate/tokens/ERC721.sol";
 

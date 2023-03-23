@@ -3,7 +3,7 @@ pragma solidity ^0.8.14;
 
 import "src/libs/utils/Struct.sol";
 import "src/libs/utils/DataRequestLib.sol";
-import "src/libs/utils/StatementRequestLib.sol";
+import "src/libs/utils/ClaimRequestLib.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ZkConnectVerifier} from "src/ZkConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
@@ -47,10 +47,8 @@ contract ZkConnect is Context {
     }
 
     function verify(bytes memory zkConnectResponseEncoded) public returns (ZkConnectVerifiedResult memory) {
-        return verify(
-            zkConnectResponseEncoded,
-            DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND})
-        );
+        DataRequest memory dataRequest;
+        return verify(zkConnectResponseEncoded, dataRequest);
     }
 
     function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest, bytes16 namespace)
@@ -80,10 +78,8 @@ contract ZkConnect is Context {
     }
 
     function verify(ZkConnectResponse memory zkConnectResponse) public returns (ZkConnectVerifiedResult memory) {
-        return verify(
-            zkConnectResponse,
-            DataRequest({statementRequests: new StatementRequest[](0), operator: LogicalOperator.AND})
-        );
+        DataRequest memory dataRequest;
+        return verify(zkConnectResponse, dataRequest);
     }
 
     function getZkConnectVersion() public view returns (bytes32) {
