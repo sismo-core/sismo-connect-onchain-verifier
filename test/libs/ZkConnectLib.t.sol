@@ -64,7 +64,13 @@ contract ZkConnectTest is HydraS2BaseTest {
     function test_RevertWith_UnequalProofsAndStatementRequestsLength() public {
         ZkConnectResponse memory invalidZkConnectResponse = validZkConnectResponse;
         invalidZkConnectResponse.proofs = new ZkConnectProof[](0);
-        vm.expectRevert(abi.encodeWithSignature("ProofsAndStatementRequestsAreUnequalInLength()"));
+        vm.expectRevert(
+            abi.encodeWithSignature(
+                "ProofsAndStatementRequestsAreUnequalInLength(uint256,uint256)",
+                invalidZkConnectResponse.proofs.length,
+                dataRequest.statementRequests.length
+            )
+        );
         zkConnect.verify(abi.encode(invalidZkConnectResponse), dataRequest);
     }
 
