@@ -7,7 +7,10 @@ import "src/libs/zk-connect/ZkConnectLib.sol";
 
 contract ZkConnectTest is HydraS2BaseTest {
     ZkConnect zkConnect;
-    DataRequest dataRequest = DataRequestLib.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    ZkConnectRequestContent zkConnectRequestContent = ZkConnectRequestContentLib.build({
+        groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
+        groupTimestamp: bytes16("latest")
+    });
     bytes16 immutable appId = 0x112a692a2005259c25f6094161007967;
 
     ZkConnectResponse validZkConnectResponse;
@@ -21,7 +24,7 @@ contract ZkConnectTest is HydraS2BaseTest {
     function test_RevertWith_InvalidZkConnectResponse() public {
         bytes memory zkConnectResponseEncoded = hex"";
         vm.expectRevert(abi.encodeWithSignature("ZkConnectResponseIsEmpty()"));
-        zkConnect.verify(zkConnectResponseEncoded, dataRequest);
+        zkConnect.verify(zkConnectResponseEncoded, zkConnectRequestContent);
     }
 
     function test_RevertWith_InvalidZkConnectVersion() public {
@@ -34,7 +37,7 @@ contract ZkConnectTest is HydraS2BaseTest {
                 zkConnect.getZkConnectVersion()
             )
         );
-        zkConnect.verify(abi.encode(invalidZkConnectResponse), dataRequest);
+        zkConnect.verify(abi.encode(invalidZkConnectResponse), zkConnectRequestContent);
     }
 
     function test_RevertWith_InvalidZkConnectAppId() public {
@@ -45,7 +48,7 @@ contract ZkConnectTest is HydraS2BaseTest {
                 "AppIdMismatch(bytes16,bytes16)", invalidZkConnectResponse.appId, validZkConnectResponse.appId
             )
         );
-        zkConnect.verify(abi.encode(invalidZkConnectResponse), dataRequest);
+        zkConnect.verify(abi.encode(invalidZkConnectResponse), zkConnectRequestContent);
     }
 
     function test_RevertWith_InvalidNamespace() public {
@@ -58,7 +61,7 @@ contract ZkConnectTest is HydraS2BaseTest {
                 validZkConnectResponse.namespace
             )
         );
-        zkConnect.verify(abi.encode(invalidZkConnectResponse), dataRequest);
+        zkConnect.verify(abi.encode(invalidZkConnectResponse), zkConnectRequestContent);
     }
 
     function test_RevertWith_UnequalProofsAndStatementRequestsLength() public {
@@ -66,17 +69,18 @@ contract ZkConnectTest is HydraS2BaseTest {
         invalidZkConnectResponse.proofs = new ZkConnectProof[](0);
         vm.expectRevert(
             abi.encodeWithSignature(
-                "ProofsAndStatementRequestsAreUnequalInLength(uint256,uint256)",
+                "ProofsAndDataRequestsAreUnequalInLength(uint256,uint256)",
                 invalidZkConnectResponse.proofs.length,
-                dataRequest.statementRequests.length
+                zkConnectRequestContent.dataRequests.length
             )
         );
-        zkConnect.verify(abi.encode(invalidZkConnectResponse), dataRequest);
+        zkConnect.verify(abi.encode(invalidZkConnectResponse), zkConnectRequestContent);
     }
 
     function test_ZkConnectLib() public {
         bytes memory zkResponseEncoded = abi.encode(hydraS2Proofs.getZkConnectResponse1());
-        ZkConnectVerifiedResult memory zkConnectVerifiedResult = zkConnect.verify(zkResponseEncoded, dataRequest);
-        console.log("zkConnectVerifiedResult.vaultId: %s", zkConnectVerifiedResult.vaultId);
+        ZkConnectVerifiedResult memory zkConnectVerifiedResult =
+            zkConnect.verify(zkResponseEncoded, zkConnectRequestContent);
+        console.log("userId: %s", zkConnectVerifiedResult.verifiedAuths[0].userId);
     }
 }

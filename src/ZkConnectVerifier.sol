@@ -10,64 +10,80 @@ contract ZkConnectVerifier {
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
-    error ProofsAndStatementRequestsAreUnequalInLength(uint256 proofsLength, uint256 statementRequestsLength);
+    error InvalidZkConnectVersion(bytes32 receivedVersion, bytes32 expectedVersion);
+    error ProofNeedsAuthOrClaim();
+    error ProofsAndDataRequestsAreUnequalInLength(uint256 proofsLength, uint256 dataRequestsLength);
+    error OnlyOneProofSupportedWithLogicalOperatorOR();
     error ProvingSchemeNotSupported(bytes32 provingScheme);
-    error StatementRequestNotFound(bytes16 groupId, bytes16 groupTimestamp);
-    error StatementComparatorMismatch(StatementComparator comparator, StatementComparator expectedComparator);
-    error StatementExtraDataMismatch(bytes extraData, bytes expectedExtraData);
-    error StatementProvingSchemeMismatch(bytes32 provingScheme, bytes32 expectedProvingScheme);
-    error StatementValueMismatch(StatementComparator comparator, uint256 value, uint256 expectedValue);
+    error ClaimRequestNotFound(bytes16 groupId, bytes16 groupTimestamp);
+    error ClaimTypeMismatch(ClaimType claimType, ClaimType expectedClaimType);
+    error ClaimExtraDataMismatch(bytes extraData, bytes expectedExtraData);
+    error ClaimProvingSchemeMismatch(bytes32 provingScheme, bytes32 expectedProvingScheme);
+    error ClaimValueMismatch(ClaimType claimType, uint256 value, uint256 expectedValue);
     error AuthProofIsEmpty();
+    error AuthRequestNotFound(AuthType authType, bool anonMode);
+    error AuthUserIdMismatch(uint256 userId, uint256 expectedUserId);
 
     event VerifierSet(bytes32, address);
 
-    function verify(ZkConnectResponse memory zkConnectResponse, DataRequest memory dataRequest)
+    function verify(ZkConnectResponse memory zkConnectResponse, ZkConnectRequestContent memory zkConnectRequestContent)
         public
         returns (ZkConnectVerifiedResult memory)
     {
-        uint256 vaultId = 0;
+        if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
+            revert InvalidZkConnectVersion(zkConnectResponse.version, ZK_CONNECT_VERSION);
+        }
+
         bytes16 appId = zkConnectResponse.appId;
         bytes16 namespace = zkConnectResponse.namespace;
-        bytes memory signedMessage = zkConnectResponse.signedMessage;
 
-        if (zkConnectResponse.proofs.length != dataRequest.statementRequests.length) {
-            revert ProofsAndStatementRequestsAreUnequalInLength(
-                zkConnectResponse.proofs.length, dataRequest.statementRequests.length
-            );
-        }
+        uint256 proofsLength = zkConnectResponse.proofs.length;
 
-        if (zkConnectResponse.proofs.length == 0 && dataRequest.statementRequests.length == 0) {
-            vaultId = _verifyAuthProof(appId, zkConnectResponse.authProof, zkConnectResponse.signedMessage);
-            return ZkConnectVerifiedResult({
-                appId: appId,
-                namespace: namespace,
-                version: zkConnectResponse.version,
-                verifiedStatements: new VerifiedStatement[](0),
-                signedMessage: signedMessage,
-                vaultId: vaultId
-            });
-        }
+        _checkLogicalOperators(zkConnectResponse, zkConnectRequestContent);
 
-        VerifiedStatement memory verifiedStatementFromProof;
-        VerifiedStatement[] memory verifiedStatements = new VerifiedStatement[](zkConnectResponse.proofs.length);
-        for (uint256 i = 0; i < zkConnectResponse.proofs.length; i++) {
+        VerifiedClaim memory verifiedClaim;
+        VerifiedAuth memory verifiedAuth;
+        VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](proofsLength);
+        VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](proofsLength);
+        bytes[] memory signedMessages = new bytes[](proofsLength);
+        for (uint256 i = 0; i < proofsLength; i++) {
             ZkConnectProof memory proof = zkConnectResponse.proofs[i];
             if (_verifiers[proof.provingScheme] == IBaseVerifier(address(0))) {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
-            _checkStatementMatchDataRequest(proof, dataRequest);
-            (vaultId, verifiedStatementFromProof) =
-                _verifiers[proof.provingScheme].verify(appId, namespace, proof, signedMessage);
-            verifiedStatements[i] = verifiedStatementFromProof;
+
+            if (proof.auth.isValid == false && proof.claim.isValid == false) {
+                revert ProofNeedsAuthOrClaim();
+            }
+
+            if (proof.auth.isValid) {
+                _checkAuthMatchContentRequest(proof, zkConnectRequestContent);
+                verifiedAuth = _verifiers[proof.provingScheme].verifyAuthProof(appId, proof);
+                verifiedAuths[i] = verifiedAuth;
+            } else {
+                VerifiedAuth memory emptyVerifiedAuth;
+                verifiedAuths[i] = emptyVerifiedAuth;
+            }
+
+            if (proof.claim.isValid) {
+                _checkClaimMatchContentRequest(proof, zkConnectRequestContent);
+                verifiedClaim = _verifiers[proof.provingScheme].verifyClaim(appId, namespace, proof);
+                verifiedClaims[i] = verifiedClaim;
+            } else {
+                VerifiedClaim memory emptyVerifiedClaim;
+                verifiedClaims[i] = emptyVerifiedClaim;
+            }
+
+            signedMessages[i] = proof.signedMessage;
         }
 
         return ZkConnectVerifiedResult({
             appId: appId,
             namespace: namespace,
             version: zkConnectResponse.version,
-            verifiedStatements: verifiedStatements,
-            signedMessage: signedMessage,
-            vaultId: vaultId
+            verifiedClaims: verifiedClaims,
+            verifiedAuths: verifiedAuths,
+            signedMessages: signedMessages
         });
     }
 
@@ -80,71 +96,112 @@ contract ZkConnectVerifier {
         emit VerifierSet(provingScheme, verifierAddress);
     }
 
-    function _verifyAuthProof(bytes16 appId, AuthProof memory authProof, bytes memory signedMessage)
-        internal
-        returns (uint256 vaultId)
-    {
-        if (keccak256(authProof.proofData) == keccak256(bytes(""))) {
-            revert AuthProofIsEmpty();
+    function _checkClaimMatchContentRequest(
+        ZkConnectProof memory proof,
+        ZkConnectRequestContent memory zkConnectRequestContent
+    ) public pure {
+        Claim memory claim = proof.claim;
+        bytes16 groupId = claim.groupId;
+        bytes16 groupTimestamp = claim.groupTimestamp;
+
+        bool isClaimRequestFound = false;
+        Claim memory claimRequest;
+        for (uint256 i = 0; i < zkConnectRequestContent.dataRequests.length; i++) {
+            claimRequest = zkConnectRequestContent.dataRequests[i].claimRequest;
+            if (claimRequest.groupId == groupId && claimRequest.groupTimestamp == groupTimestamp) {
+                isClaimRequestFound = true;
+            }
         }
 
-        return _verifiers[authProof.provingScheme].verifyAuthProof(appId, authProof, signedMessage);
+        if (!isClaimRequestFound) {
+            revert ClaimRequestNotFound(groupId, groupTimestamp);
+        }
+
+        if (claim.claimType != claimRequest.claimType) {
+            revert ClaimTypeMismatch(claim.claimType, claimRequest.claimType);
+        }
+
+        if (keccak256(claim.extraData) != keccak256(claimRequest.extraData)) {
+            revert ClaimExtraDataMismatch(claim.extraData, claimRequest.extraData);
+        }
+
+        if (claim.claimType == ClaimType.EQ) {
+            if (claim.value != claimRequest.value) {
+                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+            }
+        }
+
+        if (claim.claimType == ClaimType.GT) {
+            if (claim.value <= claimRequest.value) {
+                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+            }
+        }
+
+        if (claim.claimType == ClaimType.GTE) {
+            if (claim.value < claimRequest.value) {
+                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+            }
+        }
+
+        if (claim.claimType == ClaimType.LT) {
+            if (claim.value >= claimRequest.value) {
+                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+            }
+        }
+
+        if (claim.claimType == ClaimType.LTE) {
+            if (claim.value > claimRequest.value) {
+                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+            }
+        }
     }
 
-    function _checkStatementMatchDataRequest(ZkConnectProof memory proof, DataRequest memory dataRequest) public pure {
-        Statement memory statement = proof.statement;
-        bytes16 groupId = statement.groupId;
-        bytes16 groupTimestamp = statement.groupTimestamp;
-        bytes32 provingScheme = proof.provingScheme;
+    function _checkAuthMatchContentRequest(
+        ZkConnectProof memory proof,
+        ZkConnectRequestContent memory zkConnectRequestContent
+    ) public pure {
+        Auth memory auth = proof.auth;
+        AuthType authType = auth.authType;
+        bool anonMode = auth.anonMode;
 
-        bool isStatementRequestFound = false;
-        StatementRequest memory statementRequest;
-        for (uint256 i = 0; i < dataRequest.statementRequests.length; i++) {
-            statementRequest = dataRequest.statementRequests[i];
-            if (statementRequest.groupId == groupId && statementRequest.groupTimestamp == groupTimestamp) {
-                isStatementRequestFound = true;
+        bool isAuthRequestFound = false;
+        Auth memory authRequest;
+        for (uint256 i = 0; i < zkConnectRequestContent.dataRequests.length; i++) {
+            authRequest = zkConnectRequestContent.dataRequests[i].authRequest;
+            if (authRequest.authType == authType && authRequest.anonMode == anonMode) {
+                isAuthRequestFound = true;
             }
         }
 
-        if (!isStatementRequestFound) {
-            revert StatementRequestNotFound(groupId, groupTimestamp);
+        if (!isAuthRequestFound) {
+            revert AuthRequestNotFound(authType, anonMode);
         }
 
-        if (statement.comparator != statementRequest.comparator) {
-            revert StatementComparatorMismatch(statement.comparator, statementRequest.comparator);
-        }
-
-        if (keccak256(statement.extraData) != keccak256(statementRequest.extraData)) {
-            revert StatementExtraDataMismatch(statement.extraData, statementRequest.extraData);
-        }
-
-        if (statement.comparator == StatementComparator.EQ) {
-            if (statement.value != statementRequest.requestedValue) {
-                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
+        if (auth.userId != 0) {
+            if (auth.userId != authRequest.userId) {
+                revert AuthUserIdMismatch(auth.userId, authRequest.userId);
             }
         }
 
-        if (statement.comparator == StatementComparator.GT) {
-            if (statement.value <= statementRequest.requestedValue) {
-                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
+        if (keccak256(auth.extraData) != keccak256(authRequest.extraData)) {
+            revert ClaimExtraDataMismatch(auth.extraData, authRequest.extraData);
+        }
+    }
+
+    function _checkLogicalOperators(
+        ZkConnectResponse memory zkConnectResponse,
+        ZkConnectRequestContent memory zkConnectRequestContent
+    ) public pure {
+        if (zkConnectRequestContent.operators[0] == LogicalOperator.AND) {
+            if (zkConnectResponse.proofs.length != zkConnectRequestContent.dataRequests.length) {
+                revert ProofsAndDataRequestsAreUnequalInLength(
+                    zkConnectResponse.proofs.length, zkConnectRequestContent.dataRequests.length
+                );
             }
         }
-
-        if (statement.comparator == StatementComparator.GTE) {
-            if (statement.value < statementRequest.requestedValue) {
-                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
-            }
-        }
-
-        if (statement.comparator == StatementComparator.LT) {
-            if (statement.value >= statementRequest.requestedValue) {
-                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
-            }
-        }
-
-        if (statement.comparator == StatementComparator.LTE) {
-            if (statement.value > statementRequest.requestedValue) {
-                revert StatementValueMismatch(statement.comparator, statement.value, statementRequest.requestedValue);
+        if (zkConnectRequestContent.operators[0] == LogicalOperator.OR) {
+            if (zkConnectResponse.proofs.length != 1) {
+                revert OnlyOneProofSupportedWithLogicalOperatorOR();
             }
         }
     }

@@ -11,5 +11,5 @@ pragma solidity ^0.8.14;
 
 import {ZkConnect} from "./zk-connect/ZkConnectLib.sol";
 import "./utils/Struct.sol";
-import "./utils/DataRequestLib.sol";
-import "./utils/StatementRequestLib.sol";
+import "./utils/ZkConnectRequestContentLib.sol";
+import "./utils/ClaimRequestLib.sol";
