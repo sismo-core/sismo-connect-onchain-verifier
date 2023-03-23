@@ -4,8 +4,8 @@ pragma solidity ^0.8.17;
 import {BaseTest} from "test/BaseTest.t.sol";
 import "src/verifiers/HydraS2Verifier.sol";
 import "./HydraS2Proofs.sol";
-import "test/mocks/CommitmentMapperRegistryMock.sol";
-import "test/mocks/AvailableRootsRegistryMock.sol";
+import {CommitmentMapperRegistryMock, ICommitmentMapperRegistry} from "test/mocks/CommitmentMapperRegistryMock.sol";
+import {AvailableRootsRegistryMock, IAvailableRootsRegistry} from "test/mocks/AvailableRootsRegistryMock.sol";
 
 contract HydraS2BaseTest is BaseTest {
     HydraS2Proofs immutable hydraS2Proofs = new HydraS2Proofs();
@@ -24,6 +24,6 @@ contract HydraS2BaseTest is BaseTest {
         zkConnectVerifier.setVerifier("hydra-s2.1", address(hydraS2Verifier));
 
         commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(hydraS2Proofs.getEdDSAPubKey());
-        availableRootsRegistry.registerRoot(hydraS2Proofs.getRoot());
+        availableRootsRegistry.registerRootForAll(hydraS2Proofs.getRoot());
     }
 }
