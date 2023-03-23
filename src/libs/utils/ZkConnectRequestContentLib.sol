@@ -9,7 +9,14 @@ library ZkConnectRequestContentLib {
         public
         returns (ZkConnectRequestContent memory)
     {
-        LogicalOperator[] memory operators = new LogicalOperator[](dataRequests.length - 1);
+        uint256 logicalOperatorsLength;
+        if (dataRequests.length == 1) {
+            logicalOperatorsLength = 1;
+        } else {
+            logicalOperatorsLength = dataRequests.length - 1;
+        }
+
+        LogicalOperator[] memory operators = new LogicalOperator[](logicalOperatorsLength);
         for (uint256 i = 0; i < operators.length; i++) {
             operators[i] = operator;
         }

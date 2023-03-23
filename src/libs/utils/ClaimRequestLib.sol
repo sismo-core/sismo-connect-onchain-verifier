@@ -24,6 +24,7 @@ library ClaimRequestLib {
     ///////////////////////////
     // groupId
     ///////////////////////////
+
     function build(bytes16 groupId) public pure returns (Claim memory) {
         bytes16 groupTimestamp = bytes16("latest");
         uint256 value = 1;
@@ -63,7 +64,7 @@ library ClaimRequestLib {
     ///////////////////////////
     // groupId + groupTimestamp
     //////////////////////////
-     function build(bytes16 groupId, bytes16 groupTimestamp, uint256 value) public pure returns (Claim memory) {
+    function build(bytes16 groupId, bytes16 groupTimestamp, uint256 value) public pure returns (Claim memory) {
         ClaimType claimType = ClaimType.GTE;
         bytes memory extraData = "";
         return build(groupId, groupTimestamp, value, claimType, extraData);
@@ -75,7 +76,11 @@ library ClaimRequestLib {
         return build(groupId, groupTimestamp, value, claimType, extraData);
     }
 
-    function build(bytes16 groupId, bytes16 groupTimestamp, bytes memory extraData) public pure returns (Claim memory) {
+    function build(bytes16 groupId, bytes16 groupTimestamp, bytes memory extraData)
+        public
+        pure
+        returns (Claim memory)
+    {
         uint256 value = 1;
         ClaimType claimType = ClaimType.GTE;
         return build(groupId, groupTimestamp, value, claimType, extraData);
@@ -110,14 +115,22 @@ library ClaimRequestLib {
     //////////////////////////
 
     ///////////////////////////
-    // groupId + groupTimestamp + value 
+    // groupId + groupTimestamp + value
     //////////////////////////
-    function build(bytes16 groupId, bytes16 groupTimestamp, uint256 value, ClaimType claimType) public pure returns (Claim memory) {
+    function build(bytes16 groupId, bytes16 groupTimestamp, uint256 value, ClaimType claimType)
+        public
+        pure
+        returns (Claim memory)
+    {
         bytes memory extraData = "";
         return build(groupId, groupTimestamp, value, claimType, extraData);
     }
 
-    function build(bytes16 groupId, bytes16 groupTimestamp, uint256 value, bytes memory extraData) public pure returns (Claim memory) {
+    function build(bytes16 groupId, bytes16 groupTimestamp, uint256 value, bytes memory extraData)
+        public
+        pure
+        returns (Claim memory)
+    {
         ClaimType claimType = ClaimType.GTE;
         return build(groupId, groupTimestamp, value, claimType, extraData);
     }
@@ -125,7 +138,11 @@ library ClaimRequestLib {
     ///////////////////////////
     // groupId + groupTimestamp + claimType
     //////////////////////////
-    function build(bytes16 groupId, bytes16 groupTimestamp, ClaimType claimType, bytes memory extraData) public pure returns (Claim memory) {
+    function build(bytes16 groupId, bytes16 groupTimestamp, ClaimType claimType, bytes memory extraData)
+        public
+        pure
+        returns (Claim memory)
+    {
         uint256 value = 1;
         return build(groupId, groupTimestamp, value, claimType, extraData);
     }
@@ -137,7 +154,11 @@ library ClaimRequestLib {
     ///////////////////////////
     // groupId + value + claimType
     //////////////////////////
-    function build(bytes16 groupId, uint256 value, ClaimType claimType, bytes memory extraData) public pure returns (Claim memory) {
+    function build(bytes16 groupId, uint256 value, ClaimType claimType, bytes memory extraData)
+        public
+        pure
+        returns (Claim memory)
+    {
         bytes16 groupTimestamp = bytes16("latest");
         return build(groupId, groupTimestamp, value, claimType, extraData);
     }
@@ -165,5 +186,4 @@ library ClaimRequestLib {
     ///////////////////////////
     // groupId + value + claimType + extraData (all cases handled)
     //////////////////////////
-
 }

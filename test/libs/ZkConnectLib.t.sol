@@ -7,8 +7,10 @@ import "src/libs/zk-connect/ZkConnectLib.sol";
 
 contract ZkConnectTest is HydraS2BaseTest {
     ZkConnect zkConnect;
-    ZkConnectRequestContent zkConnectRequestContent =
-        ZkConnectRequestContentLib.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e, groupTimestamp: bytes16("latest")});
+    ZkConnectRequestContent zkConnectRequestContent = ZkConnectRequestContentLib.build({
+        groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
+        groupTimestamp: bytes16("latest")
+    });
     bytes16 immutable appId = 0x112a692a2005259c25f6094161007967;
 
     ZkConnectResponse validZkConnectResponse;
