@@ -82,8 +82,9 @@ contract ZkConnectLibTest is HydraS2BaseTest {
         bytes memory zkResponseEncoded = abi.encode(hydraS2Proofs.getZkConnectResponse1());
         ZkConnectVerifiedResult memory zkConnectVerifiedResult =
             zkConnect.verify(zkResponseEncoded, zkConnectRequestContent);
-        console.log("userId: %s", zkConnectVerifiedResult.verifiedAuths[0].userId);
+        assertEq(zkConnectVerifiedResult.verifiedAuths[0].userId, 0);
     }
+
 
     function test_ZkConnectLibWithOnlyOneAuth() public {
         Auth memory authRequest = AuthRequestLib.build({authType: AuthType.ANON});
@@ -93,6 +94,47 @@ contract ZkConnectLibTest is HydraS2BaseTest {
 
         ZkConnectVerifiedResult memory zkConnectVerifiedResult =
             zkConnect.verify(zkResponseEncoded, zkConnectRequestContent);
-        console.log("userId: %s", zkConnectVerifiedResult.verifiedAuths[0].userId);
+        assertTrue(zkConnectVerifiedResult.verifiedAuths[0].userId != 0);
     }
+    // function test_ZkConnectLibWithClaimAndAuth() public {
+    //     bytes memory zkResponseEncoded = abi.encode(hydraS2Proofs.getZkConnectResponse1());
+
+    //     Claim memory claimRequest = ClaimRequestLib.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    //     Auth memory authRequest = AuthRequestLib.build({authType: AuthType.ANON});
+    //     zkConnectRequestContent =
+    //         ZkConnectRequestContentLib.build({claimRequest: claimRequest, authRequest: authRequest});
+
+    //     ZkConnectVerifiedResult memory zkConnectVerifiedResult =
+    //         zkConnect.verify(zkResponseEncoded, zkConnectRequestContent);
+    //     assertTrue(zkConnectVerifiedResult.verifiedAuths[0].userId != 0);
+    //     console.log("userId: %s", zkConnectVerifiedResult.verifiedAuths[0].userId);
+    // }
+
+    // function test_ZkConnectLibTwoDataRequests() public {
+    //     Claim memory claimRequest = ClaimRequestLib.build({
+    //         groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
+    //         groupTimestamp: bytes16("latest"),
+    //         value: 2,
+    //         claimType: ClaimType.EQ
+    //     });
+
+    //     Auth memory authRequest = AuthRequestLib.build({authType: AuthType.EVM_ACCOUNT, anonMode: true});
+
+    //     Claim memory claimRequestTwo =
+    //         ClaimRequestLib.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e, value: 1, claimType: ClaimType.GTE});
+
+    //     Auth memory authRequestTwo = AuthRequestLib.build({authType: AuthType.ANON});
+
+    //     DataRequest[] memory dataRequests = new DataRequest[](2);
+    //     dataRequests[0] = DataRequestLib.build({claimRequest: claimRequest, authRequest: authRequest});
+    //     dataRequests[1] = DataRequestLib.build({claimRequest: claimRequestTwo, authRequest: authRequestTwo});
+
+    //     zkConnectRequestContent = ZkConnectRequestContentLib.build({dataRequests: dataRequests});
+
+    //     bytes memory zkResponseEncoded = abi.encode(hydraS2Proofs.getZkConnectResponse1());
+
+    //     ZkConnectVerifiedResult memory zkConnectVerifiedResult =
+    //         zkConnect.verify(zkResponseEncoded, zkConnectRequestContent);
+    //     console.log("userId: %s", zkConnectVerifiedResult.verifiedAuths[0].userId);
+    // }
 }

@@ -17,8 +17,7 @@ library ClaimRequestLib {
             groupTimestamp: groupTimestamp,
             value: value,
             claimType: claimType,
-            extraData: extraData,
-            isValid: true
+            extraData: extraData
         });
     }
     ///////////////////////////

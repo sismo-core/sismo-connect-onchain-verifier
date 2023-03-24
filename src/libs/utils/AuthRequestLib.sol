@@ -9,7 +9,7 @@ library AuthRequestLib {
         pure
         returns (Auth memory)
     {
-        return Auth({authType: authType, anonMode: anonMode, userId: userId, extraData: extraData, isValid: true});
+        return Auth({authType: authType, anonMode: anonMode, userId: userId, extraData: extraData});
     }
 
     function build(AuthType authType) public pure returns (Auth memory) {

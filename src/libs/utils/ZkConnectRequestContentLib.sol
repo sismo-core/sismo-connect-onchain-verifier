@@ -22,6 +22,19 @@ library ZkConnectRequestContentLib {
         return ZkConnectRequestContent({dataRequests: dataRequests, operators: operators});
     }
 
+    function build(DataRequest[] memory dataRequests) public returns (ZkConnectRequestContent memory) {
+        return build({dataRequests: dataRequests, operator: LogicalOperator.AND});
+    }
+
+    function build(DataRequest memory dataRequest, LogicalOperator operator)
+        public
+        returns (ZkConnectRequestContent memory)
+    {
+        DataRequest[] memory dataRequests = new DataRequest[](1);
+        dataRequests[0] = dataRequest;
+        return build({dataRequests: dataRequests, operator: operator});
+    }
+
     function build(DataRequest memory dataRequest) public returns (ZkConnectRequestContent memory) {
         DataRequest[] memory dataRequests = new DataRequest[](1);
         dataRequests[0] = dataRequest;

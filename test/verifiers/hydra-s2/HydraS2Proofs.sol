@@ -24,8 +24,7 @@ contract HydraS2Proofs {
             groupTimestamp: bytes16("latest"),
             value: 1,
             claimType: ClaimType.GTE,
-            extraData: "",
-            isValid: true
+            extraData: ""
         });
 
         // empty auth
@@ -54,7 +53,7 @@ contract HydraS2Proofs {
         Claim memory claim;
 
         // empty auth
-        Auth memory auth = Auth({authType: AuthType.ANON, anonMode: false, userId: 0, extraData: "", isValid: true});
+        Auth memory auth = Auth({authType: AuthType.ANON, anonMode: false, userId: 0, extraData: ""});
 
         ZkConnectProof[] memory proofs = new ZkConnectProof[](1);
         proofs[0] = ZkConnectProof({

@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
+import "forge-std/console.sol";
 import "src/libs/utils/Struct.sol";
 import "src/libs/utils/ZkConnectRequestContentLib.sol";
 import {ClaimRequestLib} from "src/libs/utils/ClaimRequestLib.sol";
 import {AuthRequestLib} from "src/libs/utils/AuthRequestLib.sol";
+import {DataRequestLib} from "src/libs/utils/DataRequestLib.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ZkConnectVerifier} from "src/ZkConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
@@ -63,7 +65,6 @@ contract ZkConnect is Context {
         if (zkConnectResponse.namespace != namespace) {
             revert NamespaceMismatch(zkConnectResponse.namespace, namespace);
         }
-
         return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequestContent);
     }
 
