@@ -11,13 +11,9 @@ contract ZkConnectTest is HydraS2BaseTest {
 
         ZkConnectResponse memory zkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
 
-        Claim memory claim = ClaimRequestLib.build({groupId: groupId});
-        Auth memory auth;
-        DataRequest[] memory dataRequests = new DataRequest[](1);
-        dataRequests[0] = DataRequest({claimRequest: claim, authRequest: auth, messageSignatureRequest: ""});
-
+        Claim memory claimRequest = ClaimRequestLib.build({groupId: groupId});
         ZkConnectRequestContent memory zkConnectRequestContent =
-            ZkConnectRequestContentLib.build({dataRequests: dataRequests, operator: LogicalOperator.AND});
+            ZkConnectRequestContentLib.build({claimRequest: claimRequest});
 
         ZkConnectVerifiedResult memory zkConnectVerifiedResult =
             zkConnectVerifier.verify(zkConnectResponse, zkConnectRequestContent);

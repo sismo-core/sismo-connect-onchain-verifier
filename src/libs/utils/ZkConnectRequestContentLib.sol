@@ -27,4 +27,67 @@ library ZkConnectRequestContentLib {
         dataRequests[0] = dataRequest;
         return build({dataRequests: dataRequests, operator: LogicalOperator.AND});
     }
+
+    function build(Claim memory claimRequest, Auth memory authRequest, bytes memory messageSignatureRequest)
+        public
+        returns (ZkConnectRequestContent memory)
+    {
+        DataRequest memory dataRequest = DataRequest({
+            claimRequest: claimRequest,
+            authRequest: authRequest,
+            messageSignatureRequest: messageSignatureRequest
+        });
+        return build(dataRequest);
+    }
+
+    function build(Claim memory claimRequest, Auth memory authRequest)
+        public
+        returns (ZkConnectRequestContent memory)
+    {
+        return build({claimRequest: claimRequest, authRequest: authRequest, messageSignatureRequest: ""});
+    }
+
+    function build(Claim memory claimRequest, bytes memory messageSignatureRequest)
+        public
+        returns (ZkConnectRequestContent memory)
+    {
+        Auth memory authRequest;
+        return build({
+            claimRequest: claimRequest,
+            authRequest: authRequest,
+            messageSignatureRequest: messageSignatureRequest
+        });
+    }
+
+    function build(Auth memory authRequest, bytes memory messageSignatureRequest)
+        public
+        returns (ZkConnectRequestContent memory)
+    {
+        Claim memory claimRequest;
+        return build({
+            claimRequest: claimRequest,
+            authRequest: authRequest,
+            messageSignatureRequest: messageSignatureRequest
+        });
+    }
+
+    function build(Claim memory claimRequest) public returns (ZkConnectRequestContent memory) {
+        Auth memory authRequest;
+        return build({claimRequest: claimRequest, authRequest: authRequest, messageSignatureRequest: ""});
+    }
+
+    function build(Auth memory authRequest) public returns (ZkConnectRequestContent memory) {
+        Claim memory claimRequest;
+        return build({claimRequest: claimRequest, authRequest: authRequest, messageSignatureRequest: ""});
+    }
+
+    function build(bytes memory messageSignatureRequest) public returns (ZkConnectRequestContent memory) {
+        Claim memory claimRequest;
+        Auth memory authRequest;
+        return build({
+            claimRequest: claimRequest,
+            authRequest: authRequest,
+            messageSignatureRequest: messageSignatureRequest
+        });
+    }
 }

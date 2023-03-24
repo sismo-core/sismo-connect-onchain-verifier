@@ -5,10 +5,7 @@ import {
     ZkConnect,
     ZkConnectRequestContentLib,
     Claim,
-    Auth,
-    DataRequest,
     ClaimRequestLib,
-    LogicalOperator,
     ZkConnectRequestContent,
     ZkConnectResponse,
     ZkConnectVerifiedResult
@@ -24,13 +21,8 @@ contract ZKDropERC721 is ERC721, ZkConnect {
         ERC721(name, symbol)
         ZkConnect(appId)
     {
-        Claim memory claim = ClaimRequestLib.build({groupId: groupId});
-        Auth memory auth;
-        DataRequest[] memory dataRequests = new DataRequest[](1);
-        dataRequests[0] = DataRequest({claimRequest: claim, authRequest: auth, messageSignatureRequest: ""});
-
-        zkConnectRequestContent =
-            ZkConnectRequestContentLib.build({dataRequests: dataRequests, operator: LogicalOperator.AND});
+        Claim memory claimRequest = ClaimRequestLib.build({groupId: groupId});
+        zkConnectRequestContent = ZkConnectRequestContentLib.build({claimRequest: claimRequest});
 
         _setBaseTokenUri(baseTokenURI);
     }
