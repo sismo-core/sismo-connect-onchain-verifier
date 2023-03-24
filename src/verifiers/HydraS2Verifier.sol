@@ -172,7 +172,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
             revert SourceVerificationNeedsToBeEnabled();
         }
         // isRootAvailable
-        if (!AVAILABLE_ROOTS_REGISTRY.isRootAvailableForMe(registryTreeRoot)) {
+        if (!AVAILABLE_ROOTS_REGISTRY.isRootAvailable(registryTreeRoot)) {
             revert RegistryRootMismatch(registryTreeRoot);
         }
         // accountsTreeValue

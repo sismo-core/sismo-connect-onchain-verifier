@@ -17,7 +17,7 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 contract AvailableRootsRegistry is IAvailableRootsRegistry, Initializable, Ownable {
     uint8 public constant IMPLEMENTATION_VERSION = 2;
 
-    mapping(address => mapping(uint256 => bool)) public _roots;
+    mapping(uint256 => bool) public _roots;
 
     /**
      * @dev Constructor
@@ -40,73 +40,36 @@ contract AvailableRootsRegistry is IAvailableRootsRegistry, Initializable, Ownab
     }
 
     /**
-     * @dev Register a root available for an attester
-     * @param attester Attester which will have the root available
+     * @dev Registers a root
      * @param root Root to register
      */
-    function registerRootForAttester(address attester, uint256 root) external onlyOwner {
-        if (attester == address(0)) revert CannotRegisterForZeroAddress();
-        _registerRootForAttester(attester, root);
+    function registerRoot(uint256 root) external onlyOwner {
+        _registerRoot(root);
     }
 
     /**
-     * @dev Unregister a root for an attester
-     * @param attester Attester which will no longer have the root available
+     * @dev Unregister a root
      * @param root Root to unregister
      */
-    function unregisterRootForAttester(address attester, uint256 root) external onlyOwner {
-        if (attester == address(0)) revert CannotUnregisterForZeroAddress();
-        _unregisterRootForAttester(attester, root);
+    function unregisterRoot(uint256 root) external onlyOwner {
+         _unregisterRoot(root);
     }
 
     /**
-     * @dev Registers a root, available for all contracts
-     * @param root Root to register
+     * @dev returns whether a root is available
+     * @param root root to check whether it is registered
      */
-    function registerRootForAll(uint256 root) external onlyOwner {
-        _registerRootForAttester(address(0), root);
+    function isRootAvailable(uint256 root) external view returns (bool) {
+        return _roots[root];
     }
 
-    /**
-     * @dev Unregister a root, available for all contracts
-     * @param root Root to unregister
-     */
-    function unregisterRootForAll(uint256 root) external onlyOwner {
-        _unregisterRootForAttester(address(0), root);
+    function _registerRoot(uint256 root) internal {
+        _roots[root] = true;
+        emit RegisteredRoot(root);
     }
 
-    /**
-     * @dev returns whether a root is available for a caller (msg.sender)
-     * @param root root to check whether it is registered for me or not
-     */
-    function isRootAvailableForMe(uint256 root) external view returns (bool) {
-        return _roots[_msgSender()][root] || _roots[address(0)][root];
-    }
-
-    /**
-     * @dev Initializes the contract, to be called by the proxy delegating calls to this implementation
-     * @param attester Owner of the contract, can update public key and address
-     * @param root Owner of the contract, can update public key and address
-     */
-    function isRootAvailableForAttester(address attester, uint256 root) external view returns (bool) {
-        return _roots[attester][root] || _roots[address(0)][root];
-    }
-
-    function _registerRootForAttester(address attester, uint256 root) internal {
-        _roots[attester][root] = true;
-        if (attester == address(0)) {
-            emit RegisteredRootForAll(root);
-        } else {
-            emit RegisteredRootForAttester(attester, root);
-        }
-    }
-
-    function _unregisterRootForAttester(address attester, uint256 root) internal {
-        _roots[attester][root] = false;
-        if (attester == address(0)) {
-            emit UnregisteredRootForAll(root);
-        } else {
-            emit UnregisteredRootForAttester(attester, root);
-        }
+    function _unregisterRoot(uint256 root) internal {
+         _roots[root] = false;
+        emit UnregisteredRoot(root);
     }
 }
