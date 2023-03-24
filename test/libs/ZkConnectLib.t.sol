@@ -5,12 +5,9 @@ import "forge-std/console.sol";
 import {HydraS2BaseTest} from "../verifiers/hydra-s2/HydraS2BaseTest.t.sol";
 import "src/libs/zk-connect/ZkConnectLib.sol";
 
-contract ZkConnectTest is HydraS2BaseTest {
+contract ZkConnectLibTest is HydraS2BaseTest {
     ZkConnect zkConnect;
-    ZkConnectRequestContent zkConnectRequestContent = ZkConnectRequestContentLib.build({
-        groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
-        groupTimestamp: bytes16("latest")
-    });
+    ZkConnectRequestContent zkConnectRequestContent;
     bytes16 immutable appId = 0x112a692a2005259c25f6094161007967;
 
     ZkConnectResponse validZkConnectResponse;
@@ -18,6 +15,14 @@ contract ZkConnectTest is HydraS2BaseTest {
     function setUp() public virtual override {
         super.setUp();
         zkConnect = new ZkConnect(appId);
+
+        Claim memory claim = ClaimRequestLib.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+        Auth memory auth;
+        DataRequest[] memory dataRequests = new DataRequest[](1);
+        dataRequests[0] = DataRequest({claimRequest: claim, authRequest: auth, messageSignatureRequest: ""});
+        zkConnectRequestContent =
+            ZkConnectRequestContentLib.build({dataRequests: dataRequests, operator: LogicalOperator.AND});
+
         validZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
     }
 
@@ -77,8 +82,23 @@ contract ZkConnectTest is HydraS2BaseTest {
         zkConnect.verify(abi.encode(invalidZkConnectResponse), zkConnectRequestContent);
     }
 
-    function test_ZkConnectLib() public {
+    function test_ZkConnectLibWithOnlyClaim() public {
         bytes memory zkResponseEncoded = abi.encode(hydraS2Proofs.getZkConnectResponse1());
+        ZkConnectVerifiedResult memory zkConnectVerifiedResult =
+            zkConnect.verify(zkResponseEncoded, zkConnectRequestContent);
+        console.log("userId: %s", zkConnectVerifiedResult.verifiedAuths[0].userId);
+    }
+
+    function test_ZkConnectLibWithOnlyOneAuth() public {
+        Claim memory claim;
+        Auth memory auth = AuthRequestLib.build({authType: AuthType.ANON});
+        DataRequest[] memory dataRequests = new DataRequest[](1);
+        dataRequests[0] = DataRequest({claimRequest: claim, authRequest: auth, messageSignatureRequest: ""});
+
+        zkConnectRequestContent =
+            ZkConnectRequestContentLib.build({dataRequests: dataRequests, operator: LogicalOperator.AND});
+
+        bytes memory zkResponseEncoded = abi.encode(hydraS2Proofs.getZkConnectResponse2());
         ZkConnectVerifiedResult memory zkConnectVerifiedResult =
             zkConnect.verify(zkResponseEncoded, zkConnectRequestContent);
         console.log("userId: %s", zkConnectVerifiedResult.verifiedAuths[0].userId);

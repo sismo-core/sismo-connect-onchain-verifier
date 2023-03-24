@@ -52,7 +52,7 @@ contract AvailableRootsRegistry is IAvailableRootsRegistry, Initializable, Ownab
      * @param root Root to unregister
      */
     function unregisterRoot(uint256 root) external onlyOwner {
-         _unregisterRoot(root);
+        _unregisterRoot(root);
     }
 
     /**
@@ -69,7 +69,7 @@ contract AvailableRootsRegistry is IAvailableRootsRegistry, Initializable, Ownab
     }
 
     function _unregisterRoot(uint256 root) internal {
-         _roots[root] = false;
+        _roots[root] = false;
         emit UnregisteredRoot(root);
     }
 }

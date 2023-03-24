@@ -13,3 +13,4 @@ import {ZkConnect} from "./zk-connect/ZkConnectLib.sol";
 import "./utils/Struct.sol";
 import "./utils/ZkConnectRequestContentLib.sol";
 import "./utils/ClaimRequestLib.sol";
+import "./utils/AuthRequestLib.sol";

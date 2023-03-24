@@ -4,7 +4,11 @@ pragma solidity ^0.8.14;
 import {
     ZkConnect,
     ZkConnectRequestContentLib,
+    Claim,
+    Auth,
+    DataRequest,
     ClaimRequestLib,
+    LogicalOperator,
     ZkConnectRequestContent,
     ZkConnectResponse,
     ZkConnectVerifiedResult
@@ -20,7 +24,14 @@ contract ZKDropERC721 is ERC721, ZkConnect {
         ERC721(name, symbol)
         ZkConnect(appId)
     {
-        zkConnectRequestContent = ZkConnectRequestContentLib.build(groupId);
+        Claim memory claim = ClaimRequestLib.build({groupId: groupId});
+        Auth memory auth;
+        DataRequest[] memory dataRequests = new DataRequest[](1);
+        dataRequests[0] = DataRequest({claimRequest: claim, authRequest: auth, messageSignatureRequest: ""});
+
+        zkConnectRequestContent =
+            ZkConnectRequestContentLib.build({dataRequests: dataRequests, operator: LogicalOperator.AND});
+
         _setBaseTokenUri(baseTokenURI);
     }
 

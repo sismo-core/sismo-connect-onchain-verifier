@@ -159,16 +159,22 @@ contract ZkConnectVerifier {
     function _checkAuthMatchContentRequest(
         ZkConnectProof memory proof,
         ZkConnectRequestContent memory zkConnectRequestContent
-    ) public pure {
+    ) public view {
         Auth memory auth = proof.auth;
         AuthType authType = auth.authType;
         bool anonMode = auth.anonMode;
+
+        console.log("anonMode: %s", anonMode);
+        console.log("authType is ANON: %s", authType == AuthType.ANON);
 
         bool isAuthRequestFound = false;
         Auth memory authRequest;
         for (uint256 i = 0; i < zkConnectRequestContent.dataRequests.length; i++) {
             authRequest = zkConnectRequestContent.dataRequests[i].authRequest;
-            if (authRequest.authType == authType && authRequest.anonMode == anonMode) {
+            console.log("authRequest anonMode: %s", authRequest.anonMode);
+            console.log("authRequest authType is ANON: %s", authRequest.authType == AuthType.ANON);
+
+            if ((authRequest.authType == authType) && (authRequest.anonMode == anonMode)) {
                 isAuthRequestFound = true;
             }
         }

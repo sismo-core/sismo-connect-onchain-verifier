@@ -12,8 +12,7 @@ interface ICommitmentMapperRegistry {
      * @param commitmentMapperEdDSAPubKey EdDSA public key of the commitment mapper
      * @notice The reinitializer modifier is needed to configure modules that are added through upgrades and that require initialization.
      */
-    function initialize(address owner, uint256[2] memory commitmentMapperEdDSAPubKey)
-        external;
+    function initialize(address owner, uint256[2] memory commitmentMapperEdDSAPubKey) external;
 
     /**
      * @dev Updates the EdDSA public key
