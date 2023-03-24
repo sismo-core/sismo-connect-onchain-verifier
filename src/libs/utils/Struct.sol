@@ -18,7 +18,6 @@ struct Claim {
     ClaimType claimType;
     uint256 value;
     bytes extraData;
-    bool isValid;
 }
 
 struct Auth {
@@ -26,10 +25,10 @@ struct Auth {
     bool anonMode;
     uint256 userId;
     bytes extraData;
-    bool isValid;
 }
 
 enum ClaimType {
+    NONE,
     GTE,
     GT,
     EQ,
@@ -83,7 +82,6 @@ struct VerifiedClaim {
     uint256 value;
     bytes extraData;
     uint256 proofId;
-    bool isValid;
 }
 
 struct VerifiedAuth {
@@ -92,5 +90,4 @@ struct VerifiedAuth {
     uint256 userId;
     bytes extraData;
     uint256 proofId;
-    bool isValid;
 }

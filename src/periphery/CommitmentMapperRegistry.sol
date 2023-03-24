@@ -34,10 +34,10 @@ contract CommitmentMapperRegistry is ICommitmentMapperRegistry, Initializable, O
      * @param commitmentMapperEdDSAPubKey EdDSA public key of the commitment mapper
      * @notice The reinitializer modifier is needed to configure modules that are added through upgrades and that require initialization.
      */
-    function initialize(
-        address ownerAddress,
-        uint256[2] memory commitmentMapperEdDSAPubKey
-    ) public reinitializer(IMPLEMENTATION_VERSION) {
+    function initialize(address ownerAddress, uint256[2] memory commitmentMapperEdDSAPubKey)
+        public
+        reinitializer(IMPLEMENTATION_VERSION)
+    {
         // if proxy did not setup owner yet or if called by constructor (for implem setup)
         if (owner() == address(0) || address(this).code.length == 0) {
             _transferOwnership(ownerAddress);

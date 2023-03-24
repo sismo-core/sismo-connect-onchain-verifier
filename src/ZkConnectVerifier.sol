@@ -36,7 +36,6 @@ contract ZkConnectVerifier {
 
         bytes16 appId = zkConnectResponse.appId;
         bytes16 namespace = zkConnectResponse.namespace;
-
         uint256 proofsLength = zkConnectResponse.proofs.length;
 
         _checkLogicalOperators(zkConnectResponse, zkConnectRequestContent);
@@ -52,11 +51,11 @@ contract ZkConnectVerifier {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
 
-            if (proof.auth.isValid == false && proof.claim.isValid == false) {
+            if (proof.auth.authType == AuthType.NONE && proof.claim.claimType == ClaimType.NONE) {
                 revert ProofNeedsAuthOrClaim();
             }
 
-            if (proof.auth.isValid) {
+            if (proof.auth.authType != AuthType.NONE) {
                 _checkAuthMatchContentRequest(proof, zkConnectRequestContent);
                 verifiedAuth = _verifiers[proof.provingScheme].verifyAuthProof(appId, proof);
                 verifiedAuths[i] = verifiedAuth;
@@ -65,7 +64,7 @@ contract ZkConnectVerifier {
                 verifiedAuths[i] = emptyVerifiedAuth;
             }
 
-            if (proof.claim.isValid) {
+            if (proof.claim.claimType != ClaimType.NONE) {
                 _checkClaimMatchContentRequest(proof, zkConnectRequestContent);
                 verifiedClaim = _verifiers[proof.provingScheme].verifyClaim(appId, namespace, proof);
                 verifiedClaims[i] = verifiedClaim;
@@ -159,7 +158,7 @@ contract ZkConnectVerifier {
     function _checkAuthMatchContentRequest(
         ZkConnectProof memory proof,
         ZkConnectRequestContent memory zkConnectRequestContent
-    ) public pure {
+    ) public view {
         Auth memory auth = proof.auth;
         AuthType authType = auth.authType;
         bool anonMode = auth.anonMode;
@@ -168,7 +167,7 @@ contract ZkConnectVerifier {
         Auth memory authRequest;
         for (uint256 i = 0; i < zkConnectRequestContent.dataRequests.length; i++) {
             authRequest = zkConnectRequestContent.dataRequests[i].authRequest;
-            if (authRequest.authType == authType && authRequest.anonMode == anonMode) {
+            if ((authRequest.authType == authType) && (authRequest.anonMode == anonMode)) {
                 isAuthRequestFound = true;
             }
         }

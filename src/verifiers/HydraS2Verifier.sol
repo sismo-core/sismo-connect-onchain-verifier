@@ -38,6 +38,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
     IAvailableRootsRegistry immutable AVAILABLE_ROOTS_REGISTRY;
 
     error InvalidProof();
+    error AnonModeIsNotYetSupported();
 
     error InvalidVersion(bytes32 version);
     error RegistryRootMismatch(uint256 inputRoot);
@@ -81,8 +82,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
             value: claim.value,
             claimType: claim.claimType,
             proofId: snarkProof.inputs[6],
-            extraData: claim.extraData,
-            isValid: true
+            extraData: claim.extraData
         });
 
         return verifiedClaim;
@@ -110,13 +110,21 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
 
         _checkSnarkProof(snarkProof);
         Auth memory auth = zkConnectProof.auth;
+
+        uint256 returnedUserId = snarkProof.inputs[10];
+        if (auth.authType != AuthType.ANON) {
+            if (auth.anonMode == true) {
+                revert AnonModeIsNotYetSupported();
+            }
+            returnedUserId = auth.userId;
+        }
+
         return VerifiedAuth({
             authType: auth.authType,
             anonMode: auth.anonMode,
-            userId: auth.userId,
+            userId: returnedUserId,
             extraData: auth.extraData,
-            proofId: snarkProof.inputs[6],
-            isValid: true
+            proofId: snarkProof.inputs[6]
         });
     }
 
