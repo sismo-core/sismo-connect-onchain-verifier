@@ -40,11 +40,6 @@ contract ZkConnectVerifier {
 
         _checkLogicalOperators(zkConnectResponse, zkConnectRequestContent);
 
-        console.log(
-            "zkConnectRequestContent authType is NONE in ZkConnectVerifier after _checkLogicalOperators : %s",
-            zkConnectRequestContent.dataRequests[0].authRequest.authType == AuthType.NONE
-        );
-
         VerifiedClaim memory verifiedClaim;
         VerifiedAuth memory verifiedAuth;
         VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](proofsLength);
