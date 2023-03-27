@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 import "src/periphery/AvailableRootsRegistry.sol";
@@ -22,13 +21,17 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
     function run() external returns (ScriptTypes.DeployAllContracts memory contracts) {
         vm.startBroadcast();
+
         Chains currentChain = Chains.TestnetGoerli;
         _setConfig(currentChain);
 
         availableRootsRegistry = _deployAvailableRootsRegistry(config.rootsOwner);
         commitmentMapperRegistry = _deployCommitmentMapperRegistry(config.owner, config.commitmentMapperEdDSAPubKey);
         hydraS2Verifier = _deployHydraS2Verifier(commitmentMapperRegistry, availableRootsRegistry);
-        zkConnectVerifier = _deployZkConnectVerifier(config.owner);
+        zkConnectVerifier = _deployZkConnectVerifier(msg.sender);
+
+        zkConnectVerifier.registerVerifier(hydraS2Verifier.HYDRA_S2_VERSION(), address(hydraS2Verifier));
+        zkConnectVerifier.transferOwnership(config.owner);
 
         contracts.availableRootsRegistry = availableRootsRegistry;
         contracts.commitmentMapperRegistry = commitmentMapperRegistry;

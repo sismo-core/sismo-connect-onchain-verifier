@@ -33,11 +33,11 @@ struct HydraS2SnarkProof {
 
 contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
     uint8 public constant IMPLEMENTATION_VERSION = 1;
-    bytes32 immutable HYDRA_S2_VERSION = "hydra-s2.1";
+    bytes32 public immutable HYDRA_S2_VERSION = "hydra-s2.1";
     // Registry storing the Commitment Mapper EdDSA Public key
-    ICommitmentMapperRegistry immutable COMMITMENT_MAPPER_REGISTRY;
+    ICommitmentMapperRegistry public immutable COMMITMENT_MAPPER_REGISTRY;
     // Registry storing the Registry Tree Roots of the Attester's available ClaimData
-    IAvailableRootsRegistry immutable AVAILABLE_ROOTS_REGISTRY;
+    IAvailableRootsRegistry public immutable AVAILABLE_ROOTS_REGISTRY;
 
     error InvalidProof();
     error AnonModeIsNotYetSupported();

@@ -100,8 +100,12 @@ contract ZkConnectVerifier is Initializable, Ownable {
         });
     }
 
-    function setVerifier(bytes32 provingScheme, address verifierAddress) public {
+    function registerVerifier(bytes32 provingScheme, address verifierAddress) public {
         _setVerifier(provingScheme, verifierAddress);
+    }
+
+    function getVerifier(bytes32 provingScheme) public returns (address) {
+        return address(_verifiers[provingScheme]);
     }
 
     function _setVerifier(bytes32 provingScheme, address verifierAddress) internal {
