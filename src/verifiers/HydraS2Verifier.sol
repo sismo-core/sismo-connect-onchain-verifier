@@ -5,6 +5,7 @@ import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../libs/utils/Struct.sol";
 import "../libs/utils/Constants.sol";
 import "forge-std/console.sol";
@@ -30,7 +31,8 @@ struct HydraS2SnarkProof {
 // sourceVerificationEnabled;
 // destinationVerificationEnabled;
 
-contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
+contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
+    uint8 public constant IMPLEMENTATION_VERSION = 1;
     bytes32 immutable HYDRA_S2_VERSION = "hydra-s2.1";
     // Registry storing the Commitment Mapper EdDSA Public key
     ICommitmentMapperRegistry immutable COMMITMENT_MAPPER_REGISTRY;
@@ -57,7 +59,10 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier {
     constructor(address commitmentMapperRegistry, address availableRootsRegistry) {
         COMMITMENT_MAPPER_REGISTRY = ICommitmentMapperRegistry(commitmentMapperRegistry);
         AVAILABLE_ROOTS_REGISTRY = IAvailableRootsRegistry(availableRootsRegistry);
+        initialize();
     }
+
+    function initialize() public reinitializer(IMPLEMENTATION_VERSION) {}
 
     function verifyClaim(bytes16 appId, bytes16 namespace, ZkConnectProof memory zkConnectProof)
         public

@@ -4,8 +4,8 @@ verbosity = 1
 via_ir = true
 
 [rpc_endpoints]
-goerli = "${RPC_URL_GOERLI}"
-mainnet = "${RPC_URL_MAINNET}"
+goerli = "http://localhost:8545"
+# mainnet = "${RPC_URL_MAINNET}"
 
 # [etherscan]
 # goerli = {key = "${ETHERSCAN_KEY}", url = "https://api-goerli.etherscan.io/api"}
