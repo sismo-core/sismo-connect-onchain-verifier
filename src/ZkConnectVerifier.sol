@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
+import {ZkConnectError} from "src/libs/errors/SismoErrorLib.sol";
 import "./libs/utils/Struct.sol";
 import "forge-std/console.sol";
 
@@ -10,20 +11,6 @@ contract ZkConnectVerifier {
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
-    error InvalidZkConnectVersion(bytes32 receivedVersion, bytes32 expectedVersion);
-    error ProofNeedsAuthOrClaim();
-    error ProofsAndDataRequestsAreUnequalInLength(uint256 proofsLength, uint256 dataRequestsLength);
-    error OnlyOneProofSupportedWithLogicalOperatorOR();
-    error ProvingSchemeNotSupported(bytes32 provingScheme);
-    error ClaimRequestNotFound(bytes16 groupId, bytes16 groupTimestamp);
-    error ClaimTypeMismatch(ClaimType claimType, ClaimType expectedClaimType);
-    error ClaimExtraDataMismatch(bytes extraData, bytes expectedExtraData);
-    error ClaimProvingSchemeMismatch(bytes32 provingScheme, bytes32 expectedProvingScheme);
-    error ClaimValueMismatch(ClaimType claimType, uint256 value, uint256 expectedValue);
-    error AuthProofIsEmpty();
-    error AuthRequestNotFound(AuthType authType, bool anonMode);
-    error AuthUserIdMismatch(uint256 userId, uint256 expectedUserId);
-
     event VerifierSet(bytes32, address);
 
     function verify(ZkConnectResponse memory zkConnectResponse, ZkConnectRequestContent memory zkConnectRequestContent)
@@ -31,7 +18,7 @@ contract ZkConnectVerifier {
         returns (ZkConnectVerifiedResult memory)
     {
         if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
-            revert InvalidZkConnectVersion(zkConnectResponse.version, ZK_CONNECT_VERSION);
+            revert ZkConnectError.InvalidZkConnectVersion(zkConnectResponse.version, ZK_CONNECT_VERSION);
         }
 
         bytes16 appId = zkConnectResponse.appId;
@@ -48,11 +35,11 @@ contract ZkConnectVerifier {
         for (uint256 i = 0; i < proofsLength; i++) {
             ZkConnectProof memory proof = zkConnectResponse.proofs[i];
             if (_verifiers[proof.provingScheme] == IBaseVerifier(address(0))) {
-                revert ProvingSchemeNotSupported(proof.provingScheme);
+                revert ZkConnectError.ProvingSchemeNotSupported(proof.provingScheme);
             }
 
             if (proof.auth.authType == AuthType.NONE && proof.claim.claimType == ClaimType.NONE) {
-                revert ProofNeedsAuthOrClaim();
+                revert ZkConnectError.ProofNeedsAuthOrClaim();
             }
 
             if (proof.auth.authType != AuthType.NONE) {
@@ -113,44 +100,44 @@ contract ZkConnectVerifier {
         }
 
         if (!isClaimRequestFound) {
-            revert ClaimRequestNotFound(groupId, groupTimestamp);
+            revert ZkConnectError.ClaimRequestNotFound(groupId, groupTimestamp);
         }
 
         if (claim.claimType != claimRequest.claimType) {
-            revert ClaimTypeMismatch(claim.claimType, claimRequest.claimType);
+            revert ZkConnectError.ClaimTypeMismatch(claim.claimType, claimRequest.claimType);
         }
 
         if (keccak256(claim.extraData) != keccak256(claimRequest.extraData)) {
-            revert ClaimExtraDataMismatch(claim.extraData, claimRequest.extraData);
+            revert ZkConnectError.ClaimExtraDataMismatch(claim.extraData, claimRequest.extraData);
         }
 
         if (claim.claimType == ClaimType.EQ) {
             if (claim.value != claimRequest.value) {
-                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+                revert ZkConnectError.ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
             }
         }
 
         if (claim.claimType == ClaimType.GT) {
             if (claim.value <= claimRequest.value) {
-                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+                revert ZkConnectError.ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
             }
         }
 
         if (claim.claimType == ClaimType.GTE) {
             if (claim.value < claimRequest.value) {
-                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+                revert ZkConnectError.ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
             }
         }
 
         if (claim.claimType == ClaimType.LT) {
             if (claim.value >= claimRequest.value) {
-                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+                revert ZkConnectError.ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
             }
         }
 
         if (claim.claimType == ClaimType.LTE) {
             if (claim.value > claimRequest.value) {
-                revert ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
+                revert ZkConnectError.ClaimValueMismatch(claim.claimType, claim.value, claimRequest.value);
             }
         }
     }
@@ -173,17 +160,17 @@ contract ZkConnectVerifier {
         }
 
         if (!isAuthRequestFound) {
-            revert AuthRequestNotFound(authType, anonMode);
+            revert ZkConnectError.AuthRequestNotFound(authType, anonMode);
         }
 
         if (auth.userId != 0) {
             if (auth.userId != authRequest.userId) {
-                revert AuthUserIdMismatch(auth.userId, authRequest.userId);
+                revert ZkConnectError.AuthUserIdMismatch(auth.userId, authRequest.userId);
             }
         }
 
         if (keccak256(auth.extraData) != keccak256(authRequest.extraData)) {
-            revert ClaimExtraDataMismatch(auth.extraData, authRequest.extraData);
+            revert ZkConnectError.ClaimExtraDataMismatch(auth.extraData, authRequest.extraData);
         }
     }
 
@@ -193,14 +180,14 @@ contract ZkConnectVerifier {
     ) public pure {
         if (zkConnectRequestContent.operators[0] == LogicalOperator.AND) {
             if (zkConnectResponse.proofs.length != zkConnectRequestContent.dataRequests.length) {
-                revert ProofsAndDataRequestsAreUnequalInLength(
+                revert ZkConnectError.ProofsAndDataRequestsAreUnequalInLength(
                     zkConnectResponse.proofs.length, zkConnectRequestContent.dataRequests.length
                 );
             }
         }
         if (zkConnectRequestContent.operators[0] == LogicalOperator.OR) {
             if (zkConnectResponse.proofs.length != 1) {
-                revert OnlyOneProofSupportedWithLogicalOperatorOR();
+                revert ZkConnectError.OnlyOneProofSupportedWithLogicalOperatorOR();
             }
         }
     }
