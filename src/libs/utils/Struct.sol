@@ -28,7 +28,7 @@ struct Auth {
 }
 
 enum ClaimType {
-    NONE,
+    EMPTY,
     GTE,
     GT,
     EQ,
@@ -38,7 +38,7 @@ enum ClaimType {
 }
 
 enum AuthType {
-    NONE,
+    EMPTY,
     ANON,
     GITHUB,
     TWITTER,

@@ -43,7 +43,7 @@ contract HydraS2Proofs {
         return ZkConnectResponse({
             appId: 0x112a692a2005259c25f6094161007967,
             namespace: bytes16(keccak256("main")),
-            version: bytes32("zk-connect-v1"),
+            version: bytes32("zk-connect-v2"),
             proofs: proofs
         });
     }
@@ -68,7 +68,7 @@ contract HydraS2Proofs {
         return ZkConnectResponse({
             appId: 0x112a692a2005259c25f6094161007967,
             namespace: bytes16(keccak256("main")),
-            version: bytes32("zk-connect-v1"),
+            version: bytes32("zk-connect-v2"),
             proofs: proofs
         });
     }
