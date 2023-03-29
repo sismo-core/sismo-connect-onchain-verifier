@@ -9,7 +9,7 @@ import "forge-std/console.sol";
 
 contract ZkConnectVerifier is Initializable, Ownable {
     uint8 public constant IMPLEMENTATION_VERSION = 1;
-    bytes32 public immutable ZK_CONNECT_VERSION = "zk-connect-v1";
+    bytes32 public immutable ZK_CONNECT_VERSION = "zk-connect-v2";
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
 
@@ -65,11 +65,11 @@ contract ZkConnectVerifier is Initializable, Ownable {
                 revert ProvingSchemeNotSupported(proof.provingScheme);
             }
 
-            if (proof.auth.authType == AuthType.NONE && proof.claim.claimType == ClaimType.NONE) {
+            if (proof.auth.authType == AuthType.EMPTY && proof.claim.claimType == ClaimType.EMPTY) {
                 revert ProofNeedsAuthOrClaim();
             }
 
-            if (proof.auth.authType != AuthType.NONE) {
+            if (proof.auth.authType != AuthType.EMPTY) {
                 _checkAuthMatchContentRequest(proof, zkConnectRequestContent);
                 verifiedAuth = _verifiers[proof.provingScheme].verifyAuthProof(appId, proof);
                 verifiedAuths[i] = verifiedAuth;
@@ -78,7 +78,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
                 verifiedAuths[i] = emptyVerifiedAuth;
             }
 
-            if (proof.claim.claimType != ClaimType.NONE) {
+            if (proof.claim.claimType != ClaimType.EMPTY) {
                 _checkClaimMatchContentRequest(proof, zkConnectRequestContent);
                 verifiedClaim = _verifiers[proof.provingScheme].verifyClaim(appId, namespace, proof);
                 verifiedClaims[i] = verifiedClaim;
