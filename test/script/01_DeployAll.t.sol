@@ -10,15 +10,15 @@ import "script/01_DeployAll.s.sol";
 contract DeployAllTest is Test {
     ScriptTypes.DeployAllContracts contracts;
 
-    address immutable ADMIN = 0xF61CabBa1e6FC166A66bcA0fcaa83762EdB6D4Bd;
-    address immutable OWNER = 0x9424ac301cFe394db459136Acd299763AF6a0eF1;
-    address immutable ROOTS_OWNER = 0x9424ac301cFe394db459136Acd299763AF6a0eF1;
+    address immutable PROXY_ADMIN = address(1);
+    address immutable OWNER = address(2);
+    address immutable ROOTS_OWNER = address(3);
 
     function setUp() public virtual {
         DeployAll deploy = new DeployAll();
 
         (bool success, bytes memory result) =
-            address(deploy).delegatecall(abi.encodeWithSelector(DeployAll.run.selector));
+            address(deploy).delegatecall(abi.encodeWithSelector(DeployAll.run.selector, "test"));
         require(success, "Deploy script did not run successfully!");
         contracts = abi.decode(result, (ScriptTypes.DeployAllContracts));
     }
@@ -28,17 +28,17 @@ contract DeployAllTest is Test {
     }
 
     function testAvailableRootsRegistryDeployed() public {
-        _expectDeployedWithProxy(address(contracts.availableRootsRegistry), ADMIN);
+        _expectDeployedWithProxy(address(contracts.availableRootsRegistry), PROXY_ADMIN);
         assertEq(contracts.availableRootsRegistry.owner(), ROOTS_OWNER);
     }
 
     function testCommitmentMapperRegistryDeployed() public {
-        _expectDeployedWithProxy(address(contracts.commitmentMapperRegistry), ADMIN);
+        _expectDeployedWithProxy(address(contracts.commitmentMapperRegistry), PROXY_ADMIN);
         assertEq(contracts.commitmentMapperRegistry.owner(), OWNER);
     }
 
     function testHydraS2Verifier() public {
-        _expectDeployedWithProxy(address(contracts.hydraS2Verifier), ADMIN);
+        _expectDeployedWithProxy(address(contracts.hydraS2Verifier), PROXY_ADMIN);
         assertEq(
             address(contracts.hydraS2Verifier.COMMITMENT_MAPPER_REGISTRY()), address(contracts.commitmentMapperRegistry)
         );
@@ -48,7 +48,7 @@ contract DeployAllTest is Test {
     }
 
     function testZkConnectVerifier() public {
-        _expectDeployedWithProxy(address(contracts.zkConnectVerifier), ADMIN);
+        _expectDeployedWithProxy(address(contracts.zkConnectVerifier), PROXY_ADMIN);
         assertEq(contracts.zkConnectVerifier.getVerifier("hydra-s2.1"), address(contracts.hydraS2Verifier));
         assertEq(contracts.zkConnectVerifier.owner(), OWNER);
     }
@@ -59,6 +59,6 @@ contract DeployAllTest is Test {
         (bool success, bytes memory result) =
             address(proxy).call(abi.encodeWithSelector(TransparentUpgradeableProxy.admin.selector));
         assertEq(success, true);
-        assertEq(abi.decode(result, (address)), ADMIN);
+        assertEq(abi.decode(result, (address)), PROXY_ADMIN);
     }
 }

@@ -19,11 +19,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
     HydraS2Verifier hydraS2Verifier;
     ZkConnectVerifier zkConnectVerifier;
 
-    function run() external returns (ScriptTypes.DeployAllContracts memory contracts) {
+    function run(string memory chainName) external returns (ScriptTypes.DeployAllContracts memory contracts) {
         vm.startBroadcast();
 
-        Chains currentChain = Chains.TestnetGoerli;
-        _setConfig(currentChain);
+        _setConfig(getChainName(chainName));
 
         availableRootsRegistry = _deployAvailableRootsRegistry(config.rootsOwner);
         commitmentMapperRegistry = _deployCommitmentMapperRegistry(config.owner, config.commitmentMapperEdDSAPubKey);

@@ -6,5 +6,6 @@ broadcast/
 
 # Dotenv file
 .env
+.env.*
 
 .vscode
