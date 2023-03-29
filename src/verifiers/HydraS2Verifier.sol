@@ -8,7 +8,6 @@ import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRe
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "../libs/utils/Struct.sol";
 import "../libs/utils/Constants.sol";
-import "forge-std/console.sol";
 
 struct HydraS2SnarkProof {
     uint256[2] a;
