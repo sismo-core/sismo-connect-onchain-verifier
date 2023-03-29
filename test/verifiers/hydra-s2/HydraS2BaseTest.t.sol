@@ -21,7 +21,9 @@ contract HydraS2BaseTest is BaseTest {
 
         hydraS2Verifier = new HydraS2Verifier(address(commitmentMapperRegistry), address(availableRootsRegistry));
 
+        vm.startPrank(owner);
         zkConnectVerifier.registerVerifier(hydraS2Verifier.HYDRA_S2_VERSION(), address(hydraS2Verifier));
+        vm.stopPrank();
 
         commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(hydraS2Proofs.getEdDSAPubKey());
         availableRootsRegistry.registerRoot(hydraS2Proofs.getRoot());

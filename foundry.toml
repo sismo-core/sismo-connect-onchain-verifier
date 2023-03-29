@@ -4,9 +4,14 @@ verbosity = 1
 via_ir = true
 
 [rpc_endpoints]
-goerli = "http://localhost:8545"
-# mainnet = "${RPC_URL_MAINNET}"
+polygon = "${RPC_URL}"
+gnosis = "${RPC_URL}"
+goerli = "${RPC_URL}"
+mumbai = "${RPC_URL}"
+# mainnet = "${RPC_URL}"
 
-# [etherscan]
-# goerli = {key = "${ETHERSCAN_KEY}", url = "https://api-goerli.etherscan.io/api"}
-# mainnet = {key = "${ETHERSCAN_KEY}"}
+[etherscan]
+polygon = { key = "${ETHERSCAN_KEY}" }
+gnosis = { key = "${ETHERSCAN_KEY}" }
+goerli = { key = "${ETHERSCAN_KEY}" }
+mumbai = { key = "${ETHERSCAN_KEY}" }
