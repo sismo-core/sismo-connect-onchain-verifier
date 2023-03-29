@@ -15,7 +15,7 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
  *
  */
 contract AvailableRootsRegistry is IAvailableRootsRegistry, Initializable, Ownable {
-    uint8 public constant IMPLEMENTATION_VERSION = 2;
+    uint8 public constant IMPLEMENTATION_VERSION = 1;
 
     mapping(uint256 => bool) public _roots;
 

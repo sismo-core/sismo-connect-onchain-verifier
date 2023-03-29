@@ -2,10 +2,13 @@
 pragma solidity ^0.8.17;
 
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "./libs/utils/Struct.sol";
 import "forge-std/console.sol";
 
-contract ZkConnectVerifier {
+contract ZkConnectVerifier is Initializable, Ownable {
+    uint8 public constant IMPLEMENTATION_VERSION = 1;
     bytes32 public immutable ZK_CONNECT_VERSION = "zk-connect-v2";
 
     mapping(bytes32 => IBaseVerifier) public _verifiers;
@@ -25,6 +28,17 @@ contract ZkConnectVerifier {
     error AuthUserIdMismatch(uint256 userId, uint256 expectedUserId);
 
     event VerifierSet(bytes32, address);
+
+    constructor(address owner) {
+        initialize(owner);
+    }
+
+    function initialize(address ownerAddress) public reinitializer(IMPLEMENTATION_VERSION) {
+        // if proxy did not setup owner yet or if called by constructor (for implem setup)
+        if (owner() == address(0) || address(this).code.length == 0) {
+            _transferOwnership(ownerAddress);
+        }
+    }
 
     function verify(ZkConnectResponse memory zkConnectResponse, ZkConnectRequestContent memory zkConnectRequestContent)
         public
@@ -86,8 +100,12 @@ contract ZkConnectVerifier {
         });
     }
 
-    function setVerifier(bytes32 provingScheme, address verifierAddress) public {
+    function registerVerifier(bytes32 provingScheme, address verifierAddress) public {
         _setVerifier(provingScheme, verifierAddress);
+    }
+
+    function getVerifier(bytes32 provingScheme) public returns (address) {
+        return address(_verifiers[provingScheme]);
     }
 
     function _setVerifier(bytes32 provingScheme, address verifierAddress) internal {
