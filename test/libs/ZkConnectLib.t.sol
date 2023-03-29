@@ -17,7 +17,7 @@ contract ZkConnectLibTest is HydraS2BaseTest {
         zkConnect = new ZkConnect(appId);
 
         zkConnectRequestContent =
-            ZkConnectRequestContentLib.buildClaimOnly({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+            ZkConnectRequestContentLib.buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
 
         validZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
     }
@@ -87,7 +87,7 @@ contract ZkConnectLibTest is HydraS2BaseTest {
     }
 
     function test_ZkConnectLibWithOnlyOneAuth() public {
-        zkConnectRequestContent = ZkConnectRequestContentLib.buildAuthOnly({authType: AuthType.ANON});
+        zkConnectRequestContent = ZkConnectRequestContentLib.buildAuth({authType: AuthType.ANON});
 
         bytes memory zkResponseEncoded = abi.encode(hydraS2Proofs.getZkConnectResponse2());
 

@@ -114,7 +114,7 @@ library ZkConnectRequestContentLib {
     }
 
     // Build a ZkConnectRequestContent with a single AuthRequest
-    function buildAuthOnly(AuthType authType, bool anonMode, uint256 userId, bytes memory extraData)
+    function buildAuth(AuthType authType, bool anonMode, uint256 userId, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -124,7 +124,7 @@ library ZkConnectRequestContentLib {
         return build(authRequest);
     }
 
-    function buildAuthOnly(AuthType authType, bool anonMode, bytes memory extraData)
+    function buildAuth(AuthType authType, bool anonMode, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -133,7 +133,7 @@ library ZkConnectRequestContentLib {
         return build(authRequest);
     }
 
-    function buildAuthOnly(AuthType authType, bool anonMode, uint256 userId)
+    function buildAuth(AuthType authType, bool anonMode, uint256 userId)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -142,7 +142,7 @@ library ZkConnectRequestContentLib {
         return build(authRequest);
     }
 
-    function buildAuthOnly(AuthType authType, uint256 userId, bytes memory extraData)
+    function buildAuth(AuthType authType, uint256 userId, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -151,7 +151,7 @@ library ZkConnectRequestContentLib {
         return build(authRequest);
     }
 
-    function buildAuthOnly(AuthType authType, bytes memory extraData)
+    function buildAuth(AuthType authType, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -160,29 +160,29 @@ library ZkConnectRequestContentLib {
         return build(authRequest);
     }
 
-    function buildAuthOnly(AuthType authType, uint256 userId) public pure returns (ZkConnectRequestContent memory) {
+    function buildAuth(AuthType authType, uint256 userId) public pure returns (ZkConnectRequestContent memory) {
         Auth memory authRequest = AuthRequestLib.build({authType: authType, userId: userId});
         return build(authRequest);
     }
 
-    function buildAuthOnly(AuthType authType, bool anonMode) public pure returns (ZkConnectRequestContent memory) {
+    function buildAuth(AuthType authType, bool anonMode) public pure returns (ZkConnectRequestContent memory) {
         Auth memory authRequest = AuthRequestLib.build({authType: authType, anonMode: anonMode});
         return build(authRequest);
     }
 
-    function buildAuthOnly(AuthType authType) public pure returns (ZkConnectRequestContent memory) {
+    function buildAuth(AuthType authType) public pure returns (ZkConnectRequestContent memory) {
         Auth memory authRequest = AuthRequestLib.build({authType: authType});
         return build(authRequest);
     }
 
     // Build a ZkConnectRequestContent with a single ClaimRequest
 
-    function buildClaimOnly(bytes16 groupId) public pure returns (ZkConnectRequestContent memory) {
+    function buildClaim(bytes16 groupId) public pure returns (ZkConnectRequestContent memory) {
         Claim memory claimRequest = ClaimRequestLib.build({groupId: groupId});
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, bytes16 groupTimestamp)
+    function buildClaim(bytes16 groupId, bytes16 groupTimestamp)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -191,12 +191,12 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, uint256 value) public pure returns (ZkConnectRequestContent memory) {
+    function buildClaim(bytes16 groupId, uint256 value) public pure returns (ZkConnectRequestContent memory) {
         Claim memory claimRequest = ClaimRequestLib.build({groupId: groupId, value: value});
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, ClaimType claimType)
+    function buildClaim(bytes16 groupId, ClaimType claimType)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -205,7 +205,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, bytes memory extraData)
+    function buildClaim(bytes16 groupId, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -214,7 +214,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, bytes16 groupTimestamp, uint256 value)
+    function buildClaim(bytes16 groupId, bytes16 groupTimestamp, uint256 value)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -224,7 +224,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, bytes16 groupTimestamp, ClaimType claimType)
+    function buildClaim(bytes16 groupId, bytes16 groupTimestamp, ClaimType claimType)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -234,7 +234,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function bbuildClaimOnlyild(bytes16 groupId, bytes16 groupTimestamp, bytes memory extraData)
+    function bbuildClaimild(bytes16 groupId, bytes16 groupTimestamp, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -244,7 +244,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, uint256 value, ClaimType claimType)
+    function buildClaim(bytes16 groupId, uint256 value, ClaimType claimType)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -253,7 +253,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, uint256 value, bytes memory extraData)
+    function buildClaim(bytes16 groupId, uint256 value, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -262,7 +262,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, ClaimType claimType, bytes memory extraData)
+    function buildClaim(bytes16 groupId, ClaimType claimType, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -272,7 +272,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, bytes16 groupTimestamp, uint256 value, ClaimType claimType)
+    function buildClaim(bytes16 groupId, bytes16 groupTimestamp, uint256 value, ClaimType claimType)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -286,7 +286,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, bytes16 groupTimestamp, uint256 value, bytes memory extraData)
+    function buildClaim(bytes16 groupId, bytes16 groupTimestamp, uint256 value, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -300,7 +300,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, bytes16 groupTimestamp, ClaimType claimType, bytes memory extraData)
+    function buildClaim(bytes16 groupId, bytes16 groupTimestamp, ClaimType claimType, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
@@ -314,7 +314,7 @@ library ZkConnectRequestContentLib {
         return build(claimRequest);
     }
 
-    function buildClaimOnly(bytes16 groupId, uint256 value, ClaimType claimType, bytes memory extraData)
+    function buildClaim(bytes16 groupId, uint256 value, ClaimType claimType, bytes memory extraData)
         public
         pure
         returns (ZkConnectRequestContent memory)
