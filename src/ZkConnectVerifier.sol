@@ -5,7 +5,6 @@ import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "./libs/utils/Struct.sol";
-import "forge-std/console.sol";
 
 contract ZkConnectVerifier is Initializable, Ownable {
     uint8 public constant IMPLEMENTATION_VERSION = 1;
@@ -176,7 +175,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
     function _checkAuthMatchContentRequest(
         ZkConnectProof memory proof,
         ZkConnectRequestContent memory zkConnectRequestContent
-    ) public view {
+    ) public pure {
         Auth memory auth = proof.auth;
         AuthType authType = auth.authType;
         bool anonMode = auth.anonMode;

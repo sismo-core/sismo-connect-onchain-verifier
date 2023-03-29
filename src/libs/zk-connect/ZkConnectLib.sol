@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import "forge-std/console.sol";
 import "src/libs/utils/Struct.sol";
 import "src/libs/utils/ZkConnectRequestContentLib.sol";
 import {ClaimRequestLib} from "src/libs/utils/ClaimRequestLib.sol";
@@ -50,7 +49,7 @@ contract ZkConnect is Context {
 
     function verify(bytes memory zkConnectResponseEncoded) public returns (ZkConnectVerifiedResult memory) {
         ZkConnectRequestContent memory zkConnectRequestContent;
-        return verify(zkConnectResponseEncoded, zkConnectRequestContent);
+        return verify(zkConnectResponseEncoded, zkConnectRequestContent, bytes16(keccak256("main")));
     }
 
     function verify(
@@ -66,18 +65,6 @@ contract ZkConnect is Context {
             revert NamespaceMismatch(zkConnectResponse.namespace, namespace);
         }
         return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequestContent);
-    }
-
-    function verify(ZkConnectResponse memory zkConnectResponse, ZkConnectRequestContent memory zkConnectRequestContent)
-        public
-        returns (ZkConnectVerifiedResult memory)
-    {
-        return verify(zkConnectResponse, zkConnectRequestContent, bytes16(keccak256("main")));
-    }
-
-    function verify(ZkConnectResponse memory zkConnectResponse) public returns (ZkConnectVerifiedResult memory) {
-        ZkConnectRequestContent memory zkConnectRequestContent;
-        return verify(zkConnectResponse, zkConnectRequestContent);
     }
 
     function getZkConnectVersion() public view returns (bytes32) {
