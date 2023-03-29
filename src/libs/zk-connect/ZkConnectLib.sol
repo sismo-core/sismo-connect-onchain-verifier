@@ -8,7 +8,7 @@ import {ClaimRequestLib} from "src/libs/utils/ClaimRequestLib.sol";
 import {AuthRequestLib} from "src/libs/utils/AuthRequestLib.sol";
 import {DataRequestLib} from "src/libs/utils/DataRequestLib.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {ZkConnectVerifier} from "src/ZkConnectVerifier.sol";
+import {IZkConnectVerifier} from "src/interfaces/IZkConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 
 contract ZkConnect is Context {
@@ -17,7 +17,7 @@ contract ZkConnect is Context {
     IAddressesProvider public immutable ADDRESSES_PROVIDER =
         IAddressesProvider(0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05);
 
-    ZkConnectVerifier private _zkConnectVerifier;
+    IZkConnectVerifier private _zkConnectVerifier;
     bytes16 public appId;
 
     error ZkConnectResponseIsEmpty();
@@ -26,7 +26,7 @@ contract ZkConnect is Context {
 
     constructor(bytes16 _appId) {
         appId = _appId;
-        _zkConnectVerifier = ZkConnectVerifier(ADDRESSES_PROVIDER.get(string("zkConnectVerifier")));
+        _zkConnectVerifier = IZkConnectVerifier(ADDRESSES_PROVIDER.get(string("zkConnectVerifier")));
     }
 
     function verify(
