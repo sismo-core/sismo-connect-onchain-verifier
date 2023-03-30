@@ -19,9 +19,12 @@ contract DeployAll is Script, BaseDeploymentConfig {
   HydraS2Verifier hydraS2Verifier;
   ZkConnectVerifier zkConnectVerifier;
 
-  function run(
+  function runFor(
     string memory chainName
-  ) external returns (ScriptTypes.DeployAllContracts memory contracts) {
+  ) public returns (ScriptTypes.DeployAllContracts memory contracts) {
+    console.log("Run for CHAIN_NAME:", chainName);
+    console.log("Deployer:", msg.sender);
+
     vm.startBroadcast();
 
     _setConfig(getChainName(chainName));
@@ -49,6 +52,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deployAvailableRootsRegistry(address owner) private returns (AvailableRootsRegistry) {
+    if (config.availableRootsRegistry != address(0)) {
+      console.log("Using existing availableRootsRegistry:", config.availableRootsRegistry);
+      return AvailableRootsRegistry(config.availableRootsRegistry);
+    }
     AvailableRootsRegistry rootsRegistryImplem = new AvailableRootsRegistry(owner);
     console.log("rootsRegistry Implem Deployed:", address(rootsRegistryImplem));
 
@@ -65,6 +72,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
     address owner,
     uint256[2] memory commitmentMapperEdDSAPubKey
   ) private returns (CommitmentMapperRegistry) {
+    if (config.commitmentMapperRegistry != address(0)) {
+      console.log("Using existing commitmentMapperRegistry:", config.commitmentMapperRegistry);
+      return CommitmentMapperRegistry(config.commitmentMapperRegistry);
+    }
     CommitmentMapperRegistry commitmentMapperImplem = new CommitmentMapperRegistry(
       owner,
       commitmentMapperEdDSAPubKey
@@ -116,6 +127,11 @@ contract DeployAll is Script, BaseDeploymentConfig {
     );
     console.log("zkConnectVerifier Proxy Deployed:", address(proxy));
     return ZkConnectVerifier(address(proxy));
+  }
+
+  function run() public returns (ScriptTypes.DeployAllContracts memory contracts) {
+    string memory chainName = vm.envString("CHAIN_NAME");
+    return runFor(chainName);
   }
 }
 
