@@ -210,6 +210,17 @@ contract ZkConnect is IZkConnectLib, Context {
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    ZkConnectRequest memory zkConnectRequest
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
   function buildClaim(
     bytes16 groupId,
     bytes16 groupTimestamp,
@@ -220,7 +231,7 @@ contract ZkConnect is IZkConnectLib, Context {
     return RequestBuilder.buildClaim(groupId, groupTimestamp, value, claimType, extraData);
   }
 
-  function buildClaim(bytes16 groupId) internal pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId) public pure returns (Claim memory) {
     return RequestBuilder.buildClaim(groupId);
   }
 
