@@ -11,4 +11,3 @@ pragma solidity ^0.8.14;
 
 import {ZkConnect} from "./zk-connect/ZkConnectLib.sol";
 import "./utils/Structs.sol";
-import {DataRequestLib} from "./utils/DataRequestLib.sol";

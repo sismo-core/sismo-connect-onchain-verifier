@@ -3,7 +3,6 @@ pragma solidity ^0.8.14;
 
 import "src/libs/utils/Structs.sol";
 import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
-import {DataRequestLib} from "src/libs/utils/DataRequestLib.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IZkConnectLib} from "./IZkConnectLib.sol";
 import {IZkConnectVerifier} from "src/interfaces/IZkConnectVerifier.sol";
