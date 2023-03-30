@@ -76,8 +76,8 @@ struct ZkConnectVerifiedResult {
   bytes16 appId;
   bytes16 namespace;
   bytes32 version;
-  VerifiedClaim[] verifiedClaims;
   VerifiedAuth[] verifiedAuths;
+  VerifiedClaim[] verifiedClaims;
   bytes[] signedMessages;
 }
 
