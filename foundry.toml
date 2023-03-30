@@ -11,7 +11,7 @@ mumbai = "${RPC_URL}"
 # mainnet = "${RPC_URL}"
 
 [etherscan]
-polygon = { key = "${ETHERSCAN_KEY}" }
-gnosis = { key = "${ETHERSCAN_KEY}" }
-goerli = { key = "${ETHERSCAN_KEY}" }
-mumbai = { key = "${ETHERSCAN_KEY}" }
+polygon = { key = "${ETHERSCAN_API_KEY}" }
+gnosis = { key = "${ETHERSCAN_API_KEY}" }
+goerli = { key = "${ETHERSCAN_API_KEY}" }
+mumbai = { key = "${ETHERSCAN_API_KEY}" }
