@@ -15,8 +15,8 @@ struct DataRequest {
 struct Claim {
     bytes16 groupId;
     bytes16 groupTimestamp;
-    ClaimType claimType;
     uint256 value;
+    ClaimType claimType;
     bytes extraData;
 }
 

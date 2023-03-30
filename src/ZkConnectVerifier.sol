@@ -59,6 +59,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
         VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](proofsLength);
         VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](proofsLength);
         bytes[] memory signedMessages = new bytes[](proofsLength);
+
         for (uint256 i = 0; i < proofsLength; i++) {
             ZkConnectProof memory proof = zkConnectResponse.proofs[i];
             if (_verifiers[proof.provingScheme] == IBaseVerifier(address(0))) {
@@ -78,9 +79,6 @@ contract ZkConnectVerifier is Initializable, Ownable {
                 verifiedAuths[i] = emptyVerifiedAuth;
             }
 
-            console.log("proof.claim.claimType is EMPTY", proof.claim.claimType == ClaimType.EMPTY);
-            console.log("proof.claim.claimType is GTE", proof.claim.claimType == ClaimType.GTE);
-            console.log("proof.claim.claimType is EQ", proof.claim.claimType == ClaimType.EQ);
             if (proof.claim.claimType != ClaimType.EMPTY) {
                 _checkClaimMatchContentRequest(proof, zkConnectRequestContent);
                 verifiedClaim = _verifiers[proof.provingScheme].verifyClaim(appId, namespace, proof);
@@ -214,6 +212,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
         ZkConnectResponse memory zkConnectResponse,
         ZkConnectRequestContent memory zkConnectRequestContent
     ) public pure {
+        // if the logical operator is AND, the number of proofs should be equal to the number of data requests
         if (zkConnectRequestContent.operators[0] == LogicalOperator.AND) {
             if (zkConnectResponse.proofs.length != zkConnectRequestContent.dataRequests.length) {
                 revert ProofsAndDataRequestsAreUnequalInLength(
@@ -221,6 +220,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
                 );
             }
         }
+        // if the logical operator is OR, the number of proofs should be 1
         if (zkConnectRequestContent.operators[0] == LogicalOperator.OR) {
             if (zkConnectResponse.proofs.length != 1) {
                 revert OnlyOneProofSupportedWithLogicalOperatorOR();

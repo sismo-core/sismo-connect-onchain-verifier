@@ -210,12 +210,6 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
             revert AppIdMismatch(appIdFromProof, appId);
         }
         // extraData
-        console.log("zkConnectProof.signedMessage");
-        console.logBytes(zkConnectProof.signedMessage);
-        console.log("keccak256(zkConnectProof.signedMessage)");
-        console.logBytes32(keccak256(zkConnectProof.signedMessage));
-        console.log("extraData");
-        console.logBytes32(bytes32(extraData));
         if (extraData != uint256(keccak256(zkConnectProof.signedMessage))) {
             revert InvalidExtraData(bytes32(extraData), keccak256(zkConnectProof.signedMessage));
         }
