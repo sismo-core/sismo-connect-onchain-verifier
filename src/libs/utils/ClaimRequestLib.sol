@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Struct.sol";
+import "src/libs/utils/Structs.sol";
 
 library ClaimRequestLib {
     ///////////////////////////

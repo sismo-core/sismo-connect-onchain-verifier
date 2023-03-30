@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Struct.sol";
+import "src/libs/utils/Structs.sol";
 
 library AuthRequestLib {
     function build(AuthType authType, bool anonMode, uint256 userId, bytes memory extraData)

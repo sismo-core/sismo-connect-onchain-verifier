@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-import "../libs/utils/Struct.sol";
+import "../libs/utils/Structs.sol";
 
 interface IBaseVerifier {
     function verifyClaim(bytes16 appId, bytes16 namespace, ZkConnectProof memory proof)

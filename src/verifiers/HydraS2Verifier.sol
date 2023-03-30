@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
+import "forge-std/console.sol";
 import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "../libs/utils/Struct.sol";
+import "../libs/utils/Structs.sol";
 import "../libs/utils/Constants.sol";
 
 struct HydraS2SnarkProof {
@@ -108,20 +109,31 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
         if (appIdFromProof != appId) {
             revert AppIdMismatch(appIdFromProof, appId);
         }
-        // if (extraData != uint256(keccak256(zkConnectProof.signedMessage))) {
-        //     revert InvalidExtraData(bytes32(extraData), keccak256(zkConnectProof.signedMessage));
-        // }
+        if (extraData != uint256(keccak256(zkConnectProof.signedMessage))) {
+            revert InvalidExtraData(bytes32(extraData), keccak256(zkConnectProof.signedMessage));
+        }
 
-        _checkSnarkProof(snarkProof);
         Auth memory auth = zkConnectProof.auth;
 
-        uint256 returnedUserId = snarkProof.inputs[10];
+
+        uint256 returnedUserId = snarkProof.inputs[10]; // vaultIdentifier by default
+        bool destinationVerificationEnabled = snarkProof.inputs[13] == 1; // destinationVerificationEnabled
+        uint256 destinationIdentifier = uint256(snarkProof.inputs[0]); // destinationIdentifier
+
+        // if the authType is not ANON (i.e. if it's not a vault authentication)
+        // we check that the proof of ownership of the destinationIdentifier is made in the circuit
+        // and we return the destinationIdentifier as the userId (instead of the vaultIdentifier by default)
         if (auth.authType != AuthType.ANON) {
             if (auth.anonMode == true) {
                 revert AnonModeIsNotYetSupported();
             }
-            returnedUserId = auth.userId;
+            if (destinationVerificationEnabled == false) {
+                revert DestinationVerificationNeedsToBeEnabled();
+            }
+            returnedUserId = destinationIdentifier;
         }
+
+        _checkSnarkProof(snarkProof);
 
         return VerifiedAuth({
             authType: auth.authType,
@@ -139,7 +151,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
         uint256[14] memory inputs,
         ZkConnectProof memory zkConnectProof
     ) internal view {
-        address destinationIdentifier = address(uint160(inputs[0]));
+        //address destinationIdentifier = address(uint160(inputs[0]));
         uint256 extraData = inputs[1];
         uint256 commitmentMapperPubKeyX = inputs[2];
         uint256 commitmentMapperPubKeyY = inputs[3];
@@ -198,9 +210,15 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
             revert AppIdMismatch(appIdFromProof, appId);
         }
         // extraData
-        // if (extraData != uint256(keccak256(zkConnectProof.signedMessage))) {
-        //     revert InvalidExtraData(bytes32(extraData), keccak256(zkConnectProof.signedMessage));
-        // }
+        console.log("zkConnectProof.signedMessage");
+        console.logBytes(zkConnectProof.signedMessage);
+        console.log("keccak256(zkConnectProof.signedMessage)");
+        console.logBytes32(keccak256(zkConnectProof.signedMessage));
+        console.log("extraData");
+        console.logBytes32(bytes32(extraData));
+        if (extraData != uint256(keccak256(zkConnectProof.signedMessage))) {
+            revert InvalidExtraData(bytes32(extraData), keccak256(zkConnectProof.signedMessage));
+        }
     }
 
     function _checkSnarkProof(HydraS2SnarkProof memory snarkProof) internal view {

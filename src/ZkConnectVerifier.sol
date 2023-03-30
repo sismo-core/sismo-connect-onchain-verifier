@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
+import "forge-std/console.sol";
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import "./libs/utils/Struct.sol";
+import "./libs/utils/Structs.sol";
 
 contract ZkConnectVerifier is Initializable, Ownable {
     uint8 public constant IMPLEMENTATION_VERSION = 1;
@@ -77,6 +78,9 @@ contract ZkConnectVerifier is Initializable, Ownable {
                 verifiedAuths[i] = emptyVerifiedAuth;
             }
 
+            console.log("proof.claim.claimType is EMPTY", proof.claim.claimType == ClaimType.EMPTY);
+            console.log("proof.claim.claimType is GTE", proof.claim.claimType == ClaimType.GTE);
+            console.log("proof.claim.claimType is EQ", proof.claim.claimType == ClaimType.EQ);
             if (proof.claim.claimType != ClaimType.EMPTY) {
                 _checkClaimMatchContentRequest(proof, zkConnectRequestContent);
                 verifiedClaim = _verifiers[proof.provingScheme].verifyClaim(appId, namespace, proof);
@@ -176,12 +180,14 @@ contract ZkConnectVerifier is Initializable, Ownable {
         ZkConnectProof memory proof,
         ZkConnectRequestContent memory zkConnectRequestContent
     ) public pure {
+        // extract the auth from the proof
         Auth memory auth = proof.auth;
         AuthType authType = auth.authType;
         bool anonMode = auth.anonMode;
 
         bool isAuthRequestFound = false;
         Auth memory authRequest;
+        // check if the auth is found in the content request
         for (uint256 i = 0; i < zkConnectRequestContent.dataRequests.length; i++) {
             authRequest = zkConnectRequestContent.dataRequests[i].authRequest;
             if ((authRequest.authType == authType) && (authRequest.anonMode == anonMode)) {
