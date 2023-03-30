@@ -1,7 +1,7 @@
 [profile.default]
 optimizer_runs = 1000000
 verbosity = 1
-via_ir = true
+# via_ir = true
 
 [rpc_endpoints]
 polygon = "${RPC_URL}"
