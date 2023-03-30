@@ -22,7 +22,7 @@ interface IZkConnectVerifier {
 
   function verify(
     ZkConnectResponse memory zkConnectResponse,
-    ZkConnectRequestContent memory zkConnectRequestContent
+    ZkConnectRequest memory zkConnectRequest
   ) external returns (ZkConnectVerifiedResult memory);
 
   function ZK_CONNECT_VERSION() external view returns (bytes32);

@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
+struct ZkConnectRequest {
+  bytes16 appId;
+  bytes16 namespace;
+  ZkConnectRequestContent content;
+}
+
 struct ZkConnectRequestContent {
   DataRequest[] dataRequests;
   LogicalOperator[] operators;

@@ -2,12 +2,9 @@
 pragma solidity ^0.8.14;
 
 import "src/libs/utils/Structs.sol";
-import "src/libs/utils/ZkConnectRequestContentLib.sol";
-import {ClaimRequestLib} from "src/libs/utils/ClaimRequestLib.sol";
-import {AuthRequestLib} from "src/libs/utils/AuthRequestLib.sol";
+import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
 import {DataRequestLib} from "src/libs/utils/DataRequestLib.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {ZkConnectRequestContentLib} from "src/libs/utils/ZkConnectRequestContentLib.sol";
 import {IZkConnectLib} from "./IZkConnectLib.sol";
 import {IZkConnectVerifier} from "src/interfaces/IZkConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
@@ -28,55 +25,191 @@ contract ZkConnect is IZkConnectLib, Context {
 
   function verify(
     bytes memory zkConnectResponseEncoded,
-    ZkConnectRequestContent memory zkConnectRequestContent,
+    Auth memory authRequest,
+    Claim memory claimRequest,
+    bytes memory messageSignatureRequest,
     bytes16 namespace
   ) public returns (ZkConnectVerifiedResult memory) {
-    if (zkConnectResponseEncoded.length == 0) {
-      revert ZkConnectResponseIsEmpty();
-    }
     ZkConnectResponse memory zkConnectResponse = abi.decode(
       zkConnectResponseEncoded,
       (ZkConnectResponse)
     );
-    return verify(zkConnectResponse, zkConnectRequestContent, namespace);
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+      claimRequest,
+      authRequest,
+      messageSignatureRequest,
+      namespace
+    );
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
     bytes memory zkConnectResponseEncoded,
-    ZkConnectRequestContent memory zkConnectRequestContent
-  ) public returns (ZkConnectVerifiedResult memory) {
-    return verify(zkConnectResponseEncoded, zkConnectRequestContent, bytes16(keccak256("main")));
-  }
-
-  function verify(
-    bytes memory zkConnectResponseEncoded
-  ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectRequestContent memory zkConnectRequestContent;
-    return verify(zkConnectResponseEncoded, zkConnectRequestContent, bytes16(keccak256("main")));
-  }
-
-  function verify(
-    ZkConnectResponse memory zkConnectResponse,
-    ZkConnectRequestContent memory zkConnectRequestContent,
+    Auth memory authRequest,
+    Claim memory claimRequest,
     bytes16 namespace
   ) public returns (ZkConnectVerifiedResult memory) {
-    if (zkConnectResponse.appId != appId) {
-      revert AppIdMismatch(zkConnectResponse.appId, appId);
-    }
-
-    if (zkConnectResponse.namespace != namespace) {
-      revert NamespaceMismatch(zkConnectResponse.namespace, namespace);
-    }
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequestContent);
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+      claimRequest,
+      authRequest,
+      namespace
+    );
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
-  function getZkConnectVersion() public view returns (bytes32) {
-    return _zkConnectVerifier.ZK_CONNECT_VERSION();
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+      authRequest,
+      messageSignatureRequest,
+      namespace
+    );
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
-  ///////////////////////////
-  // groupId + groupTimestamp + value + claimType + extraData
-  //////////////////////////
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Claim memory claimRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+      claimRequest,
+      messageSignatureRequest,
+      namespace
+    );
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Auth memory authRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(authRequest, namespace);
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Claim memory claimRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(claimRequest, namespace);
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Auth memory authRequest,
+    Claim memory claimRequest,
+    bytes memory messageSignatureRequest
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+      claimRequest,
+      authRequest,
+      messageSignatureRequest
+    );
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Auth memory authRequest,
+    Claim memory claimRequest
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(claimRequest, authRequest);
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+      authRequest,
+      messageSignatureRequest
+    );
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Claim memory claimRequest,
+    bytes memory messageSignatureRequest
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+      claimRequest,
+      messageSignatureRequest
+    );
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Auth memory authRequest
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(authRequest);
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
+  function verify(
+    bytes memory zkConnectResponseEncoded,
+    Claim memory claimRequest
+  ) public returns (ZkConnectVerifiedResult memory) {
+    ZkConnectResponse memory zkConnectResponse = abi.decode(
+      zkConnectResponseEncoded,
+      (ZkConnectResponse)
+    );
+    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(claimRequest);
+    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  }
+
   function buildClaim(
     bytes16 groupId,
     bytes16 groupTimestamp,
@@ -84,42 +217,35 @@ contract ZkConnect is IZkConnectLib, Context {
     ClaimType claimType,
     bytes memory extraData
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, groupTimestamp, value, claimType, extraData);
+    return RequestBuilder.buildClaim(groupId, groupTimestamp, value, claimType, extraData);
   }
 
-  ///////////////////////////
-  // groupId
-  ///////////////////////////
-
   function buildClaim(bytes16 groupId) internal pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId);
+    return RequestBuilder.buildClaim(groupId);
   }
 
   function buildClaim(bytes16 groupId, bytes16 groupTimestamp) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, groupTimestamp);
+    return RequestBuilder.buildClaim(groupId, groupTimestamp);
   }
 
   function buildClaim(bytes16 groupId, uint256 value) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, value);
+    return RequestBuilder.buildClaim(groupId, value);
   }
 
   function buildClaim(bytes16 groupId, ClaimType claimType) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, claimType);
+    return RequestBuilder.buildClaim(groupId, claimType);
   }
 
   function buildClaim(bytes16 groupId, bytes memory extraData) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, extraData);
+    return RequestBuilder.buildClaim(groupId, extraData);
   }
 
-  ///////////////////////////
-  // groupId + groupTimestamp
-  //////////////////////////
   function buildClaim(
     bytes16 groupId,
     bytes16 groupTimestamp,
     uint256 value
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, groupTimestamp, value);
+    return RequestBuilder.buildClaim(groupId, groupTimestamp, value);
   }
 
   function buildClaim(
@@ -127,7 +253,7 @@ contract ZkConnect is IZkConnectLib, Context {
     bytes16 groupTimestamp,
     ClaimType claimType
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, groupTimestamp, claimType);
+    return RequestBuilder.buildClaim(groupId, groupTimestamp, claimType);
   }
 
   function buildClaim(
@@ -135,18 +261,15 @@ contract ZkConnect is IZkConnectLib, Context {
     bytes16 groupTimestamp,
     bytes memory extraData
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, groupTimestamp, extraData);
+    return RequestBuilder.buildClaim(groupId, groupTimestamp, extraData);
   }
 
-  ///////////////////////////
-  // groupId + value
-  //////////////////////////
   function buildClaim(
     bytes16 groupId,
     uint256 value,
     ClaimType claimType
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, value, claimType);
+    return RequestBuilder.buildClaim(groupId, value, claimType);
   }
 
   function buildClaim(
@@ -154,34 +277,24 @@ contract ZkConnect is IZkConnectLib, Context {
     uint256 value,
     bytes memory extraData
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, value, extraData);
+    return RequestBuilder.buildClaim(groupId, value, extraData);
   }
 
-  ///////////////////////////
-  // groupId + claimType
-  //////////////////////////
   function buildClaim(
     bytes16 groupId,
     ClaimType claimType,
     bytes memory extraData
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, claimType, extraData);
+    return RequestBuilder.buildClaim(groupId, claimType, extraData);
   }
 
-  ///////////////////////////
-  // groupId + extraData (all cases handled)
-  //////////////////////////
-
-  ///////////////////////////
-  // groupId + groupTimestamp + value
-  //////////////////////////
   function buildClaim(
     bytes16 groupId,
     bytes16 groupTimestamp,
     uint256 value,
     ClaimType claimType
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, groupTimestamp, value, claimType);
+    return RequestBuilder.buildClaim(groupId, groupTimestamp, value, claimType);
   }
 
   function buildClaim(
@@ -190,60 +303,26 @@ contract ZkConnect is IZkConnectLib, Context {
     uint256 value,
     bytes memory extraData
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, groupTimestamp, value, extraData);
+    return RequestBuilder.buildClaim(groupId, groupTimestamp, value, extraData);
   }
 
-  ///////////////////////////
-  // groupId + groupTimestamp + claimType
-  //////////////////////////
   function buildClaim(
     bytes16 groupId,
     bytes16 groupTimestamp,
     ClaimType claimType,
     bytes memory extraData
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, groupTimestamp, claimType, extraData);
+    return RequestBuilder.buildClaim(groupId, groupTimestamp, claimType, extraData);
   }
 
-  ///////////////////////////
-  // groupId + groupTimestamp + extraData (all cases handled)
-  //////////////////////////
-
-  ///////////////////////////
-  // groupId + value + claimType
-  //////////////////////////
   function buildClaim(
     bytes16 groupId,
     uint256 value,
     ClaimType claimType,
     bytes memory extraData
   ) public pure returns (Claim memory) {
-    return ClaimRequestLib.build(groupId, value, claimType, extraData);
+    return RequestBuilder.buildClaim(groupId, value, claimType, extraData);
   }
-
-  ///////////////////////////
-  // groupId + value + extraData (all cases handled)
-  //////////////////////////
-
-  ///////////////////////////
-  // groupId + claimType + extraData (all cases handled)
-  //////////////////////////
-
-  ///////////////////////////
-  // groupId + groupTimestamp + value + claimType (all cases handled)
-  //////////////////////////
-
-  ///////////////////////////
-  // groupId + groupTimestamp + value + extraData (all cases handled)
-  //////////////////////////
-
-  ///////////////////////////
-  // groupId + groupTimestamp + claimType + extraData (all cases handled)
-  //////////////////////////
-
-  ///////////////////////////
-  // groupId + value + claimType + extraData (all cases handled)
-  //////////////////////////
 
   function buildAuth(
     AuthType authType,
@@ -251,23 +330,23 @@ contract ZkConnect is IZkConnectLib, Context {
     uint256 userId,
     bytes memory extraData
   ) public pure returns (Auth memory) {
-    return AuthRequestLib.build(authType, anonMode, userId, extraData);
+    return RequestBuilder.buildAuth(authType, anonMode, userId, extraData);
   }
 
   function buildAuth(AuthType authType) public pure returns (Auth memory) {
-    return AuthRequestLib.build(authType);
+    return RequestBuilder.buildAuth(authType);
   }
 
   function buildAuth(AuthType authType, bool anonMode) public pure returns (Auth memory) {
-    return AuthRequestLib.build(authType, anonMode);
+    return RequestBuilder.buildAuth(authType, anonMode);
   }
 
   function buildAuth(AuthType authType, uint256 userId) public pure returns (Auth memory) {
-    return AuthRequestLib.build(authType, userId);
+    return RequestBuilder.buildAuth(authType, userId);
   }
 
   function buildAuth(AuthType authType, bytes memory extraData) public pure returns (Auth memory) {
-    return AuthRequestLib.build(authType, extraData);
+    return RequestBuilder.buildAuth(authType, extraData);
   }
 
   function buildAuth(
@@ -275,7 +354,7 @@ contract ZkConnect is IZkConnectLib, Context {
     bool anonMode,
     uint256 userId
   ) public pure returns (Auth memory) {
-    return AuthRequestLib.build(authType, anonMode, userId);
+    return RequestBuilder.buildAuth(authType, anonMode, userId);
   }
 
   function buildAuth(
@@ -283,7 +362,7 @@ contract ZkConnect is IZkConnectLib, Context {
     bool anonMode,
     bytes memory extraData
   ) public pure returns (Auth memory) {
-    return AuthRequestLib.build(authType, anonMode, extraData);
+    return RequestBuilder.buildAuth(authType, anonMode, extraData);
   }
 
   function buildAuth(
@@ -291,90 +370,99 @@ contract ZkConnect is IZkConnectLib, Context {
     uint256 userId,
     bytes memory extraData
   ) public pure returns (Auth memory) {
-    return AuthRequestLib.build(authType, userId, extraData);
-  }
-
-  function buildZkConnectRequest(
-    DataRequest[] memory dataRequests,
-    LogicalOperator operator
-  ) public pure returns (ZkConnectRequestContent memory) {
-    uint256 logicalOperatorsLength;
-    if (dataRequests.length == 1) {
-      logicalOperatorsLength = 1;
-    } else {
-      logicalOperatorsLength = dataRequests.length - 1;
-    }
-
-    LogicalOperator[] memory operators = new LogicalOperator[](logicalOperatorsLength);
-    for (uint256 i = 0; i < operators.length; i++) {
-      operators[i] = operator;
-    }
-    return ZkConnectRequestContent({dataRequests: dataRequests, operators: operators});
-  }
-
-  function buildZkConnectRequest(
-    DataRequest[] memory dataRequests
-  ) public pure returns (ZkConnectRequestContent memory) {
-    ZkConnectRequestContentLib.build(dataRequests);
-  }
-
-  function buildZkConnectRequest(
-    DataRequest memory dataRequest,
-    LogicalOperator operator
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(dataRequest, operator);
-  }
-
-  function buildZkConnectRequest(
-    DataRequest memory dataRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(dataRequest);
+    return RequestBuilder.buildAuth(authType, userId, extraData);
   }
 
   function buildZkConnectRequest(
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes memory messageSignatureRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(claimRequest, authRequest, messageSignatureRequest);
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, authRequest, messageSignatureRequest, appId);
   }
 
   function buildZkConnectRequest(
     Claim memory claimRequest,
     Auth memory authRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(claimRequest, authRequest);
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, authRequest, appId);
   }
 
   function buildZkConnectRequest(
     Claim memory claimRequest,
     bytes memory messageSignatureRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(claimRequest, messageSignatureRequest);
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, messageSignatureRequest, appId);
   }
 
   function buildZkConnectRequest(
     Auth memory authRequest,
     bytes memory messageSignatureRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(authRequest, messageSignatureRequest);
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(authRequest, messageSignatureRequest, appId);
   }
 
   function buildZkConnectRequest(
     Claim memory claimRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(claimRequest);
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, appId);
+  }
+
+  function buildZkConnectRequest(Auth memory authRequest) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(authRequest, appId);
   }
 
   function buildZkConnectRequest(
-    Auth memory authRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(authRequest);
+    Claim memory claimRequest,
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectRequest memory) {
+    return
+      RequestBuilder.buildRequest(
+        claimRequest,
+        authRequest,
+        messageSignatureRequest,
+        appId,
+        namespace
+      );
   }
 
   function buildZkConnectRequest(
-    bytes memory messageSignatureRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return ZkConnectRequestContentLib.build(messageSignatureRequest);
+    Claim memory claimRequest,
+    Auth memory authRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, authRequest, appId, namespace);
+  }
+
+  function buildZkConnectRequest(
+    Claim memory claimRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, messageSignatureRequest, appId, namespace);
+  }
+
+  function buildZkConnectRequest(
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(authRequest, messageSignatureRequest, appId, namespace);
+  }
+
+  function buildZkConnectRequest(
+    Claim memory claimRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, appId, namespace);
+  }
+
+  function buildZkConnectRequest(
+    Auth memory authRequest,
+    bytes16 namespace
+  ) public returns (ZkConnectRequest memory) {
+    return RequestBuilder.buildRequest(authRequest, appId, namespace);
   }
 }

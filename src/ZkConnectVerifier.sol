@@ -43,7 +43,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
 
   function verify(
     ZkConnectResponse memory zkConnectResponse,
-    ZkConnectRequestContent memory zkConnectRequestContent
+    ZkConnectRequest memory zkConnectRequest
   ) public returns (ZkConnectVerifiedResult memory) {
     if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
       revert InvalidZkConnectVersion(zkConnectResponse.version, ZK_CONNECT_VERSION);
@@ -53,7 +53,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
     bytes16 namespace = zkConnectResponse.namespace;
     uint256 proofsLength = zkConnectResponse.proofs.length;
 
-    _checkLogicalOperators(zkConnectResponse, zkConnectRequestContent);
+    _checkLogicalOperators(zkConnectResponse, zkConnectRequest);
 
     VerifiedClaim memory verifiedClaim;
     VerifiedAuth memory verifiedAuth;
@@ -72,7 +72,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
       }
 
       if (proof.auth.authType != AuthType.EMPTY) {
-        _checkAuthMatchContentRequest(proof, zkConnectRequestContent);
+        _checkAuthMatchContentRequest(proof, zkConnectRequest);
         verifiedAuth = _verifiers[proof.provingScheme].verifyAuthProof(appId, proof);
         verifiedAuths[i] = verifiedAuth;
       } else {
@@ -81,7 +81,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
       }
 
       if (proof.claim.claimType != ClaimType.EMPTY) {
-        _checkClaimMatchContentRequest(proof, zkConnectRequestContent);
+        _checkClaimMatchContentRequest(proof, zkConnectRequest);
         verifiedClaim = _verifiers[proof.provingScheme].verifyClaim(appId, namespace, proof);
         verifiedClaims[i] = verifiedClaim;
       } else {
@@ -118,7 +118,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
 
   function _checkClaimMatchContentRequest(
     ZkConnectProof memory proof,
-    ZkConnectRequestContent memory zkConnectRequestContent
+    ZkConnectRequest memory zkConnectRequest
   ) public pure {
     Claim memory claim = proof.claim;
     bytes16 groupId = claim.groupId;
@@ -126,8 +126,8 @@ contract ZkConnectVerifier is Initializable, Ownable {
 
     bool isClaimRequestFound = false;
     Claim memory claimRequest;
-    for (uint256 i = 0; i < zkConnectRequestContent.dataRequests.length; i++) {
-      claimRequest = zkConnectRequestContent.dataRequests[i].claimRequest;
+    for (uint256 i = 0; i < zkConnectRequest.content.dataRequests.length; i++) {
+      claimRequest = zkConnectRequest.content.dataRequests[i].claimRequest;
       if (claimRequest.groupId == groupId && claimRequest.groupTimestamp == groupTimestamp) {
         isClaimRequestFound = true;
       }
@@ -178,7 +178,7 @@ contract ZkConnectVerifier is Initializable, Ownable {
 
   function _checkAuthMatchContentRequest(
     ZkConnectProof memory proof,
-    ZkConnectRequestContent memory zkConnectRequestContent
+    ZkConnectRequest memory zkConnectRequest
   ) public pure {
     // extract the auth from the proof
     Auth memory auth = proof.auth;
@@ -188,8 +188,8 @@ contract ZkConnectVerifier is Initializable, Ownable {
     bool isAuthRequestFound = false;
     Auth memory authRequest;
     // check if the auth is found in the content request
-    for (uint256 i = 0; i < zkConnectRequestContent.dataRequests.length; i++) {
-      authRequest = zkConnectRequestContent.dataRequests[i].authRequest;
+    for (uint256 i = 0; i < zkConnectRequest.content.dataRequests.length; i++) {
+      authRequest = zkConnectRequest.content.dataRequests[i].authRequest;
       if ((authRequest.authType == authType) && (authRequest.anonMode == anonMode)) {
         isAuthRequestFound = true;
       }
@@ -212,19 +212,19 @@ contract ZkConnectVerifier is Initializable, Ownable {
 
   function _checkLogicalOperators(
     ZkConnectResponse memory zkConnectResponse,
-    ZkConnectRequestContent memory zkConnectRequestContent
+    ZkConnectRequest memory zkConnectRequest
   ) public pure {
     // if the logical operator is AND, the number of proofs should be equal to the number of data requests
-    if (zkConnectRequestContent.operators[0] == LogicalOperator.AND) {
-      if (zkConnectResponse.proofs.length != zkConnectRequestContent.dataRequests.length) {
+    if (zkConnectRequest.content.operators[0] == LogicalOperator.AND) {
+      if (zkConnectResponse.proofs.length != zkConnectRequest.content.dataRequests.length) {
         revert ProofsAndDataRequestsAreUnequalInLength(
           zkConnectResponse.proofs.length,
-          zkConnectRequestContent.dataRequests.length
+          zkConnectRequest.content.dataRequests.length
         );
       }
     }
     // if the logical operator is OR, the number of proofs should be 1
-    if (zkConnectRequestContent.operators[0] == LogicalOperator.OR) {
+    if (zkConnectRequest.content.operators[0] == LogicalOperator.OR) {
       if (zkConnectResponse.proofs.length != 1) {
         revert OnlyOneProofSupportedWithLogicalOperatorOR();
       }
