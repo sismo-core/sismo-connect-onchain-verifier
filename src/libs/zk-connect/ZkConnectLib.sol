@@ -15,10 +15,10 @@ import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.so
 contract ZkConnect is IZkConnectLib, Context {
   uint256 public constant ZK_CONNECT_LIB_VERSION = 2;
 
-  IAddressesProvider public immutable ADDRESSES_PROVIDER =
+  IAddressesProvider public constant ADDRESSES_PROVIDER =
     IAddressesProvider(0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05);
 
-  IZkConnectVerifier private _zkConnectVerifier;
+  IZkConnectVerifier internal _zkConnectVerifier;
   bytes16 public appId;
 
   constructor(bytes16 appIdentifier) {
