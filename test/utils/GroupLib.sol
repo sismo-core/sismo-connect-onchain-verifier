@@ -15,4 +15,3 @@ library GroupLib {
         return Group({accountsData: accountsData});
     }
 }
-

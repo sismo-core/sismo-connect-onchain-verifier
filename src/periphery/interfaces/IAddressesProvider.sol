@@ -14,7 +14,10 @@ interface IAddressesProvider {
      * @param contractAddresses Addresses of the contracts.
      * @param contractNames Names of the contracts.
      */
-    function setBatch(address[] calldata contractAddresses, string[] calldata contractNames) external;
+    function setBatch(
+        address[] calldata contractAddresses,
+        string[] calldata contractNames
+    ) external;
 
     /**
      * @dev Returns the address of a contract.
@@ -40,7 +43,9 @@ interface IAddressesProvider {
      * @dev Returns the addresses of all contracts inputed.
      * @param contractNamesHash Names of the contracts as strings.
      */
-    function getBatch(bytes32[] calldata contractNamesHash) external view returns (address[] memory);
+    function getBatch(
+        bytes32[] calldata contractNamesHash
+    ) external view returns (address[] memory);
 
     /**
      * @dev Returns the addresses of all contracts in `_contractNames`

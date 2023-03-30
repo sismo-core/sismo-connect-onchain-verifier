@@ -19,17 +19,25 @@ contract DeployAll is Script, BaseDeploymentConfig {
     HydraS2Verifier hydraS2Verifier;
     ZkConnectVerifier zkConnectVerifier;
 
-    function run(string memory chainName) external returns (ScriptTypes.DeployAllContracts memory contracts) {
+    function run(
+        string memory chainName
+    ) external returns (ScriptTypes.DeployAllContracts memory contracts) {
         vm.startBroadcast();
 
         _setConfig(getChainName(chainName));
 
         availableRootsRegistry = _deployAvailableRootsRegistry(config.rootsOwner);
-        commitmentMapperRegistry = _deployCommitmentMapperRegistry(config.owner, config.commitmentMapperEdDSAPubKey);
+        commitmentMapperRegistry = _deployCommitmentMapperRegistry(
+            config.owner,
+            config.commitmentMapperEdDSAPubKey
+        );
         hydraS2Verifier = _deployHydraS2Verifier(commitmentMapperRegistry, availableRootsRegistry);
         zkConnectVerifier = _deployZkConnectVerifier(msg.sender);
 
-        zkConnectVerifier.registerVerifier(hydraS2Verifier.HYDRA_S2_VERSION(), address(hydraS2Verifier));
+        zkConnectVerifier.registerVerifier(
+            hydraS2Verifier.HYDRA_S2_VERSION(),
+            address(hydraS2Verifier)
+        );
         zkConnectVerifier.transferOwnership(config.owner);
 
         contracts.availableRootsRegistry = availableRootsRegistry;
@@ -47,21 +55,20 @@ contract DeployAll is Script, BaseDeploymentConfig {
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
             address(rootsRegistryImplem),
             config.proxyAdmin,
-            abi.encodeWithSelector(
-                rootsRegistryImplem.initialize.selector,
-                owner
-            )
+            abi.encodeWithSelector(rootsRegistryImplem.initialize.selector, owner)
         );
         console.log("rootsRegistry Proxy Deployed:", address(proxy));
         return AvailableRootsRegistry(address(proxy));
     }
 
-    function _deployCommitmentMapperRegistry(address owner, uint256[2] memory commitmentMapperEdDSAPubKey)
-        private
-        returns (CommitmentMapperRegistry)
-    {
-        CommitmentMapperRegistry commitmentMapperImplem =
-            new CommitmentMapperRegistry(owner, commitmentMapperEdDSAPubKey);
+    function _deployCommitmentMapperRegistry(
+        address owner,
+        uint256[2] memory commitmentMapperEdDSAPubKey
+    ) private returns (CommitmentMapperRegistry) {
+        CommitmentMapperRegistry commitmentMapperImplem = new CommitmentMapperRegistry(
+            owner,
+            commitmentMapperEdDSAPubKey
+        );
         console.log("commitmentMapper Implem Deployed:", address(commitmentMapperImplem));
 
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
@@ -83,16 +90,16 @@ contract DeployAll is Script, BaseDeploymentConfig {
     ) private returns (HydraS2Verifier) {
         address commitmentMapperRegistryAddr = address(commitmentMapperRegistry);
         address availableRootsRegistryAddr = address(availableRootsRegistry);
-        HydraS2Verifier hydraS2VerifierImplem =
-            new HydraS2Verifier(commitmentMapperRegistryAddr, availableRootsRegistryAddr);
+        HydraS2Verifier hydraS2VerifierImplem = new HydraS2Verifier(
+            commitmentMapperRegistryAddr,
+            availableRootsRegistryAddr
+        );
         console.log("hydraS2Verifier Implem Deployed:", address(hydraS2VerifierImplem));
 
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
             address(hydraS2VerifierImplem),
             config.proxyAdmin,
-            abi.encodeWithSelector(
-                hydraS2VerifierImplem.initialize.selector
-            )
+            abi.encodeWithSelector(hydraS2VerifierImplem.initialize.selector)
         );
         console.log("hydraS2Verifier Proxy Deployed:", address(proxy));
         return HydraS2Verifier(address(proxy));
@@ -105,10 +112,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
             address(zkConnectVerifierImplem),
             config.proxyAdmin,
-            abi.encodeWithSelector(
-                zkConnectVerifierImplem.initialize.selector,
-                owner
-            )
+            abi.encodeWithSelector(zkConnectVerifierImplem.initialize.selector, owner)
         );
         console.log("zkConnectVerifier Proxy Deployed:", address(proxy));
         return ZkConnectVerifier(address(proxy));

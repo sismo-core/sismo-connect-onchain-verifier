@@ -80,42 +80,60 @@ contract BaseDeploymentConfig is Script {
                 proxyAdmin: MAIN_PROXY_ADMIN,
                 owner: MAIN_OWNER,
                 rootsOwner: MAIN_GNOSIS_ROOTS_OWNER,
-                commitmentMapperEdDSAPubKey: [PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X, PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y]
+                commitmentMapperEdDSAPubKey: [
+                    PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+                    PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+                ]
             });
         } else if (chain == DeployedChain.Polygon) {
             config = DeploymentConfig({
                 proxyAdmin: MAIN_PROXY_ADMIN,
                 owner: MAIN_OWNER,
                 rootsOwner: MAIN_POLYGON_ROOTS_OWNER,
-                commitmentMapperEdDSAPubKey: [PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X, PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y]
+                commitmentMapperEdDSAPubKey: [
+                    PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+                    PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+                ]
             });
         } else if (chain == DeployedChain.TestnetGoerli) {
             config = DeploymentConfig({
                 proxyAdmin: TESTNET_PROXY_ADMIN,
                 owner: TESTNET_OWNER,
                 rootsOwner: TESTNET_GOERLI_ROOTS_OWNER,
-                commitmentMapperEdDSAPubKey: [DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X, DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y]
+                commitmentMapperEdDSAPubKey: [
+                    DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+                    DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+                ]
             });
         } else if (chain == DeployedChain.TestnetMumbai) {
             config = DeploymentConfig({
                 proxyAdmin: TESTNET_PROXY_ADMIN,
                 owner: TESTNET_OWNER,
                 rootsOwner: TESTNET_MUMBAI_ROOTS_OWNER,
-                commitmentMapperEdDSAPubKey: [DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X, DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y]
+                commitmentMapperEdDSAPubKey: [
+                    DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+                    DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+                ]
             });
         } else if (chain == DeployedChain.StagingGoerli) {
             config = DeploymentConfig({
                 proxyAdmin: STAGING_PROXY_ADMIN,
                 owner: STAGING_OWNER,
                 rootsOwner: STAGING_GOERLI_ROOTS_OWNER,
-                commitmentMapperEdDSAPubKey: [DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X, DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y]
+                commitmentMapperEdDSAPubKey: [
+                    DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+                    DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+                ]
             });
         } else if (chain == DeployedChain.StagingMumbai) {
             config = DeploymentConfig({
                 proxyAdmin: STAGING_PROXY_ADMIN,
                 owner: STAGING_OWNER,
                 rootsOwner: STAGING_MUMBAI_ROOTS_OWNER,
-                commitmentMapperEdDSAPubKey: [DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X, DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y]
+                commitmentMapperEdDSAPubKey: [
+                    DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+                    DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+                ]
             });
         } else if (chain == DeployedChain.Test) {
             config = DeploymentConfig({

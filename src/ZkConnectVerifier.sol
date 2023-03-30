@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
+import {IZkConnectVerifier} from "./interfaces/IZkConnectVerifier.sol";
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -40,10 +41,10 @@ contract ZkConnectVerifier is Initializable, Ownable {
         }
     }
 
-    function verify(ZkConnectResponse memory zkConnectResponse, ZkConnectRequestContent memory zkConnectRequestContent)
-        public
-        returns (ZkConnectVerifiedResult memory)
-    {
+    function verify(
+        ZkConnectResponse memory zkConnectResponse,
+        ZkConnectRequestContent memory zkConnectRequestContent
+    ) public returns (ZkConnectVerifiedResult memory) {
         if (zkConnectResponse.version != ZK_CONNECT_VERSION) {
             revert InvalidZkConnectVersion(zkConnectResponse.version, ZK_CONNECT_VERSION);
         }
@@ -81,7 +82,11 @@ contract ZkConnectVerifier is Initializable, Ownable {
 
             if (proof.claim.claimType != ClaimType.EMPTY) {
                 _checkClaimMatchContentRequest(proof, zkConnectRequestContent);
-                verifiedClaim = _verifiers[proof.provingScheme].verifyClaim(appId, namespace, proof);
+                verifiedClaim = _verifiers[proof.provingScheme].verifyClaim(
+                    appId,
+                    namespace,
+                    proof
+                );
                 verifiedClaims[i] = verifiedClaim;
             } else {
                 VerifiedClaim memory emptyVerifiedClaim;
@@ -91,14 +96,15 @@ contract ZkConnectVerifier is Initializable, Ownable {
             signedMessages[i] = proof.signedMessage;
         }
 
-        return ZkConnectVerifiedResult({
-            appId: appId,
-            namespace: namespace,
-            version: zkConnectResponse.version,
-            verifiedClaims: verifiedClaims,
-            verifiedAuths: verifiedAuths,
-            signedMessages: signedMessages
-        });
+        return
+            ZkConnectVerifiedResult({
+                appId: appId,
+                namespace: namespace,
+                version: zkConnectResponse.version,
+                verifiedClaims: verifiedClaims,
+                verifiedAuths: verifiedAuths,
+                signedMessages: signedMessages
+            });
     }
 
     function registerVerifier(bytes32 provingScheme, address verifierAddress) public onlyOwner {
@@ -216,7 +222,8 @@ contract ZkConnectVerifier is Initializable, Ownable {
         if (zkConnectRequestContent.operators[0] == LogicalOperator.AND) {
             if (zkConnectResponse.proofs.length != zkConnectRequestContent.dataRequests.length) {
                 revert ProofsAndDataRequestsAreUnequalInLength(
-                    zkConnectResponse.proofs.length, zkConnectRequestContent.dataRequests.length
+                    zkConnectResponse.proofs.length,
+                    zkConnectRequestContent.dataRequests.length
                 );
             }
         }

@@ -43,12 +43,13 @@ contract HydraS2Proofs {
         console.log("abi.encodePacked(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE)");
         console.logBytes(abi.encodePacked(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE));
 
-        return ZkConnectResponse({
-            appId: 0xf68985adfc209fafebfb1a956913e7fa,
-            namespace: bytes16(keccak256("main")),
-            version: bytes32("zk-connect-v2"),
-            proofs: proofs
-        });
+        return
+            ZkConnectResponse({
+                appId: 0xf68985adfc209fafebfb1a956913e7fa,
+                namespace: bytes16(keccak256("main")),
+                version: bytes32("zk-connect-v2"),
+                proofs: proofs
+            });
     }
 
     // simple zkConnect with only auth
@@ -56,7 +57,12 @@ contract HydraS2Proofs {
         Claim memory claim;
 
         // empty auth
-        Auth memory auth = Auth({authType: AuthType.ANON, anonMode: false, userId: 0, extraData: ""});
+        Auth memory auth = Auth({
+            authType: AuthType.ANON,
+            anonMode: false,
+            userId: 0,
+            extraData: ""
+        });
 
         ZkConnectProof[] memory proofs = new ZkConnectProof[](1);
         proofs[0] = ZkConnectProof({
@@ -68,11 +74,12 @@ contract HydraS2Proofs {
             extraData: ""
         });
 
-        return ZkConnectResponse({
-            appId: 0xf68985adfc209fafebfb1a956913e7fa,
-            namespace: bytes16(keccak256("main")),
-            version: bytes32("zk-connect-v2"),
-            proofs: proofs
-        });
+        return
+            ZkConnectResponse({
+                appId: 0xf68985adfc209fafebfb1a956913e7fa,
+                namespace: bytes16(keccak256("main")),
+                version: bytes32("zk-connect-v2"),
+                proofs: proofs
+            });
     }
 }

@@ -23,6 +23,9 @@ contract BaseTest is Test {
 
         vm.etch(sismoAddressProvider, address(addressesProvider).code);
 
-        IAddressesProvider(sismoAddressProvider).set(address(zkConnectVerifier), string("zkConnectVerifier-v2"));
+        IAddressesProvider(sismoAddressProvider).set(
+            address(zkConnectVerifier),
+            string("zkConnectVerifier-v2")
+        );
     }
 }
