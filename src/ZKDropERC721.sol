@@ -30,30 +30,21 @@ contract ZKDropERC721 is ERC721, ZkConnect {
       buildClaim({groupId: GROUP_ID})
     );
 
-    ZkConnectVerifiedResult memory zkConnectVerifiedResult1 = verify(
-      zkConnectResponse,
-      buildAuth({authType: AuthType.ANON})
-    );
-
-    ZkConnectVerifiedResult memory zkConnectVerifiedResult2 = verify(
-      zkConnectResponse,
-      buildClaim({groupId: GROUP_ID})
-    );
-
     address to = abi.decode(zkConnectVerifiedResult.signedMessages[0], (address));
     uint256 tokenId = zkConnectVerifiedResult.verifiedAuths[0].userId;
     _mint(to, tokenId);
   }
 
   function transferWithZkConnect(bytes memory zkConnectResponse) public {
-    // ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify(
-    //   zkConnectResponse,
-    //   zkConnectRequestContent
-    // );
-    // address to = abi.decode(zkConnectVerifiedResult.signedMessages[0], (address));
-    // uint256 tokenId = zkConnectVerifiedResult.verifiedAuths[0].userId;
-    // address from = ownerOf(tokenId);
-    // _transfer(from, to, tokenId);
+    ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify(
+      zkConnectResponse,
+      buildAuth({authType: AuthType.ANON}),
+      buildClaim({groupId: GROUP_ID})
+    );
+    address to = abi.decode(zkConnectVerifiedResult.signedMessages[0], (address));
+    uint256 tokenId = zkConnectVerifiedResult.verifiedAuths[0].userId;
+    address from = ownerOf(tokenId);
+    _transfer(from, to, tokenId);
   }
 
   function tokenURI(uint256 id) public view virtual override returns (string memory) {

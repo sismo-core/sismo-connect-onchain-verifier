@@ -26,14 +26,20 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
   }
 
   function verify(
-    ZkConnectResponse memory res,
-    ZkConnectRequest memory req
+    ZkConnectResponse memory response,
+    ZkConnectRequest memory request
   ) public returns (ZkConnectVerifiedResult memory) {
+    _checkResponseMatchesWithRequest(response, request);
+
     (
       VerifiedAuth memory verifiedAuth,
       VerifiedClaim memory verifiedClaim,
       bytes memory verifiedSignedMessage
-    ) = _verifiers[res.proofs[0].provingScheme].verify(res.appId, res.namespace, res.proofs[0]);
+    ) = _verifiers[response.proofs[0].provingScheme].verify(
+        response.appId,
+        response.namespace,
+        response.proofs[0]
+      );
 
     VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](1);
     verifiedAuths[0] = verifiedAuth;
@@ -44,14 +50,84 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
 
     return
       ZkConnectVerifiedResult(
-        res.appId,
-        res.namespace,
-        res.version,
+        response.appId,
+        response.namespace,
+        response.version,
         verifiedAuths,
         verifiedClaims,
         verifiedSignedMessages
       );
   }
+
+  function _checkResponseMatchesWithRequest(
+    ZkConnectResponse memory response,
+    ZkConnectRequest memory request
+  ) internal {
+    if (response.version != ZK_CONNECT_VERSION) {
+      revert VersionMismatch(response.version, ZK_CONNECT_VERSION);
+    }
+
+    if (response.namespace != request.namespace) {
+      revert NamespaceMismatch(response.namespace, request.namespace);
+    }
+
+    if (response.appId != request.appId) {
+      revert AppIdMismatch(response.appId, request.appId);
+    }
+
+    DataRequest memory dataRequest = request.content.dataRequests[0];
+    ZkConnectProof memory proof = response.proofs[0];
+
+    _checkAuthResponseMatchesWithAuthRequest(proof.auth, dataRequest.authRequest);
+    _checkClaimResponseMatchesWithClaimRequest(proof.claim, dataRequest.claimRequest);
+  }
+
+  function _checkAuthResponseMatchesWithAuthRequest(
+    Auth memory authResponse,
+    Auth memory authRequest
+  ) internal pure {
+    if (authResponse.authType != authRequest.authType) {
+      revert AuthTypeMismatch(authResponse.authType, authRequest.authType);
+    }
+    if (authResponse.anonMode != authRequest.anonMode) {
+      revert AuthAnonModeMismatch(authResponse.anonMode, authRequest.anonMode);
+    }
+    if (authResponse.userId != authRequest.userId) {
+      revert AuthUserIdMismatch(authResponse.userId, authRequest.userId);
+    }
+    if (keccak256(authResponse.extraData) != keccak256(authRequest.extraData)) {
+      revert AuthExtraDataMismatch(
+        keccak256(authResponse.extraData),
+        keccak256(authRequest.extraData)
+      );
+    }
+  }
+
+  function _checkClaimResponseMatchesWithClaimRequest(
+    Claim memory claimResponse,
+    Claim memory claimRequest
+  ) internal pure {
+    if (claimResponse.claimType != claimRequest.claimType) {
+      revert ClaimTypeMismatch(claimResponse.claimType, claimRequest.claimType);
+    }
+    if (claimResponse.groupId != claimRequest.groupId) {
+      revert ClaimGroupIdMismatch(claimResponse.groupId, claimRequest.groupId);
+    }
+    if (claimResponse.groupTimestamp != claimRequest.groupTimestamp) {
+      revert ClaimGroupTimestampMismatch(claimResponse.groupTimestamp, claimRequest.groupTimestamp);
+    }
+    if (claimResponse.value != claimRequest.value) {
+      revert ClaimValueMismatch(claimResponse.value, claimRequest.value);
+    }
+    if (keccak256(claimResponse.extraData) != keccak256(claimRequest.extraData)) {
+      revert ClaimExtraDataMismatch(
+        keccak256(claimResponse.extraData),
+        keccak256(claimRequest.extraData)
+      );
+    }
+  }
+
+  // Admin
 
   function registerVerifier(bytes32 provingScheme, address verifierAddress) public onlyOwner {
     _setVerifier(provingScheme, verifierAddress);
@@ -64,35 +140,5 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
   function _setVerifier(bytes32 provingScheme, address verifierAddress) internal {
     _verifiers[provingScheme] = IBaseVerifier(verifierAddress);
     emit VerifierSet(provingScheme, verifierAddress);
-  }
-
-  function _checkResponseMatchesWithRequest(
-    ZkConnectResponse memory res,
-    ZkConnectRequest memory req
-  ) internal {
-    if (res.version != ZK_CONNECT_VERSION) {
-      revert();
-    }
-
-    if (res.namespace != req.namespace) {
-      revert();
-    }
-
-    if (res.appId != req.appId) {
-      revert();
-    }
-
-    DataRequest memory dataRequest = req.content.dataRequests[0];
-    ZkConnectProof memory proof = res.proofs[0];
-
-    // if (dataRequest.claim != proof.claim) {
-    //   revert();
-    // }
-    // if (dataRequest.auth != proof.auth) {
-    //   revert();
-    // }
-    // if (dataRequest.signedMessage != proof.signedMessage) {
-    //   revert();
-    // }
   }
 }

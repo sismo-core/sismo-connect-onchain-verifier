@@ -4,19 +4,21 @@ pragma solidity ^0.8.17;
 import "src/libs/utils/Structs.sol";
 
 interface IZkConnectVerifier {
-  error InvalidZkConnectVersion(bytes32 receivedVersion, bytes32 expectedVersion);
-  error ProofNeedsAuthOrClaim();
-  error ProofsAndDataRequestsAreUnequalInLength(uint256 proofsLength, uint256 dataRequestsLength);
-  error OnlyOneProofSupportedWithLogicalOperatorOR();
-  error ProvingSchemeNotSupported(bytes32 provingScheme);
-  error ClaimRequestNotFound(bytes16 groupId, bytes16 groupTimestamp);
-  error ClaimTypeMismatch(ClaimType claimType, ClaimType expectedClaimType);
-  error ClaimExtraDataMismatch(bytes extraData, bytes expectedExtraData);
-  error ClaimProvingSchemeMismatch(bytes32 provingScheme, bytes32 expectedProvingScheme);
-  error ClaimValueMismatch(ClaimType claimType, uint256 value, uint256 expectedValue);
-  error AuthProofIsEmpty();
-  error AuthRequestNotFound(AuthType authType, bool anonMode);
-  error AuthUserIdMismatch(uint256 userId, uint256 expectedUserId);
+  ////Errors: Request/Response mismatch errors
+  error VersionMismatch(bytes32 requestVersion, bytes32 responseVersion);
+  error NamespaceMismatch(bytes16 requestNamespace, bytes16 responseNamespace);
+  error AppIdMismatch(bytes16 requestAppId, bytes16 responseAppId);
+  // Auth mismatch errors
+  error AuthTypeMismatch(AuthType requestAuthType, AuthType responseAuthType);
+  error AuthAnonModeMismatch(bool requestAnonMode, bool responseAnonMode);
+  error AuthUserIdMismatch(uint256 requestUserId, uint256 responseUserId);
+  error AuthExtraDataMismatch(bytes32 requestExtraData, bytes32 responseExtraData);
+  // Claim mismatch errors
+  error ClaimTypeMismatch(ClaimType requestClaimType, ClaimType responseClaimType);
+  error ClaimValueMismatch(uint256 requestClaimValue, uint256 responseClaimValue);
+  error ClaimExtraDataMismatch(bytes32 requestExtraData, bytes32 responseExtraData);
+  error ClaimGroupIdMismatch(bytes16 requestGroupId, bytes16 responseGroupId);
+  error ClaimGroupTimestampMismatch(bytes16 requestGroupTimestamp, bytes16 responseGroupTimestamp);
 
   event VerifierSet(bytes32, address);
 

@@ -25,7 +25,7 @@ library RequestBuilder {
   function GET_DEFAULT_CLAIM_REQUEST() public pure returns (Claim memory) {
     return
       Claim({
-        claimType: DEFAULT_CLAIM_TYPE,
+        claimType: ClaimType.EMPTY,
         groupId: DEFAULT_CLAIM_GROUP_ID,
         groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
         value: DEFAULT_CLAIM_VALUE,
