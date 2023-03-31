@@ -23,17 +23,14 @@ contract ZkConnect is IZkConnectLib, Context {
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Auth memory authRequest,
     Claim memory claimRequest,
     bytes memory messageSignatureRequest,
     bytes16 namespace
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(
       claimRequest,
       authRequest,
       messageSignatureRequest,
@@ -43,34 +40,24 @@ contract ZkConnect is IZkConnectLib, Context {
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Auth memory authRequest,
     Claim memory claimRequest,
     bytes16 namespace
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
-      claimRequest,
-      authRequest,
-      namespace
-    );
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest, authRequest, namespace);
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Auth memory authRequest,
     bytes memory messageSignatureRequest,
     bytes16 namespace
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(
       authRequest,
       messageSignatureRequest,
       namespace
@@ -79,16 +66,13 @@ contract ZkConnect is IZkConnectLib, Context {
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Claim memory claimRequest,
     bytes memory messageSignatureRequest,
     bytes16 namespace
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(
       claimRequest,
       messageSignatureRequest,
       namespace
@@ -97,42 +81,33 @@ contract ZkConnect is IZkConnectLib, Context {
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Auth memory authRequest,
     bytes16 namespace
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(authRequest, namespace);
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(authRequest, namespace);
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Claim memory claimRequest,
     bytes16 namespace
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(claimRequest, namespace);
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest, namespace);
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Auth memory authRequest,
     Claim memory claimRequest,
     bytes memory messageSignatureRequest
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(
       claimRequest,
       authRequest,
       messageSignatureRequest
@@ -141,82 +116,58 @@ contract ZkConnect is IZkConnectLib, Context {
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Auth memory authRequest,
     Claim memory claimRequest
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(claimRequest, authRequest);
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest, authRequest);
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Auth memory authRequest,
     bytes memory messageSignatureRequest
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
-      authRequest,
-      messageSignatureRequest
-    );
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(authRequest, messageSignatureRequest);
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Claim memory claimRequest,
     bytes memory messageSignatureRequest
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(
-      claimRequest,
-      messageSignatureRequest
-    );
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest, messageSignatureRequest);
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Auth memory authRequest
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(authRequest);
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(authRequest);
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     Claim memory claimRequest
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
-    ZkConnectRequest memory zkConnectRequest = buildZkConnectRequest(claimRequest);
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
+    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest);
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
   function verify(
-    bytes memory zkConnectResponseEncoded,
+    bytes memory responseBytes,
     ZkConnectRequest memory zkConnectRequest
   ) public returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(
-      zkConnectResponseEncoded,
-      (ZkConnectResponse)
-    );
+    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
     return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
   }
 
@@ -383,7 +334,7 @@ contract ZkConnect is IZkConnectLib, Context {
     return RequestBuilder.buildAuth(authType, userId, extraData);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes memory messageSignatureRequest
@@ -391,38 +342,36 @@ contract ZkConnect is IZkConnectLib, Context {
     return RequestBuilder.buildRequest(claimRequest, authRequest, messageSignatureRequest, appId);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Claim memory claimRequest,
     Auth memory authRequest
   ) public returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, appId);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Claim memory claimRequest,
     bytes memory messageSignatureRequest
   ) public returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, messageSignatureRequest, appId);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Auth memory authRequest,
     bytes memory messageSignatureRequest
   ) public returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, messageSignatureRequest, appId);
   }
 
-  function buildZkConnectRequest(
-    Claim memory claimRequest
-  ) public returns (ZkConnectRequest memory) {
+  function buildRequest(Claim memory claimRequest) public returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, appId);
   }
 
-  function buildZkConnectRequest(Auth memory authRequest) public returns (ZkConnectRequest memory) {
+  function buildRequest(Auth memory authRequest) public returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, appId);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes memory messageSignatureRequest,
@@ -438,7 +387,7 @@ contract ZkConnect is IZkConnectLib, Context {
       );
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes16 namespace
@@ -446,7 +395,7 @@ contract ZkConnect is IZkConnectLib, Context {
     return RequestBuilder.buildRequest(claimRequest, authRequest, appId, namespace);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Claim memory claimRequest,
     bytes memory messageSignatureRequest,
     bytes16 namespace
@@ -454,7 +403,7 @@ contract ZkConnect is IZkConnectLib, Context {
     return RequestBuilder.buildRequest(claimRequest, messageSignatureRequest, appId, namespace);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Auth memory authRequest,
     bytes memory messageSignatureRequest,
     bytes16 namespace
@@ -462,14 +411,14 @@ contract ZkConnect is IZkConnectLib, Context {
     return RequestBuilder.buildRequest(authRequest, messageSignatureRequest, appId, namespace);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Claim memory claimRequest,
     bytes16 namespace
   ) public returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, appId, namespace);
   }
 
-  function buildZkConnectRequest(
+  function buildRequest(
     Auth memory authRequest,
     bytes16 namespace
   ) public returns (ZkConnectRequest memory) {

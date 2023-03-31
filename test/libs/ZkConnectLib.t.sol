@@ -24,9 +24,9 @@ contract ZkConnectLibTest is HydraS2BaseTest {
   }
 
   // function test_RevertWith_InvalidZkConnectResponse() public {
-  //   bytes memory zkConnectResponseEncoded = hex"";
+  //   bytes memory responseBytes = hex"";
   //   vm.expectRevert(abi.encodeWithSignature("ZkConnectResponseIsEmpty()"));
-  //   zkConnect.verify(zkConnectResponseEncoded, zkConnectRequest);
+  //   zkConnect.verify(responseBytes, zkConnectRequest);
   // }
 
   // function test_RevertWith_InvalidZkConnectVersion() public {
