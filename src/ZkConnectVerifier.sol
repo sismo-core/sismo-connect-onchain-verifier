@@ -78,6 +78,10 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
     DataRequest memory dataRequest = request.content.dataRequests[0];
     ZkConnectProof memory proof = response.proofs[0];
 
+    if (keccak256(dataRequest.messageSignatureRequest) != keccak256(proof.signedMessage)) {
+      revert MessageSignatureMismatch(dataRequest.messageSignatureRequest, proof.signedMessage);
+    }
+
     _checkAuthResponseMatchesWithAuthRequest(proof.auth, dataRequest.authRequest);
     _checkClaimResponseMatchesWithClaimRequest(proof.claim, dataRequest.claimRequest);
   }
@@ -96,10 +100,7 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
       revert AuthUserIdMismatch(authResponse.userId, authRequest.userId);
     }
     if (keccak256(authResponse.extraData) != keccak256(authRequest.extraData)) {
-      revert AuthExtraDataMismatch(
-        keccak256(authResponse.extraData),
-        keccak256(authRequest.extraData)
-      );
+      revert AuthExtraDataMismatch(authResponse.extraData, authRequest.extraData);
     }
   }
 
@@ -120,10 +121,7 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
       revert ClaimValueMismatch(claimResponse.value, claimRequest.value);
     }
     if (keccak256(claimResponse.extraData) != keccak256(claimRequest.extraData)) {
-      revert ClaimExtraDataMismatch(
-        keccak256(claimResponse.extraData),
-        keccak256(claimRequest.extraData)
-      );
+      revert ClaimExtraDataMismatch(claimResponse.extraData, claimRequest.extraData);
     }
   }
 

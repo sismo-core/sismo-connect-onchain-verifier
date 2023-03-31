@@ -90,7 +90,7 @@ contract ZkConnectLibTest is HydraS2BaseTest {
       zkResponseEncoded,
       RequestBuilder.buildRequest({
         claimRequest: zkConnect.buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
-        messageSignatureRequest: abi.encodePacked(user),
+        messageSignatureRequest: abi.encode(user),
         appId: appId
       })
     );
@@ -103,7 +103,7 @@ contract ZkConnectLibTest is HydraS2BaseTest {
     address user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
     ZkConnectRequest memory zkConnectRequest = RequestBuilder.buildRequest({
       authRequest: zkConnect.buildAuth({authType: AuthType.ANON}),
-      messageSignatureRequest: abi.encodePacked(user),
+      messageSignatureRequest: abi.encode(user),
       appId: appId
     });
 
@@ -123,7 +123,7 @@ contract ZkConnectLibTest is HydraS2BaseTest {
     ZkConnectRequest memory zkConnectRequest = RequestBuilder.buildRequest({
       claimRequest: zkConnect.buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
       authRequest: zkConnect.buildAuth({authType: AuthType.ANON}),
-      messageSignatureRequest: abi.encodePacked(user),
+      messageSignatureRequest: abi.encode(user),
       appId: appId
     });
 
