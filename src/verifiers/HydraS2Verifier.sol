@@ -95,10 +95,10 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       input.commitmentMapperPubKey[1] != commitmentMapperPubKey[1]
     ) {
       revert CommitmentMapperPubKeyMismatch(
-        commitmentMapperPubKey[0],
-        commitmentMapperPubKey[1],
-        input.commitmentMapperPubKey[0],
-        input.commitmentMapperPubKey[1]
+        bytes32(commitmentMapperPubKey[0]),
+        bytes32(commitmentMapperPubKey[1]),
+        bytes32(input.commitmentMapperPubKey[0]),
+        bytes32(input.commitmentMapperPubKey[1])
       );
     }
 
@@ -161,10 +161,10 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
         input.commitmentMapperPubKey[1] != commitmentMapperPubKey[1]
       ) {
         revert CommitmentMapperPubKeyMismatch(
-          commitmentMapperPubKey[0],
-          commitmentMapperPubKey[1],
-          input.commitmentMapperPubKey[0],
-          input.commitmentMapperPubKey[1]
+          bytes32(commitmentMapperPubKey[0]),
+          bytes32(commitmentMapperPubKey[1]),
+          bytes32(input.commitmentMapperPubKey[0]),
+          bytes32(input.commitmentMapperPubKey[1])
         );
       }
 
@@ -189,8 +189,8 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     if (signedMessage.length == 0) {
       return;
     }
-    if (input.extraData != uint256(keccak256(signedMessage))) {
-      revert InvalidExtraData(bytes32(input.extraData), keccak256(signedMessage));
+    if (input.extraData != uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD) {
+      revert InvalidExtraData(input.extraData, uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD);
     }
   }
 
