@@ -22,7 +22,7 @@ library RequestBuilder {
   // default value for namespace
   bytes16 public constant DEFAULT_NAMESPACE = bytes16(keccak256("main"));
 
-  function GET_DEFAULT_CLAIM_REQUEST() public pure returns (Claim memory) {
+  function GET_EMPTY_CLAIM_REQUEST() public pure returns (Claim memory) {
     return
       Claim({
         claimType: ClaimType.EMPTY,
@@ -33,7 +33,7 @@ library RequestBuilder {
       });
   }
 
-  function GET_DEFAULT_AUTH_REQUEST() public pure returns (Auth memory) {
+  function GET_EMPTY_AUTH_REQUEST() public pure returns (Auth memory) {
     return
       Auth({
         authType: AuthType.EMPTY,
@@ -388,26 +388,26 @@ library RequestBuilder {
     Claim memory claimRequest,
     bytes memory messageSignatureRequest
   ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(claimRequest, GET_DEFAULT_AUTH_REQUEST(), messageSignatureRequest);
+    return buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), messageSignatureRequest);
   }
 
   function buildRequestContent(
     Auth memory authRequest,
     bytes memory messageSignatureRequest
   ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(GET_DEFAULT_CLAIM_REQUEST(), authRequest, messageSignatureRequest);
+    return buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, messageSignatureRequest);
   }
 
   function buildRequestContent(
     Claim memory claimRequest
   ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(claimRequest, GET_DEFAULT_AUTH_REQUEST());
+    return buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST());
   }
 
   function buildRequestContent(
     Auth memory authRequest
   ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(GET_DEFAULT_CLAIM_REQUEST(), authRequest);
+    return buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest);
   }
 
   function buildRequest(
