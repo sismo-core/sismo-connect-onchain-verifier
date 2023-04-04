@@ -17,6 +17,22 @@ contract ZkConnectTest is ZkConnect {
         return buildAuth(authType);
     }
 
+    function verifyClaimTest(bytes memory responseBytes, Claim memory claimRequest) public returns (ZkConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, claimRequest: claimRequest});
+    }
+
+    function verifyClaimAndNamespace(bytes memory responseBytes, Claim memory claimRequest, bytes16 namespace) public returns (ZkConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, claimRequest: claimRequest, namespace: namespace});
+    }
+
+    function verifyClaimAndMessageTest(bytes memory responseBytes, Claim memory claimRequest, bytes memory messageSignatureRequest) public returns (ZkConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    }
+
+    function verifyAuthAndMessageTest(bytes memory responseBytes, Auth memory authRequest, bytes memory messageSignatureRequest) public returns (ZkConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, authRequest: authRequest, messageSignatureRequest: messageSignatureRequest});
+    }
+
     function verifyTest(bytes memory zkConnectResponse, ZkConnectRequest memory zkConnectRequest) public returns (ZkConnectVerifiedResult memory) {
         return verify(zkConnectResponse, zkConnectRequest);
     }
