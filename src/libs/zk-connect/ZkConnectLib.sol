@@ -338,36 +338,36 @@ contract ZkConnect is IZkConnectLib, Context {
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes memory messageSignatureRequest
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, messageSignatureRequest, appId);
   }
 
   function buildRequest(
     Claim memory claimRequest,
     Auth memory authRequest
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, appId);
   }
 
   function buildRequest(
     Claim memory claimRequest,
     bytes memory messageSignatureRequest
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, messageSignatureRequest, appId);
   }
 
   function buildRequest(
     Auth memory authRequest,
     bytes memory messageSignatureRequest
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, messageSignatureRequest, appId);
   }
 
-  function buildRequest(Claim memory claimRequest) internal returns (ZkConnectRequest memory) {
+  function buildRequest(Claim memory claimRequest) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, appId);
   }
 
-  function buildRequest(Auth memory authRequest) internal returns (ZkConnectRequest memory) {
+  function buildRequest(Auth memory authRequest) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, appId);
   }
 
@@ -376,7 +376,7 @@ contract ZkConnect is IZkConnectLib, Context {
     Auth memory authRequest,
     bytes memory messageSignatureRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return
       RequestBuilder.buildRequest(
         claimRequest,
@@ -391,7 +391,7 @@ contract ZkConnect is IZkConnectLib, Context {
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, appId, namespace);
   }
 
@@ -399,7 +399,7 @@ contract ZkConnect is IZkConnectLib, Context {
     Claim memory claimRequest,
     bytes memory messageSignatureRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, messageSignatureRequest, appId, namespace);
   }
 
@@ -407,21 +407,21 @@ contract ZkConnect is IZkConnectLib, Context {
     Auth memory authRequest,
     bytes memory messageSignatureRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, messageSignatureRequest, appId, namespace);
   }
 
   function buildRequest(
     Claim memory claimRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, appId, namespace);
   }
 
   function buildRequest(
     Auth memory authRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectRequest memory) {
+  ) internal view returns (ZkConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, appId, namespace);
   }
 }

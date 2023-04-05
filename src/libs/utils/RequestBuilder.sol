@@ -380,33 +380,33 @@ library RequestBuilder {
   function buildRequestContent(
     Claim memory claimRequest,
     Auth memory authRequest
-  ) public returns (ZkConnectRequestContent memory) {
+  ) public pure returns (ZkConnectRequestContent memory) {
     return buildRequestContent(claimRequest, authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST);
   }
 
   function buildRequestContent(
     Claim memory claimRequest,
     bytes memory messageSignatureRequest
-  ) public returns (ZkConnectRequestContent memory) {
+  ) public pure returns (ZkConnectRequestContent memory) {
     return buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), messageSignatureRequest);
   }
 
   function buildRequestContent(
     Auth memory authRequest,
     bytes memory messageSignatureRequest
-  ) public returns (ZkConnectRequestContent memory) {
+  ) public pure returns (ZkConnectRequestContent memory) {
     return buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, messageSignatureRequest);
   }
 
   function buildRequestContent(
     Claim memory claimRequest
-  ) public returns (ZkConnectRequestContent memory) {
+  ) public pure returns (ZkConnectRequestContent memory) {
     return buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST());
   }
 
   function buildRequestContent(
     Auth memory authRequest
-  ) public returns (ZkConnectRequestContent memory) {
+  ) public pure returns (ZkConnectRequestContent memory) {
     return buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest);
   }
 
@@ -416,7 +416,7 @@ library RequestBuilder {
     bytes memory messageSignatureRequest,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -431,7 +431,7 @@ library RequestBuilder {
     bytes memory messageSignatureRequest,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -446,7 +446,7 @@ library RequestBuilder {
     Auth memory authRequest,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -461,7 +461,7 @@ library RequestBuilder {
     bytes memory messageSignatureRequest,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -475,7 +475,7 @@ library RequestBuilder {
     Claim memory claimRequest,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -489,7 +489,7 @@ library RequestBuilder {
     Auth memory authRequest,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -504,7 +504,7 @@ library RequestBuilder {
     Auth memory authRequest,
     bytes memory messageSignatureRequest,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -518,7 +518,7 @@ library RequestBuilder {
     Claim memory claimRequest,
     bytes memory messageSignatureRequest,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -532,7 +532,7 @@ library RequestBuilder {
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -546,7 +546,7 @@ library RequestBuilder {
     Auth memory authRequest,
     bytes memory messageSignatureRequest,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -559,7 +559,7 @@ library RequestBuilder {
   function buildRequest(
     Claim memory claimRequest,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,
@@ -572,7 +572,7 @@ library RequestBuilder {
   function buildRequest(
     Auth memory authRequest,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) public pure returns (ZkConnectRequest memory) {
     return (
       ZkConnectRequest({
         appId: appId,

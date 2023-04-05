@@ -8,7 +8,7 @@ contract AvailableRootsRegistryMock is IAvailableRootsRegistry {
 
   function initialize(address) external {}
 
-  function isRootAvailable(uint256 root) external view returns (bool) {
+  function isRootAvailable(uint256) external pure returns (bool) {
     return true;
   }
 

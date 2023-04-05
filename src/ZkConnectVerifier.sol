@@ -26,7 +26,7 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
   function verify(
     ZkConnectResponse memory response,
     ZkConnectRequest memory request
-  ) public override returns (ZkConnectVerifiedResult memory) {
+  ) external view override returns (ZkConnectVerifiedResult memory) {
     _checkResponseMatchesWithRequest(response, request);
 
     (
@@ -60,7 +60,7 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
   function _checkResponseMatchesWithRequest(
     ZkConnectResponse memory response,
     ZkConnectRequest memory request
-  ) internal {
+  ) internal view {
     if (response.version != ZK_CONNECT_VERSION) {
       revert VersionMismatch(response.version, ZK_CONNECT_VERSION);
     }

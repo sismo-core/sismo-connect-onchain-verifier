@@ -96,11 +96,11 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deployHydraS2Verifier(
-    CommitmentMapperRegistry commitmentMapperRegistry,
-    AvailableRootsRegistry availableRootsRegistry
+    CommitmentMapperRegistry _commitmentMapperRegistry,
+    AvailableRootsRegistry _availableRootsRegistry
   ) private returns (HydraS2Verifier) {
-    address commitmentMapperRegistryAddr = address(commitmentMapperRegistry);
-    address availableRootsRegistryAddr = address(availableRootsRegistry);
+    address commitmentMapperRegistryAddr = address(_commitmentMapperRegistry);
+    address availableRootsRegistryAddr = address(_availableRootsRegistry);
     HydraS2Verifier hydraS2VerifierImplem = new HydraS2Verifier(
       commitmentMapperRegistryAddr,
       availableRootsRegistryAddr

@@ -24,7 +24,7 @@ contract DeployAllTest is Test {
     contracts = abi.decode(result, (ScriptTypes.DeployAllContracts));
   }
 
-  function testDeployment() public {
+  function testDeployment() public view {
     console.log(address(contracts.availableRootsRegistry));
   }
 
