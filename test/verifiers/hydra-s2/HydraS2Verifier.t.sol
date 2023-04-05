@@ -3,14 +3,14 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {HydraS2BaseTest} from "./HydraS2BaseTest.t.sol";
-import "test/mocks/ZkConnectTest.sol";
+import {ZkConnectHarness} from "test/harness/ZkConnectHarness.sol";
 import "src/libs/zk-connect/ZkConnectLib.sol";
 import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "src/verifiers/HydraS2Lib.sol";
 
 contract HydraS2VerifierTest is HydraS2BaseTest {
   using HydraS2Lib for HydraS2ProofData;
 
-  ZkConnectTest zkConnect;
+  ZkConnectHarness zkConnect;
   address user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
   bytes16 constant appId = 0x11b1de449c6c4adb0b5775b3868b28b3;
   bytes16 constant groupId = 0xe9ed316946d3d98dfcd829a53ec9822e;
@@ -22,9 +22,9 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    zkConnect = new ZkConnectTest(appId);
-    claimRequest = zkConnect.buildClaimTest({groupId: groupId});
-    authRequest = zkConnect.buildAuthTest({authType: AuthType.ANON});
+    zkConnect = new ZkConnectHarness(appId);
+    claimRequest = zkConnect.exposed_buildClaim({groupId: groupId});
+    authRequest = zkConnect.exposed_buildAuth({authType: AuthType.ANON});
     messageSignatureRequest = abi.encode(user);
   }
 
@@ -44,7 +44,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32("fake-proving-scheme")
       )
     );
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_VaultNamespaceMismatch(uint256 invalidVaultNamespace) public {
@@ -63,7 +63,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         appId
       )
     );
-    zkConnect.verifyAuthAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: authRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: authRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function test_RevertWith_DestinationVerificationNotEnabled() public {
@@ -72,11 +72,11 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     invalidZkConnectResponse.proofs[0].auth = Auth({authType: AuthType.GITHUB, anonMode: false, userId: 0, extraData: ""});
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the zkConnectResponse and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = zkConnect.buildAuthTest({authType: AuthType.GITHUB});
+    Auth memory githubAuthRequest = zkConnect.exposed_buildAuth({authType: AuthType.GITHUB});
 
     // this should revert because the destinationVerificationEnabled is false and the AuthType is different from ANON
     vm.expectRevert(abi.encodeWithSignature("DestinationVerificationNotEnabled()"));
-    zkConnect.verifyAuthAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyX) public {
@@ -94,7 +94,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 13, uint256(1)); // true
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the zkConnectResponse and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = zkConnect.buildAuthTest({authType: AuthType.GITHUB});
+    Auth memory githubAuthRequest = zkConnect.exposed_buildAuth({authType: AuthType.GITHUB});
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -104,7 +104,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    zkConnect.verifyAuthAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyY) public {
@@ -121,7 +121,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 13, uint256(1)); // destinationVerificationEnabled at index 13 is equal to true
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the zkConnectResponse and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = zkConnect.buildAuthTest({authType: AuthType.GITHUB});
+    Auth memory githubAuthRequest = zkConnect.exposed_buildAuth({authType: AuthType.GITHUB});
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -131,7 +131,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    zkConnect.verifyAuthAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_ClaimValueMismatch(uint256 invalidClaimValue) public {
@@ -141,7 +141,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     // claimValue is at index 7 in the snarkProof's inputs
     invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 7, invalidClaimValue);
     vm.expectRevert(abi.encodeWithSignature("ClaimValueMismatch()"));
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_RequestIdentifierMismatch(uint256 incorrectRequestIdentifier) public {
@@ -156,7 +156,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
       incorrectRequestIdentifier,
       correctRequestIdentifier
       ));
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyX) public {
@@ -174,7 +174,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyY) public {
@@ -192,7 +192,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function test_RevertWith_SourceVerificationNotEnabled() public {
@@ -201,7 +201,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     // sourceVerificationEnabled is at index 12 in snarkProof's inputs
     invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 12, uint256(0));
     vm.expectRevert(abi.encodeWithSignature("SourceVerificationNotEnabled()"));
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_AccountsTreeValueMismatch(uint256 incorrectAccountsTreeValue) public {
@@ -218,7 +218,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         correctAccountsTreeValue
       )
     );
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function test_RevertWith_ClaimTypeMismatch() public {
@@ -235,7 +235,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         claimRequest.claimType
       )
     );
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_InvalidExtraData(uint256 incorrectExtraData) public {
@@ -252,7 +252,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         correctExtraData
       )
     );
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   function testFuzz_RevertWith_InvalidProof(uint256 incorrectProofIdentifier) public {
@@ -264,7 +264,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
      // proofIdentifier is at index 6 in snarkProof's inputs
     invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 6, incorrectProofIdentifier);
     vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-    zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    zkConnect.exposed_verify({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
   ///////////////////////////
