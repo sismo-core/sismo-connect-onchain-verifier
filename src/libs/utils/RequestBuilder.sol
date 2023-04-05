@@ -49,7 +49,7 @@ library RequestBuilder {
     uint256 value,
     ClaimType claimType,
     bytes memory extraData
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -60,7 +60,7 @@ library RequestBuilder {
       });
   }
 
-  function buildClaim(bytes16 groupId) public pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -71,7 +71,7 @@ library RequestBuilder {
       });
   }
 
-  function buildClaim(bytes16 groupId, bytes16 groupTimestamp) public pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId, bytes16 groupTimestamp) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -82,7 +82,7 @@ library RequestBuilder {
       });
   }
 
-  function buildClaim(bytes16 groupId, uint256 value) public pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId, uint256 value) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -93,7 +93,7 @@ library RequestBuilder {
       });
   }
 
-  function buildClaim(bytes16 groupId, ClaimType claimType) public pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId, ClaimType claimType) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -104,7 +104,7 @@ library RequestBuilder {
       });
   }
 
-  function buildClaim(bytes16 groupId, bytes memory extraData) public pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId, bytes memory extraData) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -119,7 +119,7 @@ library RequestBuilder {
     bytes16 groupId,
     bytes16 groupTimestamp,
     uint256 value
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -134,7 +134,7 @@ library RequestBuilder {
     bytes16 groupId,
     bytes16 groupTimestamp,
     ClaimType claimType
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -149,7 +149,7 @@ library RequestBuilder {
     bytes16 groupId,
     bytes16 groupTimestamp,
     bytes memory extraData
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -164,7 +164,7 @@ library RequestBuilder {
     bytes16 groupId,
     uint256 value,
     ClaimType claimType
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -179,7 +179,7 @@ library RequestBuilder {
     bytes16 groupId,
     uint256 value,
     bytes memory extraData
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -194,7 +194,7 @@ library RequestBuilder {
     bytes16 groupId,
     ClaimType claimType,
     bytes memory extraData
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -210,7 +210,7 @@ library RequestBuilder {
     bytes16 groupTimestamp,
     uint256 value,
     ClaimType claimType
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -226,7 +226,7 @@ library RequestBuilder {
     bytes16 groupTimestamp,
     uint256 value,
     bytes memory extraData
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -242,7 +242,7 @@ library RequestBuilder {
     bytes16 groupTimestamp,
     ClaimType claimType,
     bytes memory extraData
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -258,7 +258,7 @@ library RequestBuilder {
     uint256 value,
     ClaimType claimType,
     bytes memory extraData
-  ) public pure returns (Claim memory) {
+  ) external pure returns (Claim memory) {
     return
       Claim({
         groupId: groupId,
@@ -274,11 +274,11 @@ library RequestBuilder {
     bool anonMode,
     uint256 userId,
     bytes memory extraData
-  ) public pure returns (Auth memory) {
+  ) external pure returns (Auth memory) {
     return Auth({authType: authType, anonMode: anonMode, userId: userId, extraData: extraData});
   }
 
-  function buildAuth(AuthType authType) public pure returns (Auth memory) {
+  function buildAuth(AuthType authType) external pure returns (Auth memory) {
     return
       Auth({
         authType: authType,
@@ -288,7 +288,7 @@ library RequestBuilder {
       });
   }
 
-  function buildAuth(AuthType authType, bool anonMode) public pure returns (Auth memory) {
+  function buildAuth(AuthType authType, bool anonMode) external pure returns (Auth memory) {
     return
       Auth({
         authType: authType,
@@ -298,7 +298,7 @@ library RequestBuilder {
       });
   }
 
-  function buildAuth(AuthType authType, uint256 userId) public pure returns (Auth memory) {
+  function buildAuth(AuthType authType, uint256 userId) external pure returns (Auth memory) {
     return
       Auth({
         authType: authType,
@@ -308,7 +308,7 @@ library RequestBuilder {
       });
   }
 
-  function buildAuth(AuthType authType, bytes memory extraData) public pure returns (Auth memory) {
+  function buildAuth(AuthType authType, bytes memory extraData) external pure returns (Auth memory) {
     return
       Auth({
         authType: authType,
@@ -322,7 +322,7 @@ library RequestBuilder {
     AuthType authType,
     bool anonMode,
     uint256 userId
-  ) public pure returns (Auth memory) {
+  ) external pure returns (Auth memory) {
     return
       Auth({
         authType: authType,
@@ -336,7 +336,7 @@ library RequestBuilder {
     AuthType authType,
     bool anonMode,
     bytes memory extraData
-  ) public pure returns (Auth memory) {
+  ) external pure returns (Auth memory) {
     return
       Auth({
         authType: authType,
@@ -350,7 +350,7 @@ library RequestBuilder {
     AuthType authType,
     uint256 userId,
     bytes memory extraData
-  ) public pure returns (Auth memory) {
+  ) external pure returns (Auth memory) {
     return
       Auth({
         authType: authType,
@@ -364,7 +364,220 @@ library RequestBuilder {
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes memory messageSignatureRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
+  ) external pure returns (ZkConnectRequestContent memory) {
+    return _buildRequestContent(claimRequest, authRequest, messageSignatureRequest);
+  }
+
+  function buildRequestContent(
+    Claim memory claimRequest,
+    Auth memory authRequest
+  ) external pure returns (ZkConnectRequestContent memory) {
+    return _buildRequestContent(claimRequest, authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST);
+  }
+
+  function buildRequestContent(
+    Claim memory claimRequest,
+    bytes memory messageSignatureRequest
+  ) external pure returns (ZkConnectRequestContent memory) {
+    return _buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), messageSignatureRequest);
+  }
+
+  function buildRequestContent(
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest
+  ) external pure returns (ZkConnectRequestContent memory) {
+    return _buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, messageSignatureRequest);
+  }
+
+  function buildRequestContent(
+    Claim memory claimRequest
+  ) external pure returns (ZkConnectRequestContent memory) {
+    return _buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), DEFAULT_MESSAGE_SIGNATURE_REQUEST);
+  }
+
+  function buildRequestContent(
+    Auth memory authRequest
+  ) external pure returns (ZkConnectRequestContent memory) {
+    return _buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST);
+  }
+
+  function buildRequest(
+    Claim memory claimRequest,
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        content: _buildRequestContent(claimRequest, authRequest, messageSignatureRequest)
+      })
+    );
+  }
+
+  function buildRequest(
+    Claim memory claimRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        content: _buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), messageSignatureRequest)
+      })
+    );
+  }
+
+  function buildRequest(
+    Claim memory claimRequest,
+    Auth memory authRequest,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        content: _buildRequestContent(claimRequest, authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+      })
+    );
+  }
+
+  function buildRequest(
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        content: _buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, messageSignatureRequest)
+      })
+    );
+  }
+
+  function buildRequest(
+    Claim memory claimRequest,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        content: _buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+      })
+    );
+  }
+
+  function buildRequest(
+    Auth memory authRequest,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        content: _buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+      })
+    );
+  }
+
+  function buildRequest(
+    Claim memory claimRequest,
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 appId
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        content: _buildRequestContent(claimRequest, authRequest, messageSignatureRequest)
+      })
+    );
+  }
+
+  function buildRequest(
+    Claim memory claimRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 appId
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        content: _buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), messageSignatureRequest)
+      })
+    );
+  }
+
+  function buildRequest(
+    Claim memory claimRequest,
+    Auth memory authRequest,
+    bytes16 appId
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        content: _buildRequestContent(claimRequest, authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+      })
+    );
+  }
+
+  function buildRequest(
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest,
+    bytes16 appId
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        content: _buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, messageSignatureRequest)
+      })
+    );
+  }
+
+  function buildRequest(
+    Claim memory claimRequest,
+    bytes16 appId
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        content: _buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+      })
+    );
+  }
+
+  function buildRequest(
+    Auth memory authRequest,
+    bytes16 appId
+  ) external pure returns (ZkConnectRequest memory) {
+    return (
+      ZkConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        content: _buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+      })
+    );
+  }
+
+  function _buildRequestContent(
+    Claim memory claimRequest,
+    Auth memory authRequest,
+    bytes memory messageSignatureRequest
+  ) internal pure returns (ZkConnectRequestContent memory) {
     DataRequest[] memory dataRequests = new DataRequest[](1);
     dataRequests[0] = DataRequest({
       authRequest: authRequest,
@@ -375,210 +588,5 @@ library RequestBuilder {
     operators[0] = LogicalOperator.AND;
 
     return ZkConnectRequestContent({dataRequests: dataRequests, operators: operators});
-  }
-
-  function buildRequestContent(
-    Claim memory claimRequest,
-    Auth memory authRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(claimRequest, authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST);
-  }
-
-  function buildRequestContent(
-    Claim memory claimRequest,
-    bytes memory messageSignatureRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST(), messageSignatureRequest);
-  }
-
-  function buildRequestContent(
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest, messageSignatureRequest);
-  }
-
-  function buildRequestContent(
-    Claim memory claimRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(claimRequest, GET_EMPTY_AUTH_REQUEST());
-  }
-
-  function buildRequestContent(
-    Auth memory authRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(GET_EMPTY_CLAIM_REQUEST(), authRequest);
-  }
-
-  function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest,
-    bytes16 appId,
-    bytes16 namespace
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: namespace,
-        content: buildRequestContent(claimRequest, authRequest, messageSignatureRequest)
-      })
-    );
-  }
-
-  function buildRequest(
-    Claim memory claimRequest,
-    bytes memory messageSignatureRequest,
-    bytes16 appId,
-    bytes16 namespace
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: namespace,
-        content: buildRequestContent(claimRequest, messageSignatureRequest)
-      })
-    );
-  }
-
-  function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes16 appId,
-    bytes16 namespace
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: namespace,
-        content: buildRequestContent(claimRequest, authRequest)
-      })
-    );
-  }
-
-  function buildRequest(
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest,
-    bytes16 appId,
-    bytes16 namespace
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: namespace,
-        content: buildRequestContent(authRequest, messageSignatureRequest)
-      })
-    );
-  }
-
-  function buildRequest(
-    Claim memory claimRequest,
-    bytes16 appId,
-    bytes16 namespace
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: namespace,
-        content: buildRequestContent(claimRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
-      })
-    );
-  }
-
-  function buildRequest(
-    Auth memory authRequest,
-    bytes16 appId,
-    bytes16 namespace
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: namespace,
-        content: buildRequestContent(authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
-      })
-    );
-  }
-
-  function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest,
-    bytes16 appId
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(claimRequest, authRequest, messageSignatureRequest)
-      })
-    );
-  }
-
-  function buildRequest(
-    Claim memory claimRequest,
-    bytes memory messageSignatureRequest,
-    bytes16 appId
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(claimRequest, messageSignatureRequest)
-      })
-    );
-  }
-
-  function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes16 appId
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(claimRequest, authRequest)
-      })
-    );
-  }
-
-  function buildRequest(
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest,
-    bytes16 appId
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(authRequest, messageSignatureRequest)
-      })
-    );
-  }
-
-  function buildRequest(
-    Claim memory claimRequest,
-    bytes16 appId
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(claimRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
-      })
-    );
-  }
-
-  function buildRequest(
-    Auth memory authRequest,
-    bytes16 appId
-  ) public pure returns (ZkConnectRequest memory) {
-    return (
-      ZkConnectRequest({
-        appId: appId,
-        namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
-      })
-    );
   }
 }

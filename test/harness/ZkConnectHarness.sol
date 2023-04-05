@@ -12,31 +12,31 @@ contract ZkConnectHarness is ZkConnect {
         bytes16 appId
     ) ZkConnect(appId) {}
 
-    function exposed_buildClaim(bytes16 groupId) public pure returns (Claim memory) {
+    function exposed_buildClaim(bytes16 groupId) external pure returns (Claim memory) {
         return buildClaim(groupId);
     }
 
-    function exposed_buildAuth(AuthType authType) public pure returns (Auth memory) {
+    function exposed_buildAuth(AuthType authType) external pure returns (Auth memory) {
         return buildAuth(authType);
     }
 
-    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest) public returns (ZkConnectVerifiedResult memory) {
+    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest) external returns (ZkConnectVerifiedResult memory) {
         return verify({responseBytes: responseBytes, claimRequest: claimRequest});
     }
 
-    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest, bytes16 namespace) public returns (ZkConnectVerifiedResult memory) {
+    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest, bytes16 namespace) external returns (ZkConnectVerifiedResult memory) {
         return verify({responseBytes: responseBytes, claimRequest: claimRequest, namespace: namespace});
     }
 
-    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest, bytes memory messageSignatureRequest) public returns (ZkConnectVerifiedResult memory) {
+    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest, bytes memory messageSignatureRequest) external returns (ZkConnectVerifiedResult memory) {
         return verify({responseBytes: responseBytes, claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
     }
 
-    function exposed_verify(bytes memory responseBytes, Auth memory authRequest, bytes memory messageSignatureRequest) public returns (ZkConnectVerifiedResult memory) {
+    function exposed_verify(bytes memory responseBytes, Auth memory authRequest, bytes memory messageSignatureRequest) external returns (ZkConnectVerifiedResult memory) {
         return verify({responseBytes: responseBytes, authRequest: authRequest, messageSignatureRequest: messageSignatureRequest});
     }
 
-    function exposed_verify(bytes memory responseBytes, ZkConnectRequest memory zkConnectRequest) public returns (ZkConnectVerifiedResult memory) {
+    function exposed_verify(bytes memory responseBytes, ZkConnectRequest memory zkConnectRequest) external returns (ZkConnectVerifiedResult memory) {
         return verify({responseBytes: responseBytes, zkConnectRequest: zkConnectRequest});
     }
 }
