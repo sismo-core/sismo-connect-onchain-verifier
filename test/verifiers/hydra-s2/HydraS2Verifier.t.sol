@@ -7,7 +7,7 @@ import "test/mocks/ZkConnectTest.sol";
 import "src/libs/zk-connect/ZkConnectLib.sol";
 import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "src/verifiers/HydraS2Lib.sol";
 
-contract ZkConnectHydraS2Test is HydraS2BaseTest {
+contract HydraS2VerifierTest is HydraS2BaseTest {
   using HydraS2Lib for HydraS2ProofData;
 
   ZkConnectTest zkConnect;
@@ -47,11 +47,15 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_VaultNamespaceMismatch() public {
+  function testFuzz_RevertWith_VaultNamespaceMismatch(uint256 invalidVaultNamespace) public {
+    // we force the invalidVaultNamespace to be different from the correct one
+    // while being a valid uint128
+    vm.assume(invalidVaultNamespace < 2**128 -1);
+    vm.assume(bytes16(uint128(invalidVaultNamespace)) != appId);
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse2();
-
-    // we change the vaultNamespace to be equal 1 instead of the appId
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 11, uint256(1));
+    // we change the vaultNamespace to be equal to a random one instead of the coorect appId
+    // vaultNamespace is at index 11 is in the snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 11, invalidVaultNamespace);
     vm.expectRevert(
       abi.encodeWithSignature(
         "VaultNamespaceMismatch(bytes16,bytes16)",
@@ -75,16 +79,19 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
     zkConnect.verifyAuthAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_CommitmentMapperPubKeyXMismatchWithAuth() public {
+  function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyX) public {
+    // we assume that the incorrectCommitmentMapperPubKeyX is different from the correct commitmentMapperPubKeyX when fuzzing
+    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS2Proofs.getEdDSAPubKey()[0]);
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse2();
     // we change the authType to be equal to GITHUB instead of ANON to be able to check the commitmentMapperRegistry public key
     invalidZkConnectResponse.proofs[0].auth = Auth({authType: AuthType.GITHUB, anonMode: false, userId: 0, extraData: ""});
-    // we change the commitmentMapperPubKeyX to be equal to 1 instead of the correct commitmentMapperPubKeyX
-    uint256 incorrectCommitmentMapperPubKeyX = 1;
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 2, incorrectCommitmentMapperPubKeyX); // commitmentMapperPubKeyX at index 2 is equal to 1
+    // we change the commitmentMapperPubKeyX to be equal to a random uint256 instead of the correct commitmentMapperPubKeyX
+    // commitmentMapperPubKeyX is at index 2 in the snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 2, incorrectCommitmentMapperPubKeyX); 
     // we change the destinationVerificationEnabled to be equal to true instead of false
     // with an AuthType different from ANON, the destinationVerificationEnabled should be true
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 13, uint256(1)); // destinationVerificationEnabled at index 13 is equal to true
+    // destinationVerificationEnabled at index 13 in the snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 13, uint256(1)); // true
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the zkConnectResponse and we can test the revert of the destinationVerificationEnabled
     Auth memory githubAuthRequest = zkConnect.buildAuthTest({authType: AuthType.GITHUB});
@@ -100,13 +107,15 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
     zkConnect.verifyAuthAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_CommitmentMapperPubKeyYMismatchWithAuth() public {
+  function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyY) public {
+    // we assume that the incorrectCommitmentMapperPubKeyY is different from the correct commitmentMapperPubKeyY when fuzzing
+    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS2Proofs.getEdDSAPubKey()[1]);
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse2();
     // we change the authType to be equal to GITHUB instead of ANON to be able to check the commitmentMapperRegistry public key
     invalidZkConnectResponse.proofs[0].auth = Auth({authType: AuthType.GITHUB, anonMode: false, userId: 0, extraData: ""});
-    // we change the commitmentMapperPubKeyY to be equal to 1 instead of the correct commitmentMapperPubKeyY
-    uint256 incorrectCommitmentMapperPubKeyY = 1;
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 3, incorrectCommitmentMapperPubKeyY); // commitmentMapperPubKeyY at index 3 is equal to 1
+    // we change the commitmentMapperPubKeyY to be equal to a random uint256 instead of the correct commitmentMapperPubKeyY
+    // commitmentMapperPubKeyY is at index 3 in the snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 3, incorrectCommitmentMapperPubKeyY); 
     // we change the destinationVerificationEnabled to be equal to true instead of false
     // with an AuthType different from ANON, the destinationVerificationEnabled should be true
     invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 13, uint256(1)); // destinationVerificationEnabled at index 13 is equal to true
@@ -125,30 +134,37 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
     zkConnect.verifyAuthAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), authRequest: githubAuthRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_ClaimValueMismatch() public {
+  function testFuzz_RevertWith_ClaimValueMismatch(uint256 invalidClaimValue) public {
+    // we force that the invalidClaimValue is different from the correct claimValue when fuzzing
+    vm.assume(invalidClaimValue != 1);
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 7, uint256(10)); // claimValue at index 7 is equal to 10
-
+    // claimValue is at index 7 in the snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 7, invalidClaimValue);
     vm.expectRevert(abi.encodeWithSignature("ClaimValueMismatch()"));
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_RequestIdentifierMismatch() public {
+  function testFuzz_RevertWith_RequestIdentifierMismatch(uint256 incorrectRequestIdentifier) public {
+    uint256 correctRequestIdentifier = _encodeRequestIdentifier(groupId, bytes16("latest"), appId, bytes16(keccak256("main")));
+    // we force that the incorrectRequestIdentifier is different from the correct requestIdentifier when fuzzing
+    vm.assume(incorrectRequestIdentifier != _encodeRequestIdentifier(groupId, bytes16("latest"), appId, bytes16(keccak256("main"))));
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 5, uint256(8)); // requestIdentifier at index 5 is equal to 8
+    // requestIdentifier is at index 5 in the snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 5, incorrectRequestIdentifier); 
     vm.expectRevert(abi.encodeWithSignature(
       "RequestIdentifierMismatch(uint256,uint256)",
-      snarkProof._getRequestIdentifier(),
-      _encodeRequestIdentifier(groupId, bytes16("latest"), appId, bytes16(keccak256("main")))
+      incorrectRequestIdentifier,
+      correctRequestIdentifier
       ));
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_CommitmentMapperPubKeyXMismatchWithClaim() public {
+  function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyX) public {
+    // we assume that the incorrectCommitmentMapperPubKeyX is different from the correct commitmentMapperPubKeyX when fuzzing
+    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS2Proofs.getEdDSAPubKey()[0]);
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
-    // we change the commitmentMapperPubKeyX to be equal to 1 instead of the correct commitmentMapperPubKeyX
-    uint256 incorrectCommitmentMapperPubKeyX = 1;
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 2, incorrectCommitmentMapperPubKeyX); // commitmentMapperPubKeyX at index 2 is equal to 1
+    // commitmentMapperPubKeyX is at index 2 in snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 2, incorrectCommitmentMapperPubKeyX);
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -161,11 +177,12 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_CommitmentMapperPubKeyYMismatchWithClaim() public {
+  function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyY) public {
+    // we assume that the incorrectCommitmentMapperPubKeyY is different from the correct commitmentMapperPubKeyY when fuzzing
+    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS2Proofs.getEdDSAPubKey()[1]);
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
-    // we change the commitmentMapperPubKeyX to be equal to 1 instead of the correct commitmentMapperPubKeyX
-    uint256 incorrectCommitmentMapperPubKeyY = 1;
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 3, incorrectCommitmentMapperPubKeyY); // commitmentMapperPubKeyX at index 2 is equal to 1
+    // commitmentMapperPubKeyY is at index 3 in the snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 3, incorrectCommitmentMapperPubKeyY); 
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -178,24 +195,27 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWIth_SourceVerificationNotEnabled() public {
+  function test_RevertWith_SourceVerificationNotEnabled() public {
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
     // we change the sourceVerificationEnabled to be equal to false instead of true
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 12, uint256(0)); // sourceVerificationEnabled at index 12 is equal to false
+    // sourceVerificationEnabled is at index 12 in snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 12, uint256(0));
     vm.expectRevert(abi.encodeWithSignature("SourceVerificationNotEnabled()"));
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_AccountsTreeValueMismatch() public {
+  function testFuzz_RevertWith_AccountsTreeValueMismatch(uint256 incorrectAccountsTreeValue) public {
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
-    // we change the accountsTreeValue to be equal to 1 instead of the correct accountsTreeValue
-    uint256 incorrectAccountsTreeValue = 1;
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 8, incorrectAccountsTreeValue); // accountsTreeValue at index 8 is equal to 1
+    uint256 correctAccountsTreeValue = abi.decode(hydraS2Proofs.getZkConnectResponse1().proofs[0].proofData, (HydraS2ProofData))._getAccountsTreeValue();
+    // we assume that the incorrectAccountsTreeValue is different from the correct accountsTreeValue when fuzzing
+    vm.assume(incorrectAccountsTreeValue != correctAccountsTreeValue);
+    // accountsTreeValue is at index 8 in snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 8, incorrectAccountsTreeValue);
     vm.expectRevert(
       abi.encodeWithSignature(
         "AccountsTreeValueMismatch(uint256,uint256)",
         incorrectAccountsTreeValue,
-        abi.decode(hydraS2Proofs.getZkConnectResponse1().proofs[0].proofData, (HydraS2ProofData))._getAccountsTreeValue()
+        correctAccountsTreeValue
       )
     );
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
@@ -206,7 +226,8 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
     // we change the claimComparator to be equal to 1, the claimType should be EQ to not revert
     // but we keep the claimType of GTE in the claimRequest
     uint256 incorrectClaimComparator = 1;
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 9, incorrectClaimComparator); // claimComparator at index 9 is equal to 1
+    // claimComparator is at index 9 in snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 9, incorrectClaimComparator); 
     vm.expectRevert(
       abi.encodeWithSignature(
         "ClaimTypeMismatch(uint256,uint256)",
@@ -217,29 +238,33 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_InvalidExtraData() public {
+  function testFuzz_RevertWith_InvalidExtraData(uint256 incorrectExtraData) public {
+    uint256 correctExtraData = abi.decode(hydraS2Proofs.getZkConnectResponse1().proofs[0].proofData, (HydraS2ProofData))._getExtraData();
+    // we assume that the incorrectExtraData is different from the correct extraData when fuzzing
+    vm.assume(incorrectExtraData != correctExtraData);
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
-    // we change the extraData to be equal to 1 instead of the correct extraData
-    uint256 incorrectExtraData = 1;
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 1, incorrectExtraData); // extraData at index 1 is equal to 1
+    // extraData is at index 1 in snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 1, incorrectExtraData);
     vm.expectRevert(
       abi.encodeWithSignature(
         "InvalidExtraData(uint256,uint256)",
         incorrectExtraData,
-        abi.decode(hydraS2Proofs.getZkConnectResponse1().proofs[0].proofData, (HydraS2ProofData))._getExtraData()
+        correctExtraData
       )
     );
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
   }
 
-  function test_RevertWith_InvalidProof() public {
+  function testFuzz_RevertWith_InvalidProof(uint256 incorrectProofIdentifier) public {
+    uint256 correctProofIdentifier = abi.decode(hydraS2Proofs.getZkConnectResponse1().proofs[0].proofData, (HydraS2ProofData))._getProofIdentifier();
+    vm.assume(incorrectProofIdentifier != correctProofIdentifier);
+    // we force the incorrectProofIdentifier to be less than the SNARK_FIELD
+    vm.assume(incorrectProofIdentifier < HydraS2Lib.SNARK_FIELD);
     ZkConnectResponse memory invalidZkConnectResponse = hydraS2Proofs.getZkConnectResponse1();
-    // we change the proof identifier to trigger the invalid proof revert
-    uint256 incorrectProofIdentifier = 1;
-    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 6, incorrectProofIdentifier); // proofIdentifier at index 6 is equal to 1
+     // proofIdentifier is at index 6 in snarkProof's inputs
+    invalidZkConnectResponse = _changeProofDataInZkConnectResponse(invalidZkConnectResponse, 6, incorrectProofIdentifier);
     vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
     zkConnect.verifyClaimAndMessageTest({responseBytes: abi.encode(invalidZkConnectResponse), claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
-
   }
 
   ///////////////////////////
@@ -260,12 +285,12 @@ contract ZkConnectHydraS2Test is HydraS2BaseTest {
   }
 
   function _encodeRequestIdentifier(
-    bytes16 groupId,
+    bytes16 _groupId,
     bytes16 groupTimestamp,
     bytes16 _appId,
     bytes16 namespace
   ) internal pure returns (uint256) {
-    bytes32 groupSnapshotId = bytes32(abi.encodePacked(groupId, groupTimestamp));
+    bytes32 groupSnapshotId = bytes32(abi.encodePacked(_groupId, groupTimestamp));
     bytes32 serviceId = bytes32(abi.encodePacked(_appId, namespace));
     return
       uint256(keccak256(abi.encodePacked(serviceId, groupSnapshotId))) % HydraS2Lib.SNARK_FIELD;
