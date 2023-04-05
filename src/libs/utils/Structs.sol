@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-struct ZkConnectRequest {
+struct SismoConnectRequest {
   bytes16 appId;
   bytes16 namespace;
-  ZkConnectRequestContent content;
+  Auth[] authRequests;
+	Claim[] claimRequests;
+  Signature signatureRequest;
+  bytes32 version;
 }
 
-struct ZkConnectRequestContent {
-  DataRequest[] dataRequests;
-  LogicalOperator[] operators;
-}
-
-struct DataRequest {
-  Auth authRequest;
-  Claim claimRequest;
-  bytes messageSignatureRequest;
+struct Auth {
+  AuthType authType;
+  bool isAnon;
+  uint256 userId;
+  bool isOptional;
+  bool isSelectableByUser;
+  bytes extraData;
 }
 
 struct Claim {
@@ -23,15 +24,17 @@ struct Claim {
   bytes16 groupTimestamp;
   uint256 value;
   ClaimType claimType;
+  bool isOptional;
+  bool isSelectableByUser;
   bytes extraData;
 }
 
-struct Auth {
-  AuthType authType;
-  bool anonMode;
-  uint256 userId;
+struct Signature {
+  bytes content;
+  bool isSelectableByUser;
   bytes extraData;
 }
+
 
 enum ClaimType {
   EMPTY,
@@ -56,14 +59,14 @@ enum LogicalOperator {
   OR
 }
 
-struct ZkConnectResponse {
+struct SismoConnectResponse {
   bytes16 appId;
   bytes16 namespace;
   bytes32 version;
-  ZkConnectProof[] proofs;
+  SismoConnectProof[] proofs;
 }
 
-struct ZkConnectProof {
+struct SismoConnectProof {
   Claim claim;
   Auth auth;
   bytes signedMessage;
@@ -72,28 +75,33 @@ struct ZkConnectProof {
   bytes extraData;
 }
 
-struct ZkConnectVerifiedResult {
+struct SismoConnectVerifiedResult {
   bytes16 appId;
   bytes16 namespace;
   bytes32 version;
   VerifiedAuth[] verifiedAuths;
   VerifiedClaim[] verifiedClaims;
-  bytes[] signedMessages;
+  bytes signedMessage;
 }
 
 struct VerifiedClaim {
   bytes16 groupId;
   bytes16 groupTimestamp;
-  ClaimType claimType;
   uint256 value;
+  ClaimType claimType;
+  bool isOptional;
+  bool isSelectableByUser;
   bytes extraData;
   uint256 proofId;
+  bytes proofData;
 }
 
 struct VerifiedAuth {
   AuthType authType;
-  bool anonMode;
+  bool isAnon;
   uint256 userId;
+  bool isOptional;
+  bool isSelectableByUser;
   bytes extraData;
-  uint256 proofId;
+  bytes proofData;
 }
