@@ -8,7 +8,7 @@ import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRe
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "./HydraS2Lib.sol";
 import {IHydraS2Verifier} from "./IHydraS2Verifier.sol";
-import {Auth, ClaimType, AuthType, Claim, ZkConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
+import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
 
 contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifier, Initializable {
   using HydraS2Lib for HydraS2ProofData;
@@ -33,26 +33,26 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   function verify(
     bytes16 appId,
     bytes16 namespace,
-    ZkConnectProof memory zkConnectProof
+    SismoConnectProof memory sismoConnectProof
   ) external view override returns (VerifiedAuth memory, VerifiedClaim memory, bytes memory) {
-    // Verify the zkConnectProof version corresponds to the current verifier.
-    if (zkConnectProof.provingScheme != HYDRA_S2_VERSION) {
-      revert InvalidVersion(zkConnectProof.provingScheme);
+    // Verify the sismoConnectProof version corresponds to the current verifier.
+    if (sismoConnectProof.provingScheme != HYDRA_S2_VERSION) {
+      revert InvalidVersion(sismoConnectProof.provingScheme);
     }
 
-    Auth memory auth = zkConnectProof.auth;
-    Claim memory claim = zkConnectProof.claim;
-    bytes memory signedMessage = zkConnectProof.signedMessage;
+    Auth memory auth = sismoConnectProof.auth;
+    Claim memory claim = sismoConnectProof.claim;
+    bytes memory signedMessage = sismoConnectProof.signedMessage;
 
-    // Decode the snark proof from the zkConnectProof
+    // Decode the snark proof from the sismoConnectProof
     // This snark proof is specify to this proving scheme
-    HydraS2ProofData memory snarkProof = abi.decode(zkConnectProof.proofData, (HydraS2ProofData));
+    HydraS2ProofData memory snarkProof = abi.decode(sismoConnectProof.proofData, (HydraS2ProofData));
     HydraS2ProofInput memory snarkInput = snarkProof._input();
 
     // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
-    VerifiedAuth memory verifiedAuth = _verifyAuthValidity(snarkInput, auth, appId);
-    VerifiedClaim memory verifiedClaim = _verifyClaimValidity(snarkInput, claim, appId, namespace);
+    VerifiedAuth memory verifiedAuth = _verifyAuthValidity(snarkInput, sismoConnectProof.proofData, auth, appId);
+    VerifiedClaim memory verifiedClaim = _verifyClaimValidity(snarkInput, sismoConnectProof.proofData, claim, appId, namespace);
     _validateSignedMessageInput(snarkInput, signedMessage);
 
     // Check the snarkProof is valid
@@ -63,6 +63,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
 
   function _verifyClaimValidity(
     HydraS2ProofInput memory input,
+    bytes memory proofData,
     Claim memory claim,
     bytes16 appId,
     bytes16 namespace
@@ -127,13 +128,17 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       groupTimestamp: claim.groupTimestamp,
       value: claim.value,
       claimType: claim.claimType,
+      isOptional: claim.isOptional,
+      isSelectableByUser: claim.isSelectableByUser,
       proofId: input.proofIdentifier,
+      proofData: proofData,
       extraData: claim.extraData
     });
   }
 
   function _verifyAuthValidity(
     HydraS2ProofInput memory input,
+    bytes memory proofData,
     Auth memory auth,
     bytes16 appId
   ) private view returns (VerifiedAuth memory) {
@@ -174,10 +179,12 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     return
       VerifiedAuth({
         authType: auth.authType,
-        anonMode: auth.anonMode,
+        isAnon: auth.isAnon,
         userId: userId,
+        isOptional: auth.isOptional,
+        isSelectableByUser: auth.isSelectableByUser,
         extraData: auth.extraData,
-        proofId: 0
+        proofData: proofData
       });
   }
 

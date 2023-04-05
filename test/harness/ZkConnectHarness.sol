@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-import "src/libs/zk-connect/ZkConnectLib.sol";
+import "src/libs/zk-connect/SismoConnectLib.sol";
 
 // This contract is used to expose internal functions of ZkConnect for testing purposes
 // It is NOT deployed in production
@@ -20,23 +20,23 @@ contract ZkConnectHarness is ZkConnect {
         return buildAuth(authType);
     }
 
-    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest) external returns (ZkConnectVerifiedResult memory) {
+    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest) external returns (SismoConnectVerifiedResult memory) {
         return verify({responseBytes: responseBytes, claimRequest: claimRequest});
     }
 
-    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest, bytes16 namespace) external returns (ZkConnectVerifiedResult memory) {
+    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest, bytes16 namespace) external returns (SismoConnectVerifiedResult memory) {
         return verify({responseBytes: responseBytes, claimRequest: claimRequest, namespace: namespace});
     }
 
-    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest, bytes memory messageSignatureRequest) external returns (ZkConnectVerifiedResult memory) {
-        return verify({responseBytes: responseBytes, claimRequest: claimRequest, messageSignatureRequest: messageSignatureRequest});
+    function exposed_verify(bytes memory responseBytes, Claim memory claimRequest, bytes memory signatureRequest) external returns (SismoConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, claimRequest: claimRequest, signatureRequest: signatureRequest});
     }
 
-    function exposed_verify(bytes memory responseBytes, Auth memory authRequest, bytes memory messageSignatureRequest) external returns (ZkConnectVerifiedResult memory) {
-        return verify({responseBytes: responseBytes, authRequest: authRequest, messageSignatureRequest: messageSignatureRequest});
+    function exposed_verify(bytes memory responseBytes, Auth memory authRequest, bytes memory signatureRequest) external returns (SismoConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, authRequest: authRequest, signatureRequest: signatureRequest});
     }
 
-    function exposed_verify(bytes memory responseBytes, ZkConnectRequest memory zkConnectRequest) external returns (ZkConnectVerifiedResult memory) {
-        return verify({responseBytes: responseBytes, zkConnectRequest: zkConnectRequest});
+    function exposed_verify(bytes memory responseBytes, SismoConnectRequest memory request) external returns (SismoConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, request: request});
     }
 }

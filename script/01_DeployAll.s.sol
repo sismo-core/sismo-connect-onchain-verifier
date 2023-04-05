@@ -10,7 +10,7 @@ import "src/periphery/AvailableRootsRegistry.sol";
 import "src/periphery/CommitmentMapperRegistry.sol";
 import {HydraS2Verifier} from "src/verifiers/HydraS2Verifier.sol";
 
-import {ZkConnectVerifier} from "src/ZkConnectVerifier.sol";
+import {ZkConnectVerifier} from "src/SismoConnectVerifier.sol";
 import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
 
 contract DeployAll is Script, BaseDeploymentConfig {

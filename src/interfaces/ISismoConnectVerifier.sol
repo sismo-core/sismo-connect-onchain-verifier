@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "src/libs/utils/Structs.sol";
 
-interface IZkConnectVerifier {
+interface ISismoConnectVerifier {
   ////Errors: Request/Response mismatch errors
   error VersionMismatch(bytes32 requestVersion, bytes32 responseVersion);
   error NamespaceMismatch(bytes16 requestNamespace, bytes16 responseNamespace);
@@ -24,9 +24,9 @@ interface IZkConnectVerifier {
   event VerifierSet(bytes32, address);
 
   function verify(
-    ZkConnectResponse memory zkConnectResponse,
-    ZkConnectRequest memory zkConnectRequest
-  ) external returns (ZkConnectVerifiedResult memory);
+    SismoConnectResponse memory response,
+    SismoConnectRequest memory request
+  ) external returns (SismoConnectVerifiedResult memory);
 
-  function ZK_CONNECT_VERSION() external view returns (bytes32);
+  function SISMO_CONNECT_VERSION() external view returns (bytes32);
 }

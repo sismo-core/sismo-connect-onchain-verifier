@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import {AddressesProviderMock} from "test/mocks/AddressesProviderMock.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
-import {ZkConnectVerifier} from "src/ZkConnectVerifier.sol";
+import {ZkConnectVerifier} from "src/SismoConnectVerifier.sol";
 import {ZkConnect} from "src/libs/SismoLib.sol";
 
 contract BaseTest is Test {

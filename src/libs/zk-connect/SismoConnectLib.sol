@@ -4,39 +4,39 @@ pragma solidity ^0.8.14;
 import "src/libs/utils/Structs.sol";
 import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {IZkConnectLib} from "./IZkConnectLib.sol";
-import {IZkConnectVerifier} from "src/interfaces/IZkConnectVerifier.sol";
+import {ISismoConnectLib} from "./ISismoConnectLib.sol";
+import {ISismoConnectVerifier} from "src/interfaces/ISismoConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 
-contract ZkConnect is IZkConnectLib, Context {
+contract SismoConnect is ISismoConnectLib, Context {
   uint256 public constant ZK_CONNECT_LIB_VERSION = 2;
 
   IAddressesProvider public constant ADDRESSES_PROVIDER =
     IAddressesProvider(0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05);
 
-  IZkConnectVerifier internal _zkConnectVerifier;
+  IZkConnectVerifier internal _sismoConnectVerifier;
   bytes16 public appId;
 
   constructor(bytes16 appIdentifier) {
     appId = appIdentifier;
-    _zkConnectVerifier = IZkConnectVerifier(ADDRESSES_PROVIDER.get(string("zkConnectVerifier-v2")));
+    _sismoConnectVerifier = IZkConnectVerifier(ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1")));
   }
 
   function verify(
     bytes memory responseBytes,
     Auth memory authRequest,
     Claim memory claimRequest,
-    bytes memory messageSignatureRequest,
+    bytes memory signatureRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(
       claimRequest,
       authRequest,
-      messageSignatureRequest,
+      signatureRequest,
       namespace
     );
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -44,131 +44,131 @@ contract ZkConnect is IZkConnectLib, Context {
     Auth memory authRequest,
     Claim memory claimRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest, authRequest, namespace);
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(claimRequest, authRequest, namespace);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Auth memory authRequest,
-    bytes memory messageSignatureRequest,
+    bytes memory signatureRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(
       authRequest,
-      messageSignatureRequest,
+      signatureRequest,
       namespace
     );
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Claim memory claimRequest,
-    bytes memory messageSignatureRequest,
+    bytes memory signatureRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(
       claimRequest,
-      messageSignatureRequest,
+      signatureRequest,
       namespace
     );
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Auth memory authRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(authRequest, namespace);
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(authRequest, namespace);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Claim memory claimRequest,
     bytes16 namespace
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest, namespace);
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(claimRequest, namespace);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Auth memory authRequest,
     Claim memory claimRequest,
-    bytes memory messageSignatureRequest
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(
+    bytes memory signatureRequest
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(
       claimRequest,
       authRequest,
-      messageSignatureRequest
+      signatureRequest
     );
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Auth memory authRequest,
     Claim memory claimRequest
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest, authRequest);
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(claimRequest, authRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Auth memory authRequest,
-    bytes memory messageSignatureRequest
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(authRequest, messageSignatureRequest);
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+    bytes memory signatureRequest
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(authRequest, signatureRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Claim memory claimRequest,
-    bytes memory messageSignatureRequest
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest, messageSignatureRequest);
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+    bytes memory signatureRequest
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(claimRequest, signatureRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Auth memory authRequest
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(authRequest);
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(authRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
     Claim memory claimRequest
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    ZkConnectRequest memory zkConnectRequest = buildRequest(claimRequest);
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    SismoConnectRequest memory request = buildRequest(claimRequest);
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function verify(
     bytes memory responseBytes,
-    ZkConnectRequest memory zkConnectRequest
-  ) internal returns (ZkConnectVerifiedResult memory) {
-    ZkConnectResponse memory zkConnectResponse = abi.decode(responseBytes, (ZkConnectResponse));
-    return _zkConnectVerifier.verify(zkConnectResponse, zkConnectRequest);
+    SismoConnectRequest memory request
+  ) internal returns (SismoConnectVerifiedResult memory) {
+    SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
+    return _zkConnectVerifier.verify(response, request);
   }
 
   function buildClaim(
@@ -287,19 +287,19 @@ contract ZkConnect is IZkConnectLib, Context {
 
   function buildAuth(
     AuthType authType,
-    bool anonMode,
+    bool isAnon,
     uint256 userId,
     bytes memory extraData
   ) internal pure returns (Auth memory) {
-    return RequestBuilder.buildAuth(authType, anonMode, userId, extraData);
+    return RequestBuilder.buildAuth(authType, isAnon, userId, extraData);
   }
 
   function buildAuth(AuthType authType) internal pure returns (Auth memory) {
     return RequestBuilder.buildAuth(authType);
   }
 
-  function buildAuth(AuthType authType, bool anonMode) internal pure returns (Auth memory) {
-    return RequestBuilder.buildAuth(authType, anonMode);
+  function buildAuth(AuthType authType, bool isAnon) internal pure returns (Auth memory) {
+    return RequestBuilder.buildAuth(authType, isAnon);
   }
 
   function buildAuth(AuthType authType, uint256 userId) internal pure returns (Auth memory) {
@@ -312,18 +312,18 @@ contract ZkConnect is IZkConnectLib, Context {
 
   function buildAuth(
     AuthType authType,
-    bool anonMode,
+    bool isAnon,
     uint256 userId
   ) internal pure returns (Auth memory) {
-    return RequestBuilder.buildAuth(authType, anonMode, userId);
+    return RequestBuilder.buildAuth(authType, isAnon, userId);
   }
 
   function buildAuth(
     AuthType authType,
-    bool anonMode,
+    bool isAnon,
     bytes memory extraData
   ) internal pure returns (Auth memory) {
-    return RequestBuilder.buildAuth(authType, anonMode, extraData);
+    return RequestBuilder.buildAuth(authType, isAnon, extraData);
   }
 
   function buildAuth(
@@ -337,51 +337,51 @@ contract ZkConnect is IZkConnectLib, Context {
   function buildRequest(
     Claim memory claimRequest,
     Auth memory authRequest,
-    bytes memory messageSignatureRequest
-  ) internal view returns (ZkConnectRequest memory) {
-    return RequestBuilder.buildRequest(claimRequest, authRequest, messageSignatureRequest, appId);
+    bytes memory signatureRequest
+  ) internal view returns (SismoConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, authRequest, signatureRequest, appId);
   }
 
   function buildRequest(
     Claim memory claimRequest,
     Auth memory authRequest
-  ) internal view returns (ZkConnectRequest memory) {
+  ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, appId);
   }
 
   function buildRequest(
     Claim memory claimRequest,
-    bytes memory messageSignatureRequest
-  ) internal view returns (ZkConnectRequest memory) {
-    return RequestBuilder.buildRequest(claimRequest, messageSignatureRequest, appId);
+    bytes memory signatureRequest
+  ) internal view returns (SismoConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, signatureRequest, appId);
   }
 
   function buildRequest(
     Auth memory authRequest,
-    bytes memory messageSignatureRequest
-  ) internal view returns (ZkConnectRequest memory) {
-    return RequestBuilder.buildRequest(authRequest, messageSignatureRequest, appId);
+    bytes memory signatureRequest
+  ) internal view returns (SismoConnectRequest memory) {
+    return RequestBuilder.buildRequest(authRequest, signatureRequest, appId);
   }
 
-  function buildRequest(Claim memory claimRequest) internal view returns (ZkConnectRequest memory) {
+  function buildRequest(Claim memory claimRequest) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, appId);
   }
 
-  function buildRequest(Auth memory authRequest) internal view returns (ZkConnectRequest memory) {
+  function buildRequest(Auth memory authRequest) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, appId);
   }
 
   function buildRequest(
     Claim memory claimRequest,
     Auth memory authRequest,
-    bytes memory messageSignatureRequest,
+    bytes memory signatureRequest,
     bytes16 namespace
-  ) internal view returns (ZkConnectRequest memory) {
+  ) internal view returns (SismoConnectRequest memory) {
     return
       RequestBuilder.buildRequest(
         claimRequest,
         authRequest,
-        messageSignatureRequest,
+        signatureRequest,
         appId,
         namespace
       );
@@ -391,37 +391,37 @@ contract ZkConnect is IZkConnectLib, Context {
     Claim memory claimRequest,
     Auth memory authRequest,
     bytes16 namespace
-  ) internal view returns (ZkConnectRequest memory) {
+  ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, appId, namespace);
   }
 
   function buildRequest(
     Claim memory claimRequest,
-    bytes memory messageSignatureRequest,
+    bytes memory signatureRequest,
     bytes16 namespace
-  ) internal view returns (ZkConnectRequest memory) {
-    return RequestBuilder.buildRequest(claimRequest, messageSignatureRequest, appId, namespace);
+  ) internal view returns (SismoConnectRequest memory) {
+    return RequestBuilder.buildRequest(claimRequest, signatureRequest, appId, namespace);
   }
 
   function buildRequest(
     Auth memory authRequest,
-    bytes memory messageSignatureRequest,
+    bytes memory signatureRequest,
     bytes16 namespace
-  ) internal view returns (ZkConnectRequest memory) {
-    return RequestBuilder.buildRequest(authRequest, messageSignatureRequest, appId, namespace);
+  ) internal view returns (SismoConnectRequest memory) {
+    return RequestBuilder.buildRequest(authRequest, signatureRequest, appId, namespace);
   }
 
   function buildRequest(
     Claim memory claimRequest,
     bytes16 namespace
-  ) internal view returns (ZkConnectRequest memory) {
+  ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, appId, namespace);
   }
 
   function buildRequest(
     Auth memory authRequest,
     bytes16 namespace
-  ) internal view returns (ZkConnectRequest memory) {
+  ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, appId, namespace);
   }
 }

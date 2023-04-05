@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./libs/zk-connect/ZkConnectLib.sol";
+import "./libs/zk-connect/SismoConnectLib.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract ZKDropERC721 is ERC721, ZkConnect {
   bytes16 public immutable GROUP_ID;
-  ZkConnectRequestContent private zkConnectRequestContent;
+  SismoConnectRequestContent private requestContent;
 
   string private _baseTokenURI;
 
@@ -23,27 +23,27 @@ contract ZKDropERC721 is ERC721, ZkConnect {
     _setBaseTokenURI(baseTokenURI);
   }
 
-  function claimWithZkConnect(bytes memory zkConnectResponse, address to) public {
-    ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify({
-      responseBytes: zkConnectResponse,
+  function claimWithZkConnect(bytes memory response, address to) public {
+    SismoConnectVerifiedResult memory verifiedResult = verify({
+      responseBytes: response,
       authRequest: buildAuth({authType: AuthType.ANON}),
       claimRequest: buildClaim({groupId: GROUP_ID}),
-      messageSignatureRequest: abi.encode(to)
+      signatureRequest: abi.encode(to)
     });
 
-    uint256 tokenId = zkConnectVerifiedResult.verifiedAuths[0].userId;
+    uint256 tokenId = verifiedResult.verifiedAuths[0].userId;
     _mint(to, tokenId);
   }
 
-  function transferWithZkConnect(bytes memory zkConnectResponse, address to) public {
-    ZkConnectVerifiedResult memory zkConnectVerifiedResult = verify({
-      responseBytes: zkConnectResponse,
+  function transferWithZkConnect(bytes memory response, address to) public {
+    SismoConnectVerifiedResult memory verifiedResult = verify({
+      responseBytes: response,
       authRequest: buildAuth({authType: AuthType.ANON}),
       claimRequest: buildClaim({groupId: GROUP_ID}),
-      messageSignatureRequest: abi.encode(to)
+      signatureRequest: abi.encode(to)
     });
 
-    uint256 tokenId = zkConnectVerifiedResult.verifiedAuths[0].userId;
+    uint256 tokenId = verifiedResult.verifiedAuths[0].userId;
     address from = ownerOf(tokenId);
     _transfer(from, to, tokenId);
   }

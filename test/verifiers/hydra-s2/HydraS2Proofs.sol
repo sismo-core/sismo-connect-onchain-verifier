@@ -35,7 +35,7 @@ contract HydraS2Proofs {
   }
 
   // simple zkConnect with 1 statement
-  function getZkConnectResponse1() public view returns (ZkConnectResponse memory) {
+  function getSismoConnectResponse1() public view returns (SismoConnectResponse memory) {
     Claim memory claim = Claim({
       groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
       groupTimestamp: bytes16("latest"),
@@ -47,8 +47,8 @@ contract HydraS2Proofs {
     // empty auth
     Auth memory auth = this.GET_EMPTY_AUTH();
 
-    ZkConnectProof[] memory proofs = new ZkConnectProof[](1);
-    proofs[0] = ZkConnectProof({
+    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
+    proofs[0] = SismoConnectProof({
       claim: claim,
       auth: auth,
       signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
@@ -58,7 +58,7 @@ contract HydraS2Proofs {
     });
 
     return
-      ZkConnectResponse({
+      SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
         version: bytes32("zk-connect-v2"),
@@ -67,14 +67,14 @@ contract HydraS2Proofs {
   }
 
   // simple zkConnect with only auth
-  function getZkConnectResponse2() public view returns (ZkConnectResponse memory) {
+  function getSismoConnectResponse2() public view returns (SismoConnectResponse memory) {
     Claim memory claim = this.GET_EMPTY_CLAIM();
 
     // empty auth
-    Auth memory auth = Auth({authType: AuthType.ANON, anonMode: false, userId: 0, extraData: ""});
+    Auth memory auth = Auth({authType: AuthType.ANON, isAnon: false, userId: 0, extraData: ""});
 
-    ZkConnectProof[] memory proofs = new ZkConnectProof[](1);
-    proofs[0] = ZkConnectProof({
+    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
+    proofs[0] = SismoConnectProof({
       claim: claim,
       auth: auth,
       signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
@@ -84,7 +84,7 @@ contract HydraS2Proofs {
     });
 
     return
-      ZkConnectResponse({
+      SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
         version: bytes32("zk-connect-v2"),
@@ -106,7 +106,7 @@ contract HydraS2Proofs {
     return
       Auth({
         authType: AuthType.EMPTY,
-        anonMode: DEFAULT_AUTH_ANON_MODE,
+        isAnon: DEFAULT_AUTH_ANON_MODE,
         userId: DEFAULT_AUTH_USER_ID,
         extraData: DEFAULT_AUTH_EXTRA_DATA
       });

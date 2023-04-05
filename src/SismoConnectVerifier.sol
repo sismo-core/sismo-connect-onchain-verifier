@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-import "./interfaces/IZkConnectVerifier.sol";
+import "./interfaces/ISismoConnectVerifier.sol";
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
+contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   uint8 public constant IMPLEMENTATION_VERSION = 1;
-  bytes32 public immutable ZK_CONNECT_VERSION = "zk-connect-v2";
+  bytes32 public immutable SISMO_CONNECT_VERSION = "sismo-connect-v1";
 
   mapping(bytes32 => IBaseVerifier) public _verifiers;
 
@@ -24,45 +24,43 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
   }
 
   function verify(
-    ZkConnectResponse memory response,
-    ZkConnectRequest memory request
-  ) external view override returns (ZkConnectVerifiedResult memory) {
+    SismoConnectResponse memory response,
+    SismoConnectRequest memory request
+  ) external view override returns (SismoConnectVerifiedResult memory) {
     _checkResponseMatchesWithRequest(response, request);
 
     (
       VerifiedAuth memory verifiedAuth,
       VerifiedClaim memory verifiedClaim,
-      bytes memory verifiedSignedMessage
-    ) = _verifiers[response.proofs[0].provingScheme].verify(
-        response.appId,
-        response.namespace,
-        response.proofs[0]
-      );
+      bytes memory signedMessage
+    ) = _verifiers[response.proofs[0].provingScheme].verify({
+        appId: response.appId,
+        namespace: response.namespace,
+        sismoConnectProof: response.proofs[0]
+      });
 
     VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](1);
     verifiedAuths[0] = verifiedAuth;
     VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](1);
     verifiedClaims[0] = verifiedClaim;
-    bytes[] memory verifiedSignedMessages = new bytes[](1);
-    verifiedSignedMessages[0] = verifiedSignedMessage;
 
     return
-      ZkConnectVerifiedResult(
+      SismoConnectVerifiedResult(
         response.appId,
         response.namespace,
         response.version,
         verifiedAuths,
         verifiedClaims,
-        verifiedSignedMessages
+        signedMessage
       );
   }
 
   function _checkResponseMatchesWithRequest(
-    ZkConnectResponse memory response,
-    ZkConnectRequest memory request
+    SismoConnectResponse memory response,
+    SismoConnectRequest memory request
   ) internal view {
-    if (response.version != ZK_CONNECT_VERSION) {
-      revert VersionMismatch(response.version, ZK_CONNECT_VERSION);
+    if (response.version != SISMO_CONNECT_VERSION) {
+      revert VersionMismatch(response.version, SISMO_CONNECT_VERSION);
     }
 
     if (response.namespace != request.namespace) {
@@ -73,18 +71,23 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
       revert AppIdMismatch(response.appId, request.appId);
     }
 
-    DataRequest memory dataRequest = request.content.dataRequests[0];
-    ZkConnectProof memory proof = response.proofs[0];
+    // Get the first proof and the first auth and claim
+    // TODO: support multiple proofs, multiple auths and multiple claims for aggregation
+    SismoConnectProof memory proof = response.proofs[0];
+    Auth memory authRequest = request.authRequests[0];
+    Claim memory claimRequest = request.claimRequests[0];
 
+    // Check if the message signature matches between the request and the response
+    // only if the content of the signature is different from the hash of "MESSAGE_SELECTED_BY_USER"
     if (
-      keccak256(dataRequest.messageSignatureRequest) != keccak256("MESSAGE_SELECTED_BY_USER") &&
-      keccak256(dataRequest.messageSignatureRequest) != keccak256(proof.signedMessage)
+      keccak256(request.signatureRequest.content) != keccak256("MESSAGE_SELECTED_BY_USER") &&
+      keccak256(request.signatureRequest.content) != keccak256(proof.signedMessage)
     ) {
-      revert MessageSignatureMismatch(dataRequest.messageSignatureRequest, proof.signedMessage);
+      revert MessageSignatureMismatch(request.signatureRequest.content, proof.signedMessage);
     }
 
-    _checkAuthResponseMatchesWithAuthRequest(proof.auth, dataRequest.authRequest);
-    _checkClaimResponseMatchesWithClaimRequest(proof.claim, dataRequest.claimRequest);
+    _checkAuthResponseMatchesWithAuthRequest(proof.auth, authRequest);
+    _checkClaimResponseMatchesWithClaimRequest(proof.claim, claimRequest);
   }
 
   function _checkAuthResponseMatchesWithAuthRequest(
@@ -94,8 +97,8 @@ contract ZkConnectVerifier is IZkConnectVerifier, Initializable, Ownable {
     if (authResponse.authType != authRequest.authType) {
       revert AuthTypeMismatch(authResponse.authType, authRequest.authType);
     }
-    if (authResponse.anonMode != authRequest.anonMode) {
-      revert AuthAnonModeMismatch(authResponse.anonMode, authRequest.anonMode);
+    if (authResponse.isAnon != authRequest.isAnon) {
+      revert AuthAnonModeMismatch(authResponse.isAnon, authRequest.isAnon);
     }
     if (authResponse.userId != authRequest.userId) {
       revert AuthUserIdMismatch(authResponse.userId, authRequest.userId);
