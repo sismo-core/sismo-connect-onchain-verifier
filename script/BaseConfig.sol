@@ -62,7 +62,7 @@ contract BaseDeploymentConfig is Script {
     Test
   }
 
-  function getChainName(string memory chainName) internal returns (DeployChain) {
+  function getChainName(string memory chainName) internal pure returns (DeployChain) {
     if (_compareString(chainName, "gnosis")) {
       return DeployChain.Gnosis;
     } else if (_compareString(chainName, "polygon")) {
@@ -187,6 +187,7 @@ contract BaseDeploymentConfig is Script {
     } else {
       revert ChainNotConfigured(chain);
     }
+    return config;
   }
 
   function _compareString(string memory a, string memory b) internal pure returns (bool) {

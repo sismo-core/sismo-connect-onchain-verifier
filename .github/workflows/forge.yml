@@ -22,7 +22,7 @@ jobs:
         run: forge install
 
       - name: Compile
-        run: forge build
+        run: forge build --sizes
 
       - name: Run Forge tests
         run: forge test -vvv

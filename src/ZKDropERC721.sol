@@ -48,7 +48,7 @@ contract ZKDropERC721 is ERC721, ZkConnect {
     _transfer(from, to, tokenId);
   }
 
-  function tokenURI(uint256 id) public view virtual override returns (string memory) {
+  function tokenURI(uint256) public view virtual override returns (string memory) {
     return _baseTokenURI;
   }
 

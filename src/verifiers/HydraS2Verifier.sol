@@ -122,7 +122,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       revert ClaimTypeMismatch(input.claimComparator, uint256(claim.claimType));
     }
 
-    VerifiedClaim({
+    return VerifiedClaim({
       groupId: claim.groupId,
       groupTimestamp: claim.groupTimestamp,
       value: claim.value,
@@ -184,7 +184,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   function _validateSignedMessageInput(
     HydraS2ProofInput memory input,
     bytes memory signedMessage
-  ) private view {
+  ) private pure {
     // don't check extraData if signedMessage is empty
     if (signedMessage.length == 0) {
       return;
