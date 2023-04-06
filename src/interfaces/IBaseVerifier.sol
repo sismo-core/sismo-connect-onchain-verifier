@@ -10,5 +10,5 @@ interface IBaseVerifier {
     bytes16 namespace,
     bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
-  ) external view returns (VerifiedAuth memory, VerifiedClaim memory, bytes memory);
+  ) external view returns (VerifiedAuth memory, VerifiedClaim memory);
 }

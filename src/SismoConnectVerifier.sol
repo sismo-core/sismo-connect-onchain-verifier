@@ -29,31 +29,34 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   ) external view override returns (SismoConnectVerifiedResult memory) {
     _checkResponseMatchesWithRequest(response, request);
 
-    (
-      VerifiedAuth memory verifiedAuth,
-      VerifiedClaim memory verifiedClaim,
-      bytes memory signedMessage
-    ) = _verifiers[response.proofs[0].provingScheme].verify({
-        appId: response.appId,
-        namespace: response.namespace,
-        signedMessage: response.signedMessage,
-        sismoConnectProof: response.proofs[0]
-      });
+    uint256 responseProofsArrayLength = response.proofs.length;
+    VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](responseProofsArrayLength);
+    VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](responseProofsArrayLength);
 
-    VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](1);
-    verifiedAuths[0] = verifiedAuth;
-    VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](1);
-    verifiedClaims[0] = verifiedClaim;
+    for (uint256 i = 0; i < responseProofsArrayLength; i++) {
+      (
+        VerifiedAuth memory verifiedAuth,
+        VerifiedClaim memory verifiedClaim
+      ) = _verifiers[response.proofs[i].provingScheme].verify({
+          appId: response.appId,
+          namespace: response.namespace,
+          signedMessage: response.signedMessage,
+          sismoConnectProof: response.proofs[i]
+        });
+
+      verifiedAuths[i] = verifiedAuth;
+      verifiedClaims[i] = verifiedClaim;
+    }
 
     return
-      SismoConnectVerifiedResult(
-        response.appId,
-        response.namespace,
-        response.version,
-        verifiedAuths,
-        verifiedClaims,
-        signedMessage
-      );
+      SismoConnectVerifiedResult({
+        appId: response.appId,
+        namespace: response.namespace,
+        version: response.version,
+        auths: verifiedAuths,
+        claims: verifiedClaims,
+        signedMessage: response.signedMessage
+      });
   }
 
   function _checkResponseMatchesWithRequest(
@@ -89,9 +92,6 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     for (uint256 i = 0; i < response.proofs.length; i++) {
       SismoConnectProof memory proof = response.proofs[i];
       // Check if the auths and claims in the response match the auths and claims int the request
-      // TODO: support multiple auths and claims (for now we only support one auth and one claim in the array)
-      // we will need to have a function that match the auths and claims in the response with the correct auths and claims in the request
-      // we have to throw an error if we don't find a match
       _checkAuthsInResponseMatchWithAuthsInRequest({auths: proof.auths, authRequests: request.auths});
       _checkClaimsInResponseMatchWithClaimsInRequest({claims: proof.claims, claimRequests: request.claims});
     }

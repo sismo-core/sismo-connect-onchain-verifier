@@ -35,7 +35,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     bytes16 namespace,
     bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
-  ) external view override returns (VerifiedAuth memory, VerifiedClaim memory, bytes memory) {
+  ) external view override returns (VerifiedAuth memory, VerifiedClaim memory) {
     // Verify the sismoConnectProof version corresponds to the current verifier.
     if (sismoConnectProof.provingScheme != HYDRA_S2_VERSION) {
       revert InvalidVersion(sismoConnectProof.provingScheme);
@@ -76,7 +76,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     // Check the snarkProof is valid
     _checkSnarkProof(snarkProof);
 
-    return (verifiedAuth, verifiedClaim, signedMessage);
+    return (verifiedAuth, verifiedClaim);
   }
 
   function _verifyClaimValidity(
