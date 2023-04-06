@@ -33,6 +33,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   function verify(
     bytes16 appId,
     bytes16 namespace,
+    bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
   ) external view override returns (VerifiedAuth memory, VerifiedClaim memory, bytes memory) {
     // Verify the sismoConnectProof version corresponds to the current verifier.
@@ -40,19 +41,36 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       revert InvalidVersion(sismoConnectProof.provingScheme);
     }
 
-    Auth memory auth = sismoConnectProof.auth;
-    Claim memory claim = sismoConnectProof.claim;
-    bytes memory signedMessage = sismoConnectProof.signedMessage;
-
     // Decode the snark proof from the sismoConnectProof
     // This snark proof is specify to this proving scheme
     HydraS2ProofData memory snarkProof = abi.decode(sismoConnectProof.proofData, (HydraS2ProofData));
     HydraS2ProofInput memory snarkInput = snarkProof._input();
 
-    // Verify Claim, Auth and SignedMessage validity by checking corresponding
+    // We only support one Auth and one Claim in the hydra-s2 proving scheme
+    // We revert if there is more than one Auth or Claim in the sismoConnectProof
+    if (sismoConnectProof.auths.length > 1 || sismoConnectProof.claims.length > 1) {
+      revert OnlyOneAuthAndOneClaimIsSupported();
+    }
+
+    
+
+     // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
-    VerifiedAuth memory verifiedAuth = _verifyAuthValidity(snarkInput, sismoConnectProof.proofData, auth, appId);
-    VerifiedClaim memory verifiedClaim = _verifyClaimValidity(snarkInput, sismoConnectProof.proofData, claim, appId, namespace);
+    VerifiedAuth memory verifiedAuth;
+    VerifiedClaim memory verifiedClaim;
+    if (sismoConnectProof.auths.length == 1) {
+      // Get the Auth from the sismoConnectProof
+      // We only support one Auth in the hydra-s2 proving scheme
+      Auth memory auth = sismoConnectProof.auths[0];
+      verifiedAuth = _verifyAuthValidity(snarkInput, sismoConnectProof.proofData, auth, appId);
+    }
+    if (sismoConnectProof.claims.length == 1) {
+      // Get the Claim from the sismoConnectProof
+      // We only support one Claim in the hydra-s2 proving scheme
+      Claim memory claim = sismoConnectProof.claims[0];
+      verifiedClaim = _verifyClaimValidity(snarkInput, sismoConnectProof.proofData, claim, appId, namespace);
+    }
+
     _validateSignedMessageInput(snarkInput, signedMessage);
 
     // Check the snarkProof is valid
@@ -68,11 +86,6 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     bytes16 appId,
     bytes16 namespace
   ) private view returns (VerifiedClaim memory) {
-    if (claim.claimType == ClaimType.EMPTY) {
-      VerifiedClaim memory emptyVerifiedClaim;
-      return emptyVerifiedClaim;
-    }
-
     // Check claim value validity
     if (input.claimValue != claim.value) {
       revert ClaimValueMismatch();
@@ -128,8 +141,6 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       groupTimestamp: claim.groupTimestamp,
       value: claim.value,
       claimType: claim.claimType,
-      isOptional: claim.isOptional,
-      isSelectableByUser: claim.isSelectableByUser,
       proofId: input.proofIdentifier,
       proofData: proofData,
       extraData: claim.extraData
@@ -142,12 +153,8 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     Auth memory auth,
     bytes16 appId
   ) private view returns (VerifiedAuth memory) {
-    if (auth.authType == AuthType.EMPTY) {
-      VerifiedAuth memory emptyVerifiedAuth;
-      return emptyVerifiedAuth;
-    }
     uint256 userId;
-    if (auth.authType == AuthType.ANON) {
+    if (auth.authType == AuthType.VAULT) {
       // vaultNamespace validity
       bytes16 appIdFromProof = bytes16(uint128(input.vaultNamespace));
       if (appIdFromProof != bytes16(appId)) {
@@ -181,8 +188,6 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
         authType: auth.authType,
         isAnon: auth.isAnon,
         userId: userId,
-        isOptional: auth.isOptional,
-        isSelectableByUser: auth.isSelectableByUser,
         extraData: auth.extraData,
         proofData: proofData
       });

@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 struct SismoConnectRequest {
   bytes16 appId;
   bytes16 namespace;
-  
   AuthRequest[] authRequests;
 	ClaimRequest[] claimRequests;
   SignatureRequest signatureRequest;
@@ -54,19 +53,18 @@ enum ClaimType {
   LTE
 }
 
+struct Auth {
+  AuthType authType;
+  bool isAnon;
+  uint256 userId;
+  bytes extraData;
+}
+
 struct Claim {
   ClaimType claimType;
   bytes16 groupId;
   bytes16 groupTimestamp;
   uint256 value;
-  bytes extraData;
-  uint256 proofId;
-}
-
-struct Auth {
-  AuthType authType;
-  bool isAnon;
-  uint256 userId;
   bytes extraData;
 }
 
@@ -84,8 +82,8 @@ struct SismoConnectResponse {
 }
 
 struct SismoConnectProof {
-  Claim[] claims;
   Auth[] auths;
+  Claim[] claims;
   bytes32 provingScheme;
   bytes proofData;
   bytes extraData;
@@ -100,6 +98,14 @@ struct SismoConnectVerifiedResult {
   bytes signedMessage; 
 }
 
+struct VerifiedAuth {
+  AuthType authType;
+  bool isAnon;
+  uint256 userId;
+  bytes extraData;
+  bytes proofData;
+}
+
 struct VerifiedClaim {
   ClaimType claimType;
   bytes16 groupId;
@@ -109,13 +115,3 @@ struct VerifiedClaim {
   uint256 proofId;
   bytes proofData;
 }
-
-struct VerifiedAuth {
-  AuthType authType;
-  bool isAnon;
-  uint256 userId;
-  bytes extraData;
-  bytes proofData;
-}
-
-

@@ -24,9 +24,9 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Auth memory authRequest,
-    Claim memory claimRequest,
-    bytes memory signatureRequest,
+    AuthRequest memory authRequest,
+    ClaimRequest memory claimRequest,
+    SignatureRequest memory signatureRequest,
     bytes16 namespace
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
@@ -41,8 +41,8 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Auth memory authRequest,
-    Claim memory claimRequest,
+    AuthRequest memory authRequest,
+    ClaimRequest memory claimRequest,
     bytes16 namespace
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
@@ -52,8 +52,8 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Auth memory authRequest,
-    bytes memory signatureRequest,
+    AuthRequest memory authRequest,
+    SignatureRequest memory signatureRequest,
     bytes16 namespace
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
@@ -67,8 +67,8 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Claim memory claimRequest,
-    bytes memory signatureRequest,
+    ClaimRequest memory claimRequest,
+    SignatureRequest memory signatureRequest,
     bytes16 namespace
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
@@ -82,7 +82,7 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Auth memory authRequest,
+    AuthRequest memory authRequest,
     bytes16 namespace
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
@@ -92,7 +92,7 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Claim memory claimRequest,
+    ClaimRequest memory claimRequest,
     bytes16 namespace
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
@@ -102,9 +102,9 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Auth memory authRequest,
-    Claim memory claimRequest,
-    bytes memory signatureRequest
+    AuthRequest memory authRequest,
+    ClaimRequest memory claimRequest,
+    SignatureRequest memory signatureRequest
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(
@@ -117,8 +117,8 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Auth memory authRequest,
-    Claim memory claimRequest
+    AuthRequest memory authRequest,
+    ClaimRequest memory claimRequest
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claimRequest, authRequest);
@@ -127,8 +127,8 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Auth memory authRequest,
-    bytes memory signatureRequest
+    AuthRequest memory authRequest,
+    SignatureRequest memory signatureRequest
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(authRequest, signatureRequest);
@@ -137,8 +137,8 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Claim memory claimRequest,
-    bytes memory signatureRequest
+    ClaimRequest memory claimRequest,
+    SignatureRequest memory signatureRequest
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claimRequest, signatureRequest);
@@ -147,7 +147,7 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Auth memory authRequest
+    AuthRequest memory authRequest
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(authRequest);
@@ -156,7 +156,7 @@ contract SismoConnect is ISismoConnectLib, Context {
 
   function verify(
     bytes memory responseBytes,
-    Claim memory claimRequest
+    ClaimRequest memory claimRequest
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claimRequest);
@@ -177,27 +177,27 @@ contract SismoConnect is ISismoConnectLib, Context {
     uint256 value,
     ClaimType claimType,
     bytes memory extraData
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, groupTimestamp, value, claimType, extraData);
   }
 
-  function buildClaim(bytes16 groupId) internal pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId);
   }
 
-  function buildClaim(bytes16 groupId, bytes16 groupTimestamp) internal pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId, bytes16 groupTimestamp) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, groupTimestamp);
   }
 
-  function buildClaim(bytes16 groupId, uint256 value) internal pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId, uint256 value) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, value);
   }
 
-  function buildClaim(bytes16 groupId, ClaimType claimType) internal pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId, ClaimType claimType) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, claimType);
   }
 
-  function buildClaim(bytes16 groupId, bytes memory extraData) internal pure returns (Claim memory) {
+  function buildClaim(bytes16 groupId, bytes memory extraData) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, extraData);
   }
 
@@ -205,7 +205,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupId,
     bytes16 groupTimestamp,
     uint256 value
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, groupTimestamp, value);
   }
 
@@ -213,7 +213,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupId,
     bytes16 groupTimestamp,
     ClaimType claimType
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, groupTimestamp, claimType);
   }
 
@@ -221,7 +221,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupId,
     bytes16 groupTimestamp,
     bytes memory extraData
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, groupTimestamp, extraData);
   }
 
@@ -229,7 +229,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupId,
     uint256 value,
     ClaimType claimType
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, value, claimType);
   }
 
@@ -237,7 +237,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupId,
     uint256 value,
     bytes memory extraData
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, value, extraData);
   }
 
@@ -245,7 +245,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupId,
     ClaimType claimType,
     bytes memory extraData
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, claimType, extraData);
   }
 
@@ -254,7 +254,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupTimestamp,
     uint256 value,
     ClaimType claimType
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, groupTimestamp, value, claimType);
   }
 
@@ -263,7 +263,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupTimestamp,
     uint256 value,
     bytes memory extraData
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, groupTimestamp, value, extraData);
   }
 
@@ -272,7 +272,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     bytes16 groupTimestamp,
     ClaimType claimType,
     bytes memory extraData
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, groupTimestamp, claimType, extraData);
   }
 
@@ -281,7 +281,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     uint256 value,
     ClaimType claimType,
     bytes memory extraData
-  ) internal pure returns (Claim memory) {
+  ) internal pure returns (ClaimRequest memory) {
     return RequestBuilder.buildClaim(groupId, value, claimType, extraData);
   }
 
@@ -290,23 +290,23 @@ contract SismoConnect is ISismoConnectLib, Context {
     bool isAnon,
     uint256 userId,
     bytes memory extraData
-  ) internal pure returns (Auth memory) {
+  ) internal pure returns (AuthRequest memory) {
     return RequestBuilder.buildAuth(authType, isAnon, userId, extraData);
   }
 
-  function buildAuth(AuthType authType) internal pure returns (Auth memory) {
+  function buildAuth(AuthType authType) internal pure returns (AuthRequest memory) {
     return RequestBuilder.buildAuth(authType);
   }
 
-  function buildAuth(AuthType authType, bool isAnon) internal pure returns (Auth memory) {
+  function buildAuth(AuthType authType, bool isAnon) internal pure returns (AuthRequest memory) {
     return RequestBuilder.buildAuth(authType, isAnon);
   }
 
-  function buildAuth(AuthType authType, uint256 userId) internal pure returns (Auth memory) {
+  function buildAuth(AuthType authType, uint256 userId) internal pure returns (AuthRequest memory) {
     return RequestBuilder.buildAuth(authType, userId);
   }
 
-  function buildAuth(AuthType authType, bytes memory extraData) internal pure returns (Auth memory) {
+  function buildAuth(AuthType authType, bytes memory extraData) internal pure returns (AuthRequest memory) {
     return RequestBuilder.buildAuth(authType, extraData);
   }
 
@@ -314,7 +314,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     AuthType authType,
     bool isAnon,
     uint256 userId
-  ) internal pure returns (Auth memory) {
+  ) internal pure returns (AuthRequest memory) {
     return RequestBuilder.buildAuth(authType, isAnon, userId);
   }
 
@@ -322,7 +322,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     AuthType authType,
     bool isAnon,
     bytes memory extraData
-  ) internal pure returns (Auth memory) {
+  ) internal pure returns (AuthRequest memory) {
     return RequestBuilder.buildAuth(authType, isAnon, extraData);
   }
 
@@ -330,51 +330,79 @@ contract SismoConnect is ISismoConnectLib, Context {
     AuthType authType,
     uint256 userId,
     bytes memory extraData
-  ) internal pure returns (Auth memory) {
+  ) internal pure returns (AuthRequest memory) {
     return RequestBuilder.buildAuth(authType, userId, extraData);
   }
 
+  function buildSignature(bytes memory message) internal pure returns (SignatureRequest memory) {
+    return RequestBuilder.buildSignature(message);
+  }
+
+  function buildSignature(bytes memory message, bool isSelectableByUser) internal pure returns (SignatureRequest memory) {
+    return RequestBuilder.buildSignature(message, isSelectableByUser);
+  }
+
+  function buildSignature(bytes memory message, bytes memory extraData) external pure returns (SignatureRequest memory) {
+    return RequestBuilder.buildSignature(message, extraData);
+  }
+
+  function buildSignature(
+    bytes memory message,
+    bool isSelectableByUser,
+    bytes memory extraData
+  ) external pure returns (SignatureRequest memory) {
+    return RequestBuilder.buildSignature(message, isSelectableByUser, extraData);
+  }
+
+  function buildSignature(bool isSelectableByUser) external pure returns (SignatureRequest memory) {
+    return RequestBuilder.buildSignature(isSelectableByUser);
+  }
+
+  function buildSignature(bool isSelectableByUser, bytes memory extraData) external pure returns (SignatureRequest memory) {
+    return RequestBuilder.buildSignature(isSelectableByUser, extraData);
+  }
+
   function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes memory signatureRequest
+    ClaimRequest memory claimRequest,
+    AuthRequest memory authRequest,
+    SignatureRequest memory signatureRequest
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, signatureRequest, appId);
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest
+    ClaimRequest memory claimRequest,
+    AuthRequest memory authRequest
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, appId);
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    bytes memory signatureRequest
+    ClaimRequest memory claimRequest,
+    SignatureRequest memory signatureRequest
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, signatureRequest, appId);
   }
 
   function buildRequest(
-    Auth memory authRequest,
-    bytes memory signatureRequest
+    AuthRequest memory authRequest,
+    SignatureRequest memory signatureRequest
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, signatureRequest, appId);
   }
 
-  function buildRequest(Claim memory claimRequest) internal view returns (SismoConnectRequest memory) {
+  function buildRequest(ClaimRequest memory claimRequest) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, appId);
   }
 
-  function buildRequest(Auth memory authRequest) internal view returns (SismoConnectRequest memory) {
+  function buildRequest(AuthRequest memory authRequest) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, appId);
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes memory signatureRequest,
+    ClaimRequest memory claimRequest,
+    AuthRequest memory authRequest,
+    SignatureRequest memory signatureRequest,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
     return
@@ -388,38 +416,38 @@ contract SismoConnect is ISismoConnectLib, Context {
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
+    ClaimRequest memory claimRequest,
+    AuthRequest memory authRequest,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, authRequest, appId, namespace);
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    bytes memory signatureRequest,
+    ClaimRequest memory claimRequest,
+    SignatureRequest memory signatureRequest,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, signatureRequest, appId, namespace);
   }
 
   function buildRequest(
-    Auth memory authRequest,
-    bytes memory signatureRequest,
+    AuthRequest memory authRequest,
+    SignatureRequest memory signatureRequest,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, signatureRequest, appId, namespace);
   }
 
   function buildRequest(
-    Claim memory claimRequest,
+    ClaimRequest memory claimRequest,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(claimRequest, appId, namespace);
   }
 
   function buildRequest(
-    Auth memory authRequest,
+    AuthRequest memory authRequest,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
     return RequestBuilder.buildRequest(authRequest, appId, namespace);

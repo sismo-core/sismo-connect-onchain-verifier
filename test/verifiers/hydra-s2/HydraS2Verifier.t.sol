@@ -14,9 +14,9 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
   address user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
   bytes16 constant appId = 0x11b1de449c6c4adb0b5775b3868b28b3;
   bytes16 constant groupId = 0xe9ed316946d3d98dfcd829a53ec9822e;
-  Claim claimRequest;
-  Auth authRequest;
-  bytes signatureRequest;
+  ClaimRequest claimRequest;
+  AuthRequest authRequest;
+  SignatureRequest signatureRequest;
 
   HydraS2ProofData snarkProof;
 
@@ -24,8 +24,8 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     super.setUp();
     sismoConnect = new SismoConnectHarness(appId);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: groupId});
-    authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.ANON});
-    signatureRequest = abi.encode(user);
+    authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
+    signatureRequest = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
   }
 
   function test_RevertWith_InvalidVersionOfProvingScheme() public {
@@ -69,10 +69,10 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
   function test_RevertWith_DestinationVerificationNotEnabled() public {
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse2();
     // we change the authType to be equal to GITHUB instead of ANON
-    invalidSismoConnectResponse.proofs[0].auth = Auth({authType: AuthType.GITHUB, isAnon: false, userId: 0, extraData: ""});
+    invalidSismoConnectResponse.proofs[0].auths[0] = Auth({authType: AuthType.GITHUB, isAnon: false, userId: 0, extraData: ""});
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
+    AuthRequest memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
 
     // this should revert because the destinationVerificationEnabled is false and the AuthType is different from ANON
     vm.expectRevert(abi.encodeWithSignature("DestinationVerificationNotEnabled()"));
@@ -84,7 +84,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     vm.assume(incorrectCommitmentMapperPubKeyX != hydraS2Proofs.getEdDSAPubKey()[0]);
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse2();
     // we change the authType to be equal to GITHUB instead of ANON to be able to check the commitmentMapperRegistry public key
-    invalidSismoConnectResponse.proofs[0].auth = Auth({authType: AuthType.GITHUB, isAnon: false, userId: 0, extraData: ""});
+    invalidSismoConnectResponse.proofs[0].auths[0] = Auth({authType: AuthType.GITHUB, isAnon: false, userId: 0, extraData: ""});
     // we change the commitmentMapperPubKeyX to be equal to a random uint256 instead of the correct commitmentMapperPubKeyX
     // commitmentMapperPubKeyX is at index 2 in the snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 2, incorrectCommitmentMapperPubKeyX); 
@@ -94,7 +94,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 13, uint256(1)); // true
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
+    AuthRequest memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -112,7 +112,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     vm.assume(incorrectCommitmentMapperPubKeyY != hydraS2Proofs.getEdDSAPubKey()[1]);
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse2();
     // we change the authType to be equal to GITHUB instead of ANON to be able to check the commitmentMapperRegistry public key
-    invalidSismoConnectResponse.proofs[0].auth = Auth({authType: AuthType.GITHUB, isAnon: false, userId: 0, extraData: ""});
+    invalidSismoConnectResponse.proofs[0].auths[0] = Auth({authType: AuthType.GITHUB, isAnon: false, userId: 0, extraData: ""});
     // we change the commitmentMapperPubKeyY to be equal to a random uint256 instead of the correct commitmentMapperPubKeyY
     // commitmentMapperPubKeyY is at index 3 in the snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 3, incorrectCommitmentMapperPubKeyY); 
@@ -121,7 +121,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 13, uint256(1)); // destinationVerificationEnabled at index 13 is equal to true
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
+    AuthRequest memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",

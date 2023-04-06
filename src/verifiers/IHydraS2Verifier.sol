@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 interface IHydraS2Verifier {
   error InvalidProof();
   error AnonModeIsNotYetSupported();
+  error OnlyOneAuthAndOneClaimIsSupported();
 
   error InvalidVersion(bytes32 version);
   error RegistryRootNotAvailable(uint256 inputRoot);
