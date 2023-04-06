@@ -471,237 +471,237 @@ library RequestBuilder {
   }
 
   function buildRequest(
-    ClaimRequest memory claimRequest,
-    AuthRequest memory authRequest,
-    SignatureRequest memory signatureRequest,
+    ClaimRequest memory claim,
+    AuthRequest memory auth,
+    SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](1);
-    authRequests[0] = authRequest;
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](1);
-    claimRequests[0] = claimRequest;
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: signatureRequest
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    ClaimRequest memory claimRequest,
-    SignatureRequest memory signatureRequest,
+    ClaimRequest memory claim,
+    SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](0);
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](1);
-    claimRequests[0] = claimRequest;
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: signatureRequest
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    ClaimRequest memory claimRequest,
-    AuthRequest memory authRequest,
+    ClaimRequest memory claim,
+    AuthRequest memory auth,
     bytes16 appId,
     bytes16 namespace
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](1);
-    authRequests[0] = authRequest;
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](1);
-    claimRequests[0] = claimRequest;
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: _GET_EMPTY_SIGNATURE_REQUEST()
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    AuthRequest memory authRequest,
-    SignatureRequest memory signatureRequest,
+    AuthRequest memory auth,
+    SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](1);
-    authRequests[0] = authRequest;
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](0);
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: signatureRequest
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    ClaimRequest memory claimRequest,
+    ClaimRequest memory claim,
     bytes16 appId,
     bytes16 namespace
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](0);
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](1);
-    claimRequests[0] = claimRequest;
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: _GET_EMPTY_SIGNATURE_REQUEST()
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    AuthRequest memory authRequest,
+    AuthRequest memory auth,
     bytes16 appId,
     bytes16 namespace
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](1);
-    authRequests[0] = authRequest;
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](0);
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: _GET_EMPTY_SIGNATURE_REQUEST()
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    ClaimRequest memory claimRequest,
-    AuthRequest memory authRequest,
-    SignatureRequest memory signatureRequest,
+    ClaimRequest memory claim,
+    AuthRequest memory auth,
+    SignatureRequest memory signature,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](1);
-    authRequests[0] = authRequest;
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](1);
-    claimRequests[0] = claimRequest;
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: signatureRequest
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    ClaimRequest memory claimRequest,
-    SignatureRequest memory signatureRequest,
+    ClaimRequest memory claim,
+    SignatureRequest memory signature,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](0);
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](1);
-    claimRequests[0] = claimRequest;
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: signatureRequest
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    ClaimRequest memory claimRequest,
-    AuthRequest memory authRequest,
+    ClaimRequest memory claim,
+    AuthRequest memory auth,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](1);
-    authRequests[0] = authRequest;
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](1);
-    claimRequests[0] = claimRequest;
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: _GET_EMPTY_SIGNATURE_REQUEST()
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    AuthRequest memory authRequest,
-    SignatureRequest memory signatureRequest,
+    AuthRequest memory auth,
+    SignatureRequest memory signature,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](1);
-    authRequests[0] = authRequest;
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](0);
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: signatureRequest
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    ClaimRequest memory claimRequest,
+    ClaimRequest memory claim,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](0);
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](1);
-    claimRequests[0] = claimRequest;
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: _GET_EMPTY_SIGNATURE_REQUEST()
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    AuthRequest memory authRequest,
+    AuthRequest memory auth,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory authRequests = new AuthRequest[](1);
-    authRequests[0] = authRequest;
-    ClaimRequest[] memory claimRequests = new ClaimRequest[](0);
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        authRequests: authRequests,
-        claimRequests: claimRequests,
-        signatureRequest: _GET_EMPTY_SIGNATURE_REQUEST()
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }

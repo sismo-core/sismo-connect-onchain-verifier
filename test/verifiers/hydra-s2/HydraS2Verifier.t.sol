@@ -16,7 +16,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
   bytes16 constant groupId = 0xe9ed316946d3d98dfcd829a53ec9822e;
   ClaimRequest claimRequest;
   AuthRequest authRequest;
-  SignatureRequest signatureRequest;
+  SignatureRequest signature;
 
   HydraS2ProofData snarkProof;
 
@@ -25,7 +25,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     sismoConnect = new SismoConnectHarness(appId);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: groupId});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
-    signatureRequest = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
+    signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
   }
 
   function test_RevertWith_InvalidVersionOfProvingScheme() public {
@@ -44,7 +44,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32("fake-proving-scheme")
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_VaultNamespaceMismatch(uint256 invalidVaultNamespace) public {
@@ -63,7 +63,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         appId
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: authRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), auth: authRequest, signature: signature});
   }
 
   function test_RevertWith_DestinationVerificationNotEnabled() public {
@@ -76,7 +76,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
     // this should revert because the destinationVerificationEnabled is false and the AuthType is different from ANON
     vm.expectRevert(abi.encodeWithSignature("DestinationVerificationNotEnabled()"));
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), auth: githubAuthRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyX) public {
@@ -104,7 +104,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), auth: githubAuthRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyY) public {
@@ -131,7 +131,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), auth: githubAuthRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_ClaimValueMismatch(uint256 invalidClaimValue) public {
@@ -141,7 +141,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     // claimValue is at index 7 in the snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 7, invalidClaimValue);
     vm.expectRevert(abi.encodeWithSignature("ClaimValueMismatch()"));
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_RequestIdentifierMismatch(uint256 incorrectRequestIdentifier) public {
@@ -156,7 +156,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
       incorrectRequestIdentifier,
       correctRequestIdentifier
       ));
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyX) public {
@@ -174,7 +174,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyY) public {
@@ -192,7 +192,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_SourceVerificationNotEnabled() public {
@@ -201,7 +201,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     // sourceVerificationEnabled is at index 12 in snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 12, uint256(0));
     vm.expectRevert(abi.encodeWithSignature("SourceVerificationNotEnabled()"));
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_AccountsTreeValueMismatch(uint256 incorrectAccountsTreeValue) public {
@@ -218,7 +218,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         correctAccountsTreeValue
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_ClaimTypeMismatch() public {
@@ -235,7 +235,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         claimRequest.claimType
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_InvalidExtraData(uint256 incorrectExtraData) public {
@@ -252,7 +252,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         correctExtraData
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function testFuzz_RevertWith_InvalidProof(uint256 incorrectProofIdentifier) public {
@@ -264,7 +264,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
      // proofIdentifier is at index 6 in snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 6, incorrectProofIdentifier);
     vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   ///////////////////////////

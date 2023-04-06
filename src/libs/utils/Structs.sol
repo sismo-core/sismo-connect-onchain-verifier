@@ -4,9 +4,9 @@ pragma solidity ^0.8.17;
 struct SismoConnectRequest {
   bytes16 appId;
   bytes16 namespace;
-  AuthRequest[] authRequests;
-	ClaimRequest[] claimRequests;
-  SignatureRequest signatureRequest;
+  AuthRequest[] auths;
+	ClaimRequest[] claims;
+  SignatureRequest signature;
 }
 
 struct AuthRequest {
@@ -93,8 +93,8 @@ struct SismoConnectVerifiedResult {
   bytes16 appId;
   bytes16 namespace;
   bytes32 version;
-  VerifiedAuth[] verifiedAuths;
-  VerifiedClaim[] verifiedClaims;
+  VerifiedAuth[] auths;
+  VerifiedClaim[] claims;
   bytes signedMessage; 
 }
 

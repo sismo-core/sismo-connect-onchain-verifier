@@ -24,20 +24,20 @@ contract SismoConnectHarness is SismoConnect {
         return buildSignature(message);
     }
 
-    function exposed_verify(bytes memory responseBytes, ClaimRequest memory claimRequest) external returns (SismoConnectVerifiedResult memory) {
-        return verify({responseBytes: responseBytes, claimRequest: claimRequest});
+    function exposed_verify(bytes memory responseBytes, ClaimRequest memory claim) external returns (SismoConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, claim: claim});
     }
 
-    function exposed_verify(bytes memory responseBytes, ClaimRequest memory claimRequest, bytes16 namespace) external returns (SismoConnectVerifiedResult memory) {
-        return verify({responseBytes: responseBytes, claimRequest: claimRequest, namespace: namespace});
+    function exposed_verify(bytes memory responseBytes, ClaimRequest memory claim, bytes16 namespace) external returns (SismoConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, claim: claim, namespace: namespace});
     }
 
-    function exposed_verify(bytes memory responseBytes, ClaimRequest memory claimRequest, SignatureRequest memory signatureRequest) external returns (SismoConnectVerifiedResult memory) {
-        return verify({responseBytes: responseBytes, claimRequest: claimRequest, signatureRequest: signatureRequest});
+    function exposed_verify(bytes memory responseBytes, ClaimRequest memory claim, SignatureRequest memory signature) external returns (SismoConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, claim: claim, signature: signature});
     }
 
-    function exposed_verify(bytes memory responseBytes, AuthRequest memory authRequest, SignatureRequest memory signatureRequest) external returns (SismoConnectVerifiedResult memory) {
-        return verify({responseBytes: responseBytes, authRequest: authRequest, signatureRequest: signatureRequest});
+    function exposed_verify(bytes memory responseBytes, AuthRequest memory auth, SignatureRequest memory signature) external returns (SismoConnectVerifiedResult memory) {
+        return verify({responseBytes: responseBytes, auth: auth, signature: signature});
     }
 
     function exposed_verify(bytes memory responseBytes, SismoConnectRequest memory request) external returns (SismoConnectVerifiedResult memory) {

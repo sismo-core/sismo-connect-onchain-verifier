@@ -25,24 +25,24 @@ contract ZKDropERC721 is ERC721, SismoConnect {
   function claimWithSismoConnect(bytes memory response, address to) public {
     SismoConnectVerifiedResult memory verifiedResult = verify({
       responseBytes: response,
-      authRequest: buildAuth({authType: AuthType.VAULT}),
-      claimRequest: buildClaim({groupId: GROUP_ID}),
-      signatureRequest: buildSignature({message: abi.encode(to)})
+      auth: buildAuth({authType: AuthType.VAULT}),
+      claim: buildClaim({groupId: GROUP_ID}),
+      signature: buildSignature({message: abi.encode(to)})
     });
 
-    uint256 tokenId = verifiedResult.verifiedAuths[0].userId;
+    uint256 tokenId = verifiedResult.auths[0].userId;
     _mint(to, tokenId);
   }
 
   function transferWithSismoConnect(bytes memory response, address to) public {
     SismoConnectVerifiedResult memory verifiedResult = verify({
       responseBytes: response,
-      authRequest: buildAuth({authType: AuthType.VAULT}),
-      claimRequest: buildClaim({groupId: GROUP_ID}),
-      signatureRequest: buildSignature({message: abi.encode(to)})
+      auth: buildAuth({authType: AuthType.VAULT}),
+      claim: buildClaim({groupId: GROUP_ID}),
+      signature: buildSignature({message: abi.encode(to)})
     });
 
-    uint256 tokenId = verifiedResult.verifiedAuths[0].userId;
+    uint256 tokenId = verifiedResult.auths[0].userId;
     address from = ownerOf(tokenId);
     _transfer(from, to, tokenId);
   }

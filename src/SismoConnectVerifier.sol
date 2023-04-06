@@ -74,15 +74,15 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
 
     // Check if the message of the signature matches between the request and the response
     // if the signature request is NOT selectable by the user
-    if (request.signatureRequest.isSelectableByUser == false) {
+    if (request.signature.isSelectableByUser == false) {
       // Check if the message signature matches between the request and the response
       // only if the content of the signature is different from the hash of "MESSAGE_SELECTED_BY_USER"
       if (
-        keccak256(request.signatureRequest.message) != keccak256("MESSAGE_SELECTED_BY_USER") &&
+        keccak256(request.signature.message) != keccak256("MESSAGE_SELECTED_BY_USER") &&
         // we hash the messages to be able to compare them (as they are of type bytes)
-        keccak256(request.signatureRequest.message) != keccak256(response.signedMessage)
+        keccak256(request.signature.message) != keccak256(response.signedMessage)
       ) {
-        revert SignatureMessageMismatch(request.signatureRequest.message, response.signedMessage);
+        revert SignatureMessageMismatch(request.signature.message, response.signedMessage);
       }
     }
 
@@ -92,8 +92,8 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       // TODO: support multiple auths and claims (for now we only support one auth and one claim in the array)
       // we will need to have a function that match the auths and claims in the response with the correct auths and claims in the request
       // we have to throw an error if we don't find a match
-      _checkAuthsInResponseMatchWithAuthsInRequest({auths: proof.auths, authRequests: request.authRequests});
-      _checkClaimsInResponseMatchWithClaimsInRequest({claims: proof.claims, claimRequests: request.claimRequests});
+      _checkAuthsInResponseMatchWithAuthsInRequest({auths: proof.auths, authRequests: request.auths});
+      _checkClaimsInResponseMatchWithClaimsInRequest({claims: proof.claims, claimRequests: request.claims});
     }
   }
 

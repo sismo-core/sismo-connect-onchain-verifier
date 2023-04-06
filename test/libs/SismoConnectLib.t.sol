@@ -15,7 +15,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
   bytes16 immutable appId = 0x11b1de449c6c4adb0b5775b3868b28b3;
   ClaimRequest claimRequest;
   AuthRequest authRequest;
-  SignatureRequest signatureRequest;
+  SignatureRequest signature;
 
   bytes16 immutable APP_ID_ZK_DROP = 0x11b1de449c6c4adb0b5775b3868b28b3;
   bytes16 immutable ZK = 0xe9ed316946d3d98dfcd829a53ec9822e;
@@ -26,7 +26,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     sismoConnect = new SismoConnectHarness(appId);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
-    signatureRequest = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
+    signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
 
     zkdrop =
         new ZKDropERC721({appId: APP_ID_ZK_DROP, groupId: ZK, name: "ZKDrop test", symbol: "test", baseTokenURI: "https://test.com"});
@@ -39,7 +39,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     bytes memory responseBytes = hex"";
     // we just expect a revert with an empty responseBytes as far as the decoding will not be successful
     vm.expectRevert();
-    sismoConnect.exposed_verify({responseBytes: responseBytes, claimRequest: claimRequest});
+    sismoConnect.exposed_verify({responseBytes: responseBytes, claim: claimRequest});
   }
 
   function test_RevertWith_VersionMismatch() public {
@@ -53,7 +53,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         expectedVersion
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest});
   }
 
   function test_RevertWith_AppIdMismatch() public {
@@ -66,7 +66,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         hydraS2Proofs.getSismoConnectResponse1().appId
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest});
   }
 
   function test_RevertWith_NamespaceMismatch() public {
@@ -79,20 +79,20 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         hydraS2Proofs.getSismoConnectResponse1().namespace
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest});
   }
 
   function test_RevertWith_SignatureMessageMismatch() public {
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse1();
-    signatureRequest = sismoConnect.exposed_buildSignature({message: abi.encode("fake-signature")});
+    signature = sismoConnect.exposed_buildSignature({message: abi.encode("fake-signature")});
     vm.expectRevert(
       abi.encodeWithSignature(
         "SignatureMessageMismatch(bytes,bytes)",
-        signatureRequest,
+        signature,
         hydraS2Proofs.getSismoConnectResponse1().signedMessage
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_AuthTypeMismatch() public {
@@ -105,7 +105,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         uint8(authRequest.authType)
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: authRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), auth: authRequest, signature: signature});
   }
 
   function test_RevertWith_AuthAnonModeMismatch() public {
@@ -118,7 +118,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         authRequest.isAnon
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: authRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), auth: authRequest, signature: signature});
   }
 
   function test_RevertWith_AuthUserIdMismatch() public {
@@ -131,7 +131,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         authRequest.userId
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: authRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), auth: authRequest, signature: signature});
   }
 
   function test_RevertWith_AuthExtraDataMismatch() public {
@@ -144,7 +144,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         authRequest.extraData
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: authRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), auth: authRequest, signature: signature});
   }
 
   function test_RevertWith_ClaimTypeMismatch() public {
@@ -157,7 +157,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         uint8(claimRequest.claimType)
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_ClaimGroupIdMismatch() public {
@@ -170,7 +170,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         claimRequest.groupId
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_ClaimGroupTimestampMismatch() public {
@@ -183,7 +183,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         claimRequest.groupTimestamp
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_ClaimExtraDataMismatch() public {
@@ -196,7 +196,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
         claimRequest.extraData
       )
     );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claim: claimRequest, signature: signature});
   }
 
   // tests that should pass without reverting
@@ -209,20 +209,20 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     SismoConnectVerifiedResult memory verifiedResult = sismoConnect.exposed_verify({
       responseBytes: zkResponseEncoded,
       request: RequestBuilder.buildRequest({
-        claimRequest: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
-        signatureRequest: sismoConnect.exposed_buildSignature({message: abi.encode(user)}),
+        claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
+        signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)}),
         appId: appId
       })
     });
-    assertEq(verifiedResult.verifiedAuths[0].userId, 0);
+    assertEq(verifiedResult.auths[0].userId, 0);
   }
 
   function test_SismoConnectLibWithOnlyOneAuth() public {
     bytes
       memory zkResponseEncoded = hex"000000000000000000000000000000000000000000000000000000000000002011b1de449c6c4adb0b5775b3868b28b300000000000000000000000000000000b8e2054f8a912367e38a22ce773328ff000000000000000000000000000000007a6b2d636f6e6e6563742d76320000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000000022068796472612d73322e31000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000260000000000000000000000000000000000000000000000000000000000000054000000000000000000000000000000000000000000000000000000000000000006c617465737400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000007def1d6d28d6bda49e69fa89ad75d160becba3ae00000000000000000000000000000000000000000000000000000000000002c00823e270146a83cf1ec74f9a2d48e083d1958d4b7fba9687295e5299520184d015cadbe4331a6a5d511921a5f33866c89dd6af364dfdc7182ddd748a3e3d5a8919c96d2ffe1b53ea06536618f396d8663f7b74f3e2d40eb535457672e6369f8a1c16a1ae759db8eeaa5c9a18cc794ddc93ce4667af00d4779641ff325eee9fac05155352b176c1c6eca01d2e2018890adae767afbad5974ea7950266083065512d953abb4f03b022c15609530a965cd2052c669e0edcdbf673f27a173b4f2ba62fd7a7ca858dd140b6192bf40e95c90f00f8b74e46aa69f2c504246168c76c6e050ffc10c6ca5ba1ae8474a84bd16bf8c051d713bc73b76343d6142d3a6e4e3b000000000000000000000000000000000000000000000000000000000000000009f60d972df499264335faccfc437669a97ea2b6c97a1a7ddf3f0105eda34b1d07f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb920706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c5e3eb3996b56ed6e60c6c7823f4fa3e972a882bef34f6f35ed769bb60c35f90000000000000000000000000000000011b1de449c6c4adb0b5775b3868b28b3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     SismoConnectRequest memory request = RequestBuilder.buildRequest({
-      authRequest: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
-      signatureRequest: signatureRequest,
+      auth: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
+      signature: signature,
       appId: appId
     });
 
@@ -230,16 +230,16 @@ contract SismoConnectLibTest is HydraS2BaseTest {
       zkResponseEncoded,
       request
     );
-    assertTrue(verifiedResult.verifiedAuths[0].userId != 0);
+    assertTrue(verifiedResult.auths[0].userId != 0);
   }
 
   function test_SismoConnectLibWithClaimAndAuth() public {
     bytes
       memory zkResponseEncoded = hex"000000000000000000000000000000000000000000000000000000000000002011b1de449c6c4adb0b5775b3868b28b300000000000000000000000000000000b8e2054f8a912367e38a22ce773328ff000000000000000000000000000000007a6b2d636f6e6e6563742d76320000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000000022068796472612d73322e310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002600000000000000000000000000000000000000000000000000000000000000540e9ed316946d3d98dfcd829a53ec9822e000000000000000000000000000000006c617465737400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000007def1d6d28d6bda49e69fa89ad75d160becba3ae00000000000000000000000000000000000000000000000000000000000002c0220cb37982b97aa8585899c5b6c384eb0723fb77c52939413d9b921568d95da82ba898042155cef1d8114bca8d8c1e35dcf8892083c31201aca5ca60970838e9230ae6beec34ad477e5da162a511e367d2d1a4ce41376cac9e919145f22606ab0d8d460e68b220d73dde985d084adeb87d5e83bc3120406dd18fbd5299ed76fc25bbf7d2743f87636f40c3fbfc737236aa43f4df88cf433393def95537ed6122182bcfefd46d137990184596dadaab29c7bad596b6d637cfcbbb85f52cc701ba01066e489ef6cc73745480fed74f14fda369f9c553e556294928062f96963b8418285da48d35a556fbd7aa0c70b4574c84b49ec66034502fa52d41facd9f56f4000000000000000000000000000000000000000000000000000000000000000009f60d972df499264335faccfc437669a97ea2b6c97a1a7ddf3f0105eda34b1d07f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb920706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa1900027a626c79673bcd47d69cf371248a6ba78feee2ec32c5e83b681af8433904f81599b826fa9b715033e76e5b2fdda881352a9b61360022e30ee33ddccad90744e9b92802056c722ac4b31612e1b1de544d5b99481386b162a0b59862e0850000000000000000000000000000000000000000000000000000000000000001285bf79dc20d58e71b9712cb38c420b9cb91d3438c8e3dbaf07829b03ffffffc00000000000000000000000000000000000000000000000000000000000000000c5e3eb3996b56ed6e60c6c7823f4fa3e972a882bef34f6f35ed769bb60c35f90000000000000000000000000000000011b1de449c6c4adb0b5775b3868b28b3000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     SismoConnectRequest memory request = RequestBuilder.buildRequest({
-      claimRequest: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
-      authRequest: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
-      signatureRequest: signatureRequest,
+      claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
+      auth: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
+      signature: signature,
       appId: appId
     });
 
@@ -247,7 +247,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
       zkResponseEncoded,
       request
     );
-    assertTrue(verifiedResult.verifiedAuths[0].userId != 0);
+    assertTrue(verifiedResult.auths[0].userId != 0);
   }
 
    function test_ClaimAndAuthWithSignedMessageZKDROP() public {
@@ -282,8 +282,8 @@ contract SismoConnectLibTest is HydraS2BaseTest {
   //     AuthRequest memory authRequestTwo = AuthRequestLib.build({authType: AuthType.VAULT});
 
   //     DataRequest[] memory dataRequests = new DataRequest[](2);
-  //     dataRequests[0] = DataRequestLib.build({claimRequest: claimRequest, authRequest: authRequest});
-  //     dataRequests[1] = DataRequestLib.build({claimRequest: claimRequestTwo, authRequest: authRequestTwo});
+  //     dataRequests[0] = DataRequestLib.build({claim: claimRequest, auth: authRequest});
+  //     dataRequests[1] = DataRequestLib.build({claim: claimRequestTwo, auth: authRequestTwo});
 
   //     requestContent = SismoConnectRequestContentLib.build({dataRequests: dataRequests});
 
@@ -291,6 +291,6 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
   //     SismoConnectVerifiedResult memory verifiedResult =
   //         sismoConnect.verify(zkResponseEncoded, requestContent);
-  //     console.log("userId: %s", verifiedResult.verifiedAuths[0].userId);
+  //     console.log("userId: %s", verifiedResult.auths[0].userId);
   // }
 }
