@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "./libs/zk-connect/SismoConnectLib.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract ZKDropERC721 is ERC721, ZkConnect {
+contract ZKDropERC721 is ERC721, SismoConnect {
   bytes16 public immutable GROUP_ID;
   SismoConnectRequestContent private requestContent;
 
@@ -18,12 +18,12 @@ contract ZKDropERC721 is ERC721, ZkConnect {
     string memory baseTokenURI,
     bytes16 appId,
     bytes16 groupId
-  ) ERC721(name, symbol) ZkConnect(appId) {
+  ) ERC721(name, symbol) SismoConnect(appId) {
     GROUP_ID = groupId;
     _setBaseTokenURI(baseTokenURI);
   }
 
-  function claimWithZkConnect(bytes memory response, address to) public {
+  function claimWithSismoConnect(bytes memory response, address to) public {
     SismoConnectVerifiedResult memory verifiedResult = verify({
       responseBytes: response,
       authRequest: buildAuth({authType: AuthType.ANON}),
@@ -35,7 +35,7 @@ contract ZKDropERC721 is ERC721, ZkConnect {
     _mint(to, tokenId);
   }
 
-  function transferWithZkConnect(bytes memory response, address to) public {
+  function transferWithSismoConnect(bytes memory response, address to) public {
     SismoConnectVerifiedResult memory verifiedResult = verify({
       responseBytes: response,
       authRequest: buildAuth({authType: AuthType.ANON}),

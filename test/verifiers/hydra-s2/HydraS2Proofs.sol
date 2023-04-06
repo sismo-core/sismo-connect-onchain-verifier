@@ -34,7 +34,7 @@ contract HydraS2Proofs {
     return 0x1d4a72bd1c1e4f9ab68c3c4c55afd3e582685a18b9ec09fc96136619d2513fe8;
   }
 
-  // simple zkConnect with 1 statement
+  // simple sismoConnect with 1 statement
   function getSismoConnectResponse1() public view returns (SismoConnectResponse memory) {
     Claim memory claim = Claim({
       groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
@@ -66,7 +66,7 @@ contract HydraS2Proofs {
       });
   }
 
-  // simple zkConnect with only auth
+  // simple sismoConnect with only auth
   function getSismoConnectResponse2() public view returns (SismoConnectResponse memory) {
     Claim memory claim = this.GET_EMPTY_CLAIM();
 

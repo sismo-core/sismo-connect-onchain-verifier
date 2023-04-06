@@ -3,14 +3,14 @@ pragma solidity ^0.8.17;
 
 import "src/libs/zk-connect/SismoConnectLib.sol";
 
-// This contract is used to expose internal functions of ZkConnect for testing purposes
+// This contract is used to expose internal functions of SismoConnect for testing purposes
 // It is NOT deployed in production
 // see: https://book.getfoundry.sh/tutorials/best-practices?highlight=coverage#test-harnesses
-contract ZkConnectHarness is ZkConnect {
+contract SismoConnectHarness is SismoConnect {
 
     constructor(
         bytes16 appId
-    ) ZkConnect(appId) {}
+    ) SismoConnect(appId) {}
 
     function exposed_buildClaim(bytes16 groupId) external pure returns (Claim memory) {
         return buildClaim(groupId);

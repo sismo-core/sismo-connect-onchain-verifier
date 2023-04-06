@@ -3,14 +3,14 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {HydraS2BaseTest} from "./HydraS2BaseTest.t.sol";
-import {ZkConnectHarness} from "test/harness/ZkConnectHarness.sol";
+import {SismoConnectHarness} from "test/harness/SismoConnectHarness.sol";
 import "src/libs/zk-connect/SismoConnectLib.sol";
 import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "src/verifiers/HydraS2Lib.sol";
 
 contract HydraS2VerifierTest is HydraS2BaseTest {
   using HydraS2Lib for HydraS2ProofData;
 
-  ZkConnectHarness zkConnect;
+  SismoConnectHarness sismoConnect;
   address user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
   bytes16 constant appId = 0x11b1de449c6c4adb0b5775b3868b28b3;
   bytes16 constant groupId = 0xe9ed316946d3d98dfcd829a53ec9822e;
@@ -22,19 +22,19 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    zkConnect = new ZkConnectHarness(appId);
-    claimRequest = zkConnect.exposed_buildClaim({groupId: groupId});
-    authRequest = zkConnect.exposed_buildAuth({authType: AuthType.ANON});
+    sismoConnect = new SismoConnectHarness(appId);
+    claimRequest = sismoConnect.exposed_buildClaim({groupId: groupId});
+    authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.ANON});
     signatureRequest = abi.encode(user);
   }
 
   function test_RevertWith_InvalidVersionOfProvingScheme() public {
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse1();
     invalidSismoConnectResponse.proofs[0].provingScheme = bytes32("fake-proving-scheme");
-    // register the fake proving scheme to the HydraS2Verifier address i the ZkConnectVerifier contract
-    // if the proving scheme is not registered, it will revert without an error since the ZkConnectVerifier will not be able to find the verifier when routing
+    // register the fake proving scheme to the HydraS2Verifier address i the SismoConnectVerifier contract
+    // if the proving scheme is not registered, it will revert without an error since the SismoConnectVerifier will not be able to find the verifier when routing
     vm.prank(owner);
-    zkConnectVerifier.registerVerifier(
+    sismoConnectVerifier.registerVerifier(
       bytes32("fake-proving-scheme"),
       address(hydraS2Verifier)
     );
@@ -44,7 +44,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32("fake-proving-scheme")
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_VaultNamespaceMismatch(uint256 invalidVaultNamespace) public {
@@ -63,7 +63,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         appId
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: authRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: authRequest, signatureRequest: signatureRequest});
   }
 
   function test_RevertWith_DestinationVerificationNotEnabled() public {
@@ -72,11 +72,11 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     invalidSismoConnectResponse.proofs[0].auth = Auth({authType: AuthType.GITHUB, isAnon: false, userId: 0, extraData: ""});
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = zkConnect.exposed_buildAuth({authType: AuthType.GITHUB});
+    Auth memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
 
     // this should revert because the destinationVerificationEnabled is false and the AuthType is different from ANON
     vm.expectRevert(abi.encodeWithSignature("DestinationVerificationNotEnabled()"));
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyX) public {
@@ -94,7 +94,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 13, uint256(1)); // true
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = zkConnect.exposed_buildAuth({authType: AuthType.GITHUB});
+    Auth memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -104,7 +104,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyY) public {
@@ -121,7 +121,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 13, uint256(1)); // destinationVerificationEnabled at index 13 is equal to true
 
     // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    Auth memory githubAuthRequest = zkConnect.exposed_buildAuth({authType: AuthType.GITHUB});
+    Auth memory githubAuthRequest = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -131,7 +131,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), authRequest: githubAuthRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_ClaimValueMismatch(uint256 invalidClaimValue) public {
@@ -141,7 +141,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     // claimValue is at index 7 in the snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 7, invalidClaimValue);
     vm.expectRevert(abi.encodeWithSignature("ClaimValueMismatch()"));
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_RequestIdentifierMismatch(uint256 incorrectRequestIdentifier) public {
@@ -156,7 +156,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
       incorrectRequestIdentifier,
       correctRequestIdentifier
       ));
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyX) public {
@@ -174,7 +174,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyY) public {
@@ -192,7 +192,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function test_RevertWith_SourceVerificationNotEnabled() public {
@@ -201,7 +201,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     // sourceVerificationEnabled is at index 12 in snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 12, uint256(0));
     vm.expectRevert(abi.encodeWithSignature("SourceVerificationNotEnabled()"));
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_AccountsTreeValueMismatch(uint256 incorrectAccountsTreeValue) public {
@@ -218,7 +218,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         correctAccountsTreeValue
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function test_RevertWith_ClaimTypeMismatch() public {
@@ -235,7 +235,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         claimRequest.claimType
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_InvalidExtraData(uint256 incorrectExtraData) public {
@@ -252,7 +252,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
         correctExtraData
       )
     );
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   function testFuzz_RevertWith_InvalidProof(uint256 incorrectProofIdentifier) public {
@@ -264,7 +264,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
      // proofIdentifier is at index 6 in snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 6, incorrectProofIdentifier);
     vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-    zkConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest, signatureRequest: signatureRequest});
   }
 
   ///////////////////////////

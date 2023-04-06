@@ -10,14 +10,14 @@ import "src/periphery/AvailableRootsRegistry.sol";
 import "src/periphery/CommitmentMapperRegistry.sol";
 import {HydraS2Verifier} from "src/verifiers/HydraS2Verifier.sol";
 
-import {ZkConnectVerifier} from "src/SismoConnectVerifier.sol";
+import {SismoConnectVerifier} from "src/SismoConnectVerifier.sol";
 import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
 
 contract DeployAll is Script, BaseDeploymentConfig {
   AvailableRootsRegistry availableRootsRegistry;
   CommitmentMapperRegistry commitmentMapperRegistry;
   HydraS2Verifier hydraS2Verifier;
-  ZkConnectVerifier zkConnectVerifier;
+  SismoConnectVerifier sismoConnectVerifier;
 
   function runFor(
     string memory chainName
@@ -35,18 +35,18 @@ contract DeployAll is Script, BaseDeploymentConfig {
       config.commitmentMapperEdDSAPubKey
     );
     hydraS2Verifier = _deployHydraS2Verifier(commitmentMapperRegistry, availableRootsRegistry);
-    zkConnectVerifier = _deployZkConnectVerifier(msg.sender);
+    sismoConnectVerifier = _deploySismoConnectVerifier(msg.sender);
 
-    zkConnectVerifier.registerVerifier(
+    sismoConnectVerifier.registerVerifier(
       hydraS2Verifier.HYDRA_S2_VERSION(),
       address(hydraS2Verifier)
     );
-    zkConnectVerifier.transferOwnership(config.owner);
+    sismoConnectVerifier.transferOwnership(config.owner);
 
     contracts.availableRootsRegistry = availableRootsRegistry;
     contracts.commitmentMapperRegistry = commitmentMapperRegistry;
     contracts.hydraS2Verifier = hydraS2Verifier;
-    contracts.zkConnectVerifier = zkConnectVerifier;
+    contracts.sismoConnectVerifier = sismoConnectVerifier;
 
     vm.stopBroadcast();
   }
@@ -116,17 +116,17 @@ contract DeployAll is Script, BaseDeploymentConfig {
     return HydraS2Verifier(address(proxy));
   }
 
-  function _deployZkConnectVerifier(address owner) private returns (ZkConnectVerifier) {
-    ZkConnectVerifier zkConnectVerifierImplem = new ZkConnectVerifier(owner);
-    console.log("zkConnectVerifier Implem Deployed:", address(zkConnectVerifierImplem));
+  function _deploySismoConnectVerifier(address owner) private returns (SismoConnectVerifier) {
+    SismoConnectVerifier sismoConnectVerifierImplem = new SismoConnectVerifier(owner);
+    console.log("sismoConnectVerifier Implem Deployed:", address(sismoConnectVerifierImplem));
 
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-      address(zkConnectVerifierImplem),
+      address(sismoConnectVerifierImplem),
       config.proxyAdmin,
-      abi.encodeWithSelector(zkConnectVerifierImplem.initialize.selector, owner)
+      abi.encodeWithSelector(sismoConnectVerifierImplem.initialize.selector, owner)
     );
-    console.log("zkConnectVerifier Proxy Deployed:", address(proxy));
-    return ZkConnectVerifier(address(proxy));
+    console.log("sismoConnectVerifier Proxy Deployed:", address(proxy));
+    return SismoConnectVerifier(address(proxy));
   }
 
   function run() public returns (ScriptTypes.DeployAllContracts memory contracts) {
@@ -140,6 +140,6 @@ library ScriptTypes {
     AvailableRootsRegistry availableRootsRegistry;
     CommitmentMapperRegistry commitmentMapperRegistry;
     HydraS2Verifier hydraS2Verifier;
-    ZkConnectVerifier zkConnectVerifier;
+    SismoConnectVerifier sismoConnectVerifier;
   }
 }

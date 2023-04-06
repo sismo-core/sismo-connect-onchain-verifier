@@ -74,25 +74,29 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     // Get the first proof and the first auth and claim
     // TODO: support multiple proofs, multiple auths and multiple claims for aggregation
     SismoConnectProof memory proof = response.proofs[0];
-    Auth memory authRequest = request.authRequests[0];
-    Claim memory claimRequest = request.claimRequests[0];
+    AuthRequest memory authRequest = request.authRequests[0];
+    ClaimRequest memory claimRequest = request.claimRequests[0];
 
     // Check if the message signature matches between the request and the response
     // only if the content of the signature is different from the hash of "MESSAGE_SELECTED_BY_USER"
     if (
-      keccak256(request.signatureRequest.content) != keccak256("MESSAGE_SELECTED_BY_USER") &&
-      keccak256(request.signatureRequest.content) != keccak256(proof.signedMessage)
+      keccak256(request.signatureRequest.message) != keccak256("MESSAGE_SELECTED_BY_USER") &&
+      keccak256(request.signatureRequest.message) != keccak256(response.signedMessage)
     ) {
-      revert MessageSignatureMismatch(request.signatureRequest.content, proof.signedMessage);
+      revert MessageSignatureMismatch(request.signatureRequest.message, response.signedMessage);
     }
 
-    _checkAuthResponseMatchesWithAuthRequest(proof.auth, authRequest);
-    _checkClaimResponseMatchesWithClaimRequest(proof.claim, claimRequest);
+    // Check if the auths and claims in the response match the auths and claims int the request
+    // TODO: support multiple auths and claims (for now we only support one auth and one claim in the array)
+    // we will need to have a function that match the auths and claims in the response with the correct auths and claims in the request
+    // we have to throw an error if we don't find a match
+    _checkAuthResponseMatchesWithAuthRequest(proof.auths[0], authRequest);
+    _checkClaimResponseMatchesWithClaimRequest(proof.claims[0], claimRequest);
   }
 
   function _checkAuthResponseMatchesWithAuthRequest(
     Auth memory authResponse,
-    Auth memory authRequest
+    AuthRequest memory authRequest
   ) internal pure {
     if (authResponse.authType != authRequest.authType) {
       revert AuthTypeMismatch(authResponse.authType, authRequest.authType);
@@ -110,7 +114,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
 
   function _checkClaimResponseMatchesWithClaimRequest(
     Claim memory claimResponse,
-    Claim memory claimRequest
+    ClaimRequest memory claimRequest
   ) internal pure {
     if (claimResponse.claimType != claimRequest.claimType) {
       revert ClaimTypeMismatch(claimResponse.claimType, claimRequest.claimType);

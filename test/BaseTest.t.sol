@@ -5,8 +5,8 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import {AddressesProviderMock} from "test/mocks/AddressesProviderMock.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
-import {ZkConnectVerifier} from "src/SismoConnectVerifier.sol";
-import {ZkConnect} from "src/libs/SismoLib.sol";
+import {SismoConnectVerifier} from "src/SismoConnectVerifier.sol";
+import {SismoConnect} from "src/libs/SismoLib.sol";
 
 contract BaseTest is Test {
   address immutable user1 = vm.addr(1);
@@ -15,17 +15,17 @@ contract BaseTest is Test {
   address immutable sismoAddressProvider = 0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05;
 
   AddressesProviderMock addressesProvider;
-  ZkConnectVerifier zkConnectVerifier;
+  SismoConnectVerifier sismoConnectVerifier;
 
   function setUp() public virtual {
     addressesProvider = new AddressesProviderMock();
-    zkConnectVerifier = new ZkConnectVerifier(owner);
+    sismoConnectVerifier = new SismoConnectVerifier(owner);
 
     vm.etch(sismoAddressProvider, address(addressesProvider).code);
 
     IAddressesProvider(sismoAddressProvider).set(
-      address(zkConnectVerifier),
-      string("zkConnectVerifier-v2")
+      address(sismoConnectVerifier),
+      string("sismoConnectVerifier-v2")
     );
   }
 }

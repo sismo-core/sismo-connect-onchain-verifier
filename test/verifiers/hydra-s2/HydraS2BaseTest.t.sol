@@ -25,7 +25,7 @@ contract HydraS2BaseTest is BaseTest {
     );
 
     vm.startPrank(owner);
-    zkConnectVerifier.registerVerifier(
+    sismoConnectVerifier.registerVerifier(
       hydraS2Verifier.HYDRA_S2_VERSION(),
       address(hydraS2Verifier)
     );

@@ -9,17 +9,17 @@ import {ISismoConnectVerifier} from "src/interfaces/ISismoConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 
 contract SismoConnect is ISismoConnectLib, Context {
-  uint256 public constant ZK_CONNECT_LIB_VERSION = 2;
+  uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;
 
   IAddressesProvider public constant ADDRESSES_PROVIDER =
     IAddressesProvider(0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05);
 
-  IZkConnectVerifier internal _sismoConnectVerifier;
+  ISismoConnectVerifier internal _sismoConnectVerifier;
   bytes16 public appId;
 
   constructor(bytes16 appIdentifier) {
     appId = appIdentifier;
-    _sismoConnectVerifier = IZkConnectVerifier(ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1")));
+    _sismoConnectVerifier = ISismoConnectVerifier(ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1")));
   }
 
   function verify(
@@ -36,7 +36,7 @@ contract SismoConnect is ISismoConnectLib, Context {
       signatureRequest,
       namespace
     );
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -47,7 +47,7 @@ contract SismoConnect is ISismoConnectLib, Context {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claimRequest, authRequest, namespace);
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -62,7 +62,7 @@ contract SismoConnect is ISismoConnectLib, Context {
       signatureRequest,
       namespace
     );
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -77,7 +77,7 @@ contract SismoConnect is ISismoConnectLib, Context {
       signatureRequest,
       namespace
     );
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -87,7 +87,7 @@ contract SismoConnect is ISismoConnectLib, Context {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(authRequest, namespace);
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -97,7 +97,7 @@ contract SismoConnect is ISismoConnectLib, Context {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claimRequest, namespace);
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -112,7 +112,7 @@ contract SismoConnect is ISismoConnectLib, Context {
       authRequest,
       signatureRequest
     );
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -122,7 +122,7 @@ contract SismoConnect is ISismoConnectLib, Context {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claimRequest, authRequest);
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -132,7 +132,7 @@ contract SismoConnect is ISismoConnectLib, Context {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(authRequest, signatureRequest);
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -142,7 +142,7 @@ contract SismoConnect is ISismoConnectLib, Context {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claimRequest, signatureRequest);
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -151,7 +151,7 @@ contract SismoConnect is ISismoConnectLib, Context {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(authRequest);
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -160,7 +160,7 @@ contract SismoConnect is ISismoConnectLib, Context {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claimRequest);
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function verify(
@@ -168,7 +168,7 @@ contract SismoConnect is ISismoConnectLib, Context {
     SismoConnectRequest memory request
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
-    return _zkConnectVerifier.verify(response, request);
+    return _sismoConnectVerifier.verify(response, request);
   }
 
   function buildClaim(

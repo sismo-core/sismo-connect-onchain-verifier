@@ -18,7 +18,7 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
     vm.startBroadcast();
 
     IAddressesProvider sismoAddressProvider = IAddressesProvider(config.sismoAddressesProvider);
-    sismoAddressProvider.set(config.zkConnectVerifier, string("zkConnectVerifier-v2"));
+    sismoAddressProvider.set(config.sismoConnectVerifier, string("sismoConnectVerifier-v2"));
 
     vm.stopBroadcast();
   }
