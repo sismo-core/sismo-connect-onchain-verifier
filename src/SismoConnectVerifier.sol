@@ -109,18 +109,18 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     Auth[] memory auths,
     AuthRequest[] memory authRequests
   ) internal pure {
-    // for each auth in the response, we check if it matches with one of the auths in the request
-    for (uint256 i = 0; i < auths.length; i++) {
+    // for each auth in the request, we check if it matches with one of the auths in the response
+    for (uint256 i = 0; i < authRequests.length; i++) {
       // we store the information about the maximum matching properties in a uint8 
-      // if the auth in the response matches with the auth in the request, the matchingProperties will be equal to 15 (1111)
+      // if the auth in the request matches with an auth in the response, the matchingProperties will be equal to 15 (1111)
       // otherwise, we can look at the binary representation of the matchingProperties to know which properties are not matching and throw an error
       uint8 maxMatchingProperties = 0;
-      Auth memory auth = auths[i];
-      for (uint256 j = 0; j < authRequests.length; j++) {
-        // we store the matching properties for the current auth in the response and the current auth in the request in a uint8
+      AuthRequest memory authRequest = authRequests[i];
+      for (uint256 j = 0; j < auths.length; j++) {
+        // we store the matching properties for the current auth in the response in a uint8
         // we will store it in the maxMatchingProperties variable if it is greater than the current value of maxMatchingProperties
         uint8 matchingProperties = 0;
-        AuthRequest memory authRequest = authRequests[j];
+        Auth memory auth = auths[j];
         if (auth.authType == authRequest.authType) {
           matchingProperties += 1; // 0001
         }
@@ -134,12 +134,12 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
           matchingProperties += 8; // 1000
         }
         // if the matchingProperties are greater than the current value of maxMatchingProperties, we update the value of maxMatchingProperties
-        // by doing so we will be able to know how close the auth in the response is to the auth in the request
+        // by doing so we will be able to know how close the auth in the request is to the auth in the response
         if (matchingProperties > maxMatchingProperties) {
           maxMatchingProperties = matchingProperties;
         }
       }
-      _handleAuthErrors(maxMatchingProperties, auth);
+      _handleAuthErrors(maxMatchingProperties, authRequest);
     }
   }
 
@@ -147,12 +147,12 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     Claim[] memory claims,
     ClaimRequest[] memory claimRequests
   ) internal pure {
-    for (uint256 i=0; i < claims.length; i++) {
+    for (uint256 i=0; i < claimRequests.length; i++) {
       uint8 maxMatchingProperties = 0;
-      Claim memory claim = claims[i];
-      for (uint256 j=0; j < claimRequests.length; j++) {
+      ClaimRequest memory claimRequest = claimRequests[i];
+      for (uint256 j=0; j < claims.length; j++) {
         uint8 matchingProperties = 0;
-        ClaimRequest memory claimRequest = claimRequests[j];
+        Claim memory claim = claims[j];
         if (claim.claimType == claimRequest.claimType) {
           matchingProperties += 1; // 0001
         }
@@ -172,7 +172,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
           maxMatchingProperties = matchingProperties;
         }
       }
-      _handleClaimErrors(maxMatchingProperties, claim);
+      _handleClaimErrors(maxMatchingProperties, claimRequest);
     }
   }
 
@@ -189,58 +189,58 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     emit VerifierSet(provingScheme, verifierAddress);
   }
 
-  function _handleAuthErrors(uint8 maxMatchingProperties, Auth memory auth) internal pure {
-      // if the maxMatchingProperties is equal to 15 (1111), it means that the auth in the response matches with one of the auths in the request
+  function _handleAuthErrors(uint8 maxMatchingProperties, AuthRequest memory auth) internal pure {
+      // if the maxMatchingProperties is equal to 15 (1111), it means that the auth in the request matches with one of the auths in the response
       // otherwise, we can look at the binary representation of the maxMatchingProperties to know which properties are not matching and throw an error
       if (maxMatchingProperties == 0) { // 0000
-      // if maxMatchingProperties == 0000, it means that no property of the auth in the response matches with any property of the auths in the request
-      revert AuthInResponseNotFoundInRequest(auth.authType, auth.isAnon, auth.userId, auth.extraData);
+      // if maxMatchingProperties == 0000, it means that no property of the auth in the request matches with any property of the auths in the response
+      revert AuthInRequestNotFoundInResponse(auth.authType, auth.isAnon, auth.userId, auth.extraData);
       } else if (maxMatchingProperties == 1) {
-      // if maxMatchingProperties == 0001, it means that only the authType property of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 0001, it means that only the authType property of the auth in the request matches with one of the auths in the response
       revert AuthIsAnonUserIdAndExtraDataMismatch(auth.isAnon, auth.userId, auth.extraData);
       } else if (maxMatchingProperties == 2) {
-      // if maxMatchingProperties == 0010, it means that only the isAnon property of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 0010, it means that only the isAnon property of the auth in the request matches with one of the auths in the response
       revert AuthTypeUserIdAndExtraDataMismatch(auth.authType, auth.userId, auth.extraData);
       } else if (maxMatchingProperties == 3) {
-      // if maxMatchingProperties == 0011, it means that only the authType and isAnon properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 0011, it means that only the authType and isAnon properties of the auth in the request matches with one of the auths in the response
       revert AuthUserIdAndExtraDataMismatch(auth.userId, auth.extraData);
       } else if (maxMatchingProperties == 4) {
-      // if maxMatchingProperties == 0100, it means that only the userId property of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 0100, it means that only the userId property of the auth in the request matches with one of the auths in the response
       revert AuthTypeIsAnonAndExtraDataMismatch(auth.authType, auth.isAnon, auth.extraData);
       } else if (maxMatchingProperties == 5) {
-      // if maxMatchingProperties == 0101, it means that only the authType and userId properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 0101, it means that only the authType and userId properties of the auth in the request matches with one of the auths in the response
       revert AuthIsAnonAndExtraDataMismatch(auth.isAnon, auth.extraData);
       } else if (maxMatchingProperties == 6) {
-      // if maxMatchingProperties == 0110, it means that only the isAnon and userId properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 0110, it means that only the isAnon and userId properties of the auth in the request matches with one of the auths in the response
       revert AuthTypeAndExtraDataMismatch(auth.authType, auth.extraData);
       } else if (maxMatchingProperties == 7) {
-      // if maxMatchingProperties == 0111, it means that only the authType, isAnon and userId properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 0111, it means that only the authType, isAnon and userId properties of the auth in the request matches with one of the auths in the response
       revert AuthExtraDataMismatch(auth.extraData);
       } else if (maxMatchingProperties == 8) {
-      // if maxMatchingProperties == 1000, it means that only the extraData property of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 1000, it means that only the extraData property of the auth in the request matches with one of the auths in the response
       revert AuthTypeIsAnonAndUserIdMismatch(auth.authType, auth.isAnon, auth.userId);
       } else if (maxMatchingProperties == 9) {
-      // if maxMatchingProperties == 1001, it means that only the authType and extraData properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 1001, it means that only the authType and extraData properties of the auth in the request matches with one of the auths in the response
       revert AuthIsAnonAndUserIdMismatch(auth.isAnon, auth.userId);
       } else if (maxMatchingProperties == 10) {
-      // if maxMatchingProperties == 1010, it means that only the isAnon and extraData properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 1010, it means that only the isAnon and extraData properties of the auth in the request matches with one of the auths in the response
       revert AuthTypeAndUserIdMismatch(auth.authType, auth.userId);
       } else if (maxMatchingProperties == 11) {
-      // if maxMatchingProperties == 1011, it means that only the authType, isAnon and extraData properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 1011, it means that only the authType, isAnon and extraData properties of the auth in the request matches with one of the auths in the response
       revert AuthUserIdMismatch(auth.userId);
       } else if (maxMatchingProperties == 12) {
-      // if maxMatchingProperties == 1100, it means that only the userId and extraData properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 1100, it means that only the userId and extraData properties of the auth in the request matches with one of the auths in the response
       revert AuthTypeAndIsAnonMismatch(auth.authType, auth.isAnon);
       } else if (maxMatchingProperties == 13) {
-      // if maxMatchingProperties == 1101, it means that only the authType, userId and extraData properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 1101, it means that only the authType, userId and extraData properties of the auth in the request matches with one of the auths in the response
       revert AuthIsAnonMismatch(auth.isAnon);
       } else if (maxMatchingProperties == 14) {
-      // if maxMatchingProperties == 1110, it means that only the isAnon, userId and extraData properties of the auth in the response matches with one of the auths in the request
+      // if maxMatchingProperties == 1110, it means that only the isAnon, userId and extraData properties of the auth in the request matches with one of the auths in the response
       revert AuthTypeMismatch(auth.authType);
       }
   } 
 
-  function _handleClaimErrors(uint8 maxMatchingProperties, Claim memory claim) internal pure {
+  function _handleClaimErrors(uint8 maxMatchingProperties, ClaimRequest memory claim) internal pure {
       //TODO: implement
       if (maxMatchingProperties != 31) { // 11111
         revert ClaimInResponseNotFoundInRequest(claim.claimType, claim.groupId, claim.groupTimestamp, claim.value, claim.extraData);

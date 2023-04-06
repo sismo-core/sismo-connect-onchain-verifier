@@ -10,22 +10,22 @@ interface ISismoConnectVerifier {
   error AppIdMismatch(bytes16 requestAppId, bytes16 responseAppId);
   error SignatureMessageMismatch(bytes requestMessageSignature, bytes responseMessageSignature);
   // Auth mismatch errors
-  error AuthInResponseNotFoundInRequest(AuthType responseAuthType, bool responseIsAnon, uint256 responseUserId, bytes responseExtraData);
-  error AuthTypeMismatch(AuthType responseAuthType);
-  error AuthIsAnonMismatch(bool responseIsAnon);
-  error AuthUserIdMismatch(uint256 responseUserId);
+  error AuthInRequestNotFoundInResponse(AuthType requestAuthType, bool requestIsAnon, uint256 requestUserId, bytes requestExtraData);
+  error AuthTypeMismatch(AuthType requestAuthType);
+  error AuthIsAnonMismatch(bool requestIsAnon);
+  error AuthUserIdMismatch(uint256 requestUserId);
 
-  error AuthIsAnonUserIdAndExtraDataMismatch(bool responseIsAnon, uint256 responseUserId, bytes responseExtraData);
-  error AuthTypeUserIdAndExtraDataMismatch(AuthType responseAuthType, uint256 responseUserId, bytes responseExtraData);
-  error AuthUserIdAndExtraDataMismatch(uint256 responseUserId, bytes responseExtraData);
-  error AuthTypeIsAnonAndExtraDataMismatch(AuthType responseAuthType, bool responseIsAnon, bytes responseExtraData);
-  error AuthIsAnonAndExtraDataMismatch(bool responseIsAnon, bytes responseExtraData);
-  error AuthTypeAndExtraDataMismatch(AuthType responseAuthType, bytes responseExtraData);
-  error AuthExtraDataMismatch(bytes responseExtraData);
-  error AuthTypeIsAnonAndUserIdMismatch(AuthType responseAuthType, bool responseIsAnon, uint256 responseUserId);
-  error AuthIsAnonAndUserIdMismatch(bool responseIsAnon, uint256 responseUserId);
-  error AuthTypeAndUserIdMismatch(AuthType responseAuthType, uint256 responseUserId);
-  error AuthTypeAndIsAnonMismatch(AuthType responseAuthType, bool responseIsAnon);
+  error AuthIsAnonUserIdAndExtraDataMismatch(bool requestIsAnon, uint256 requestUserId, bytes requestExtraData);
+  error AuthTypeUserIdAndExtraDataMismatch(AuthType requestAuthType, uint256 requestUserId, bytes requestExtraData);
+  error AuthUserIdAndExtraDataMismatch(uint256 requestUserId, bytes requestExtraData);
+  error AuthTypeIsAnonAndExtraDataMismatch(AuthType requestAuthType, bool requestIsAnon, bytes requestExtraData);
+  error AuthIsAnonAndExtraDataMismatch(bool requestIsAnon, bytes requestExtraData);
+  error AuthTypeAndExtraDataMismatch(AuthType requestAuthType, bytes requestExtraData);
+  error AuthExtraDataMismatch(bytes requestExtraData);
+  error AuthTypeIsAnonAndUserIdMismatch(AuthType requestAuthType, bool requestIsAnon, uint256 requestUserId);
+  error AuthIsAnonAndUserIdMismatch(bool requestIsAnon, uint256 requestUserId);
+  error AuthTypeAndUserIdMismatch(AuthType requestAuthType, uint256 requestUserId);
+  error AuthTypeAndIsAnonMismatch(AuthType requestAuthType, bool requestIsAnon);
 
   // Claim mismatch errors
   error ClaimInResponseNotFoundInRequest(ClaimType responseClaimType, bytes16 responseClaimGroupId, bytes16 responseClaimGroupTimestamp, uint256 responseClaimValue, bytes responseExtraData);
