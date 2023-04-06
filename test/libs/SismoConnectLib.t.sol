@@ -82,12 +82,12 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     sismoConnect.exposed_verify({responseBytes: abi.encode(invalidSismoConnectResponse), claimRequest: claimRequest});
   }
 
-  function test_RevertWith_MessageSignatureMismatch() public {
+  function test_RevertWith_SignatureMessageMismatch() public {
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse1();
     signatureRequest = sismoConnect.exposed_buildSignature({message: abi.encode("fake-signature")});
     vm.expectRevert(
       abi.encodeWithSignature(
-        "MessageSignatureMismatch(bytes,bytes)",
+        "SignatureMessageMismatch(bytes,bytes)",
         signatureRequest,
         hydraS2Proofs.getSismoConnectResponse1().signedMessage
       )
