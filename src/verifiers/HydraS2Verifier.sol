@@ -52,8 +52,6 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       revert OnlyOneAuthAndOneClaimIsSupported();
     }
 
-    
-
      // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
     VerifiedAuth memory verifiedAuth;
@@ -153,15 +151,14 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     Auth memory auth,
     bytes16 appId
   ) private view returns (VerifiedAuth memory) {
-    uint256 userId;
+    uint256 userIdFromProof;
     if (auth.authType == AuthType.VAULT) {
       // vaultNamespace validity
       bytes16 appIdFromProof = bytes16(uint128(input.vaultNamespace));
       if (appIdFromProof != bytes16(appId)) {
         revert VaultNamespaceMismatch(appIdFromProof, appId);
       }
-
-      userId = input.vaultIdentifier;
+      userIdFromProof = input.vaultIdentifier;
     } else {
       if (input.destinationVerificationEnabled == false) {
         revert DestinationVerificationNotEnabled();
@@ -179,15 +176,20 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
           bytes32(input.commitmentMapperPubKey[1])
         );
       }
+      userIdFromProof = uint256(uint160(input.destinationIdentifier));
+    }
 
-      userId = uint256(uint160(input.destinationIdentifier));
+    // check that the userId from the proof is the same as the userId in the auth
+    // the userId in the proof is the vaultIdentifier for AuthType.VAULT and the destinationIdentifier for other Auth types
+    if (auth.userId != userIdFromProof) {
+      revert UserIdMismatch(userIdFromProof, auth.userId);
     }
 
     return
       VerifiedAuth({
         authType: auth.authType,
         isAnon: auth.isAnon,
-        userId: userId,
+        userId: userIdFromProof,
         extraData: auth.extraData,
         proofData: proofData
       });

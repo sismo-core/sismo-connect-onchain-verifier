@@ -30,4 +30,5 @@ interface IHydraS2Verifier {
     uint256 expectedAccountsTreeValue
   );
   error VaultNamespaceMismatch(bytes16 appIdFromProof, bytes16 expectedAppId);
+  error UserIdMismatch(uint256 userIdFromProof, uint256 expectedUserId);
 }

@@ -30,8 +30,16 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     _checkResponseMatchesWithRequest(response, request);
 
     uint256 responseProofsArrayLength = response.proofs.length;
-    VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](responseProofsArrayLength);
-    VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](responseProofsArrayLength);
+    uint256 authsInResponseLength = 0;
+    uint256 claimsInResponseLength = 0;
+    // Count the number of auths and claims in the response
+    for (uint256 i = 0; i < responseProofsArrayLength; i++) {
+      authsInResponseLength += response.proofs[i].auths.length;
+      claimsInResponseLength += response.proofs[i].claims.length;
+    }
+
+    VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](authsInResponseLength);
+    VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](claimsInResponseLength);
 
     for (uint256 i = 0; i < responseProofsArrayLength; i++) {
       (
