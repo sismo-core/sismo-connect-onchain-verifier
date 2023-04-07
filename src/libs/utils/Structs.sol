@@ -15,7 +15,7 @@ struct AuthRequest {
   // flags
   bool isAnon; // default: false -> true not supported yet, need to throw if true
   bool isOptional; // default: false
-  bool isSelectableByUser; // default: false
+  bool isSelectableByUser; // default: true
   // 
   bytes extraData; // default: ""
 }
@@ -27,7 +27,7 @@ struct ClaimRequest {
   uint256 value; // default: 1
   // flags
   bool isOptional; // default: false 
-  bool isSelectableByUser; // default: false
+  bool isSelectableByUser; // default: true
   // 
   bytes extraData; // default: ""
 }
@@ -56,6 +56,7 @@ enum ClaimType {
 struct Auth {
   AuthType authType;
   bool isAnon;
+  bool isSelectableByUser;
   uint256 userId;
   bytes extraData;
 }
@@ -64,6 +65,7 @@ struct Claim {
   ClaimType claimType;
   bytes16 groupId;
   bytes16 groupTimestamp;
+  bool isSelectableByUser;
   uint256 value;
   bytes extraData;
 }

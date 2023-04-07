@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
+import "forge-std/console.sol";
 import "./interfaces/ISismoConnectVerifier.sol";
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
@@ -11,6 +12,16 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   bytes32 public immutable SISMO_CONNECT_VERSION = "sismo-connect-v1";
 
   mapping(bytes32 => IBaseVerifier) public _verifiers;
+
+  // struct to store informations about the number of verified auths and claims returned
+  // indexes of the first available slot in the arrays of auths and claims are also stored
+  // this struct is used to avoid stack to deep errors without using via_ir in foundry 
+  struct VerifiedArraysInfos {
+    uint256 nbOfAuths; // number of verified auths
+    uint256 nbOfClaims; // number of verified claims
+    uint256 authsIndex; // index of the first available slot in the array of verified auths
+    uint256 claimsIndex; // index of the first available slot in the array of verified claims
+  }
 
   constructor(address owner) {
     initialize(owner);
@@ -30,16 +41,21 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     _checkResponseMatchesWithRequest(response, request);
 
     uint256 responseProofsArrayLength = response.proofs.length;
-    uint256 authsInResponseLength = 0;
-    uint256 claimsInResponseLength = 0;
+    VerifiedArraysInfos memory infos = VerifiedArraysInfos({
+      nbOfAuths: 0,
+      nbOfClaims: 0,
+      authsIndex: 0,
+      claimsIndex: 0
+    });
+
     // Count the number of auths and claims in the response
     for (uint256 i = 0; i < responseProofsArrayLength; i++) {
-      authsInResponseLength += response.proofs[i].auths.length;
-      claimsInResponseLength += response.proofs[i].claims.length;
+      infos.nbOfAuths += response.proofs[i].auths.length;
+      infos.nbOfClaims += response.proofs[i].claims.length;
     }
 
-    VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](authsInResponseLength);
-    VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](claimsInResponseLength);
+    VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](infos.nbOfAuths);
+    VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](infos.nbOfClaims);
 
     for (uint256 i = 0; i < responseProofsArrayLength; i++) {
       (
@@ -52,8 +68,16 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
           sismoConnectProof: response.proofs[i]
         });
 
-      verifiedAuths[i] = verifiedAuth;
-      verifiedClaims[i] = verifiedClaim;
+      // we only want to add the verified auths and claims to the result
+      // if they are not empty, for that we check the length of the proofData that should always be different from 0
+      if (verifiedAuth.proofData.length != 0) {
+        verifiedAuths[infos.authsIndex] = verifiedAuth;
+        infos.authsIndex++;
+      }
+      if (verifiedClaim.proofData.length != 0) {
+        verifiedClaims[infos.claimsIndex] = verifiedClaim;
+        infos.claimsIndex++;
+      }
     }
 
     return
@@ -97,18 +121,35 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       }
     }
 
-    for (uint256 i = 0; i < response.proofs.length; i++) {
-      SismoConnectProof memory proof = response.proofs[i];
-      // Check if the auths and claims in the response match the auths and claims int the request
-      _checkAuthsInResponseMatchWithAuthsInRequest({auths: proof.auths, authRequests: request.auths});
-      _checkClaimsInResponseMatchWithClaimsInRequest({claims: proof.claims, claimRequests: request.claims});
-    }
+    // Check if the auths and claims in the request match the auths and claims int the response
+    _checkAuthsInRequestMatchWithAuthsInResponse({proofs: response.proofs, authRequests: request.auths});
+    _checkClaimsInRequestMatchWithClaimsInResponse({proofs: response.proofs, claimRequests: request.claims});
+
   }
 
-  function _checkAuthsInResponseMatchWithAuthsInRequest(
-    Auth[] memory auths,
+  function _checkAuthsInRequestMatchWithAuthsInResponse(
+    SismoConnectProof[] memory proofs,
     AuthRequest[] memory authRequests
-  ) internal pure {
+  ) internal view {
+    // we store the auths in the response
+    uint256 nbOfAuths = 0;
+    console.log("proofs length", proofs.length);
+    for (uint256 i = 0; i < proofs.length; i++) {
+      nbOfAuths += proofs[i].auths.length;
+      console.log("auths length for proof", proofs[i].auths.length);
+    }
+    Auth[] memory auths = new Auth[](nbOfAuths);
+    uint256 authsIndex = 0;
+    // we store the auths in the response in a single array
+    // we do a loop on the proofs array and on the auths array of each proof
+    for (uint256 i = 0; i < proofs.length; i++) {
+      for (uint256 j = 0; j < proofs[i].auths.length; j++) {
+        auths[authsIndex] = proofs[i].auths[j];
+        authsIndex++;
+      }
+    }
+
+    console.log("auths length", auths.length);
     // for each auth in the request, we check if it matches with one of the auths in the response
     for (uint256 i = 0; i < authRequests.length; i++) {
       // we store the information about the maximum matching properties in a uint8 
@@ -116,23 +157,26 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       // otherwise, we can look at the binary representation of the matchingProperties to know which properties are not matching and throw an error
       uint8 maxMatchingProperties = 0;
       AuthRequest memory authRequest = authRequests[i];
+
       for (uint256 j = 0; j < auths.length; j++) {
+        console.log("auths length", auths.length);
         // we store the matching properties for the current auth in the response in a uint8
         // we will store it in the maxMatchingProperties variable if it is greater than the current value of maxMatchingProperties
         uint8 matchingProperties = 0;
         Auth memory auth = auths[j];
+        console.logBytes(auth.extraData);
         if (auth.authType == authRequest.authType) {
           matchingProperties += 1; // 0001
         }
         if (auth.isAnon == authRequest.isAnon) {
           matchingProperties += 2; // 0010
         }
-        if (auth.userId != authRequest.userId) {
-          matchingProperties += 4; // 0100
-        }
-        if (keccak256(auth.extraData) != keccak256(authRequest.extraData)) {
-          matchingProperties += 8; // 1000
-        }
+        // if (auth.userId != authRequest.userId) {
+        //   matchingProperties += 4; // 0100
+        // }
+        // if (keccak256(auth.extraData) != keccak256(authRequest.extraData)) {
+        //   matchingProperties += 8; // 1000
+        // }
         // if the matchingProperties are greater than the current value of maxMatchingProperties, we update the value of maxMatchingProperties
         // by doing so we will be able to know how close the auth in the request is to the auth in the response
         if (matchingProperties > maxMatchingProperties) {
@@ -143,10 +187,28 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     }
   }
 
-  function _checkClaimsInResponseMatchWithClaimsInRequest(
-    Claim[] memory claims,
+  function _checkClaimsInRequestMatchWithClaimsInResponse(
+    SismoConnectProof[] memory proofs,
     ClaimRequest[] memory claimRequests
   ) internal pure {
+
+    // we store the claims in the response
+    uint256 nbOfClaims = 0;
+    for (uint256 i=0; i < proofs.length; i++) {
+      nbOfClaims += proofs[i].claims.length;
+    }
+
+    Claim[] memory claims = new Claim[](nbOfClaims);
+    uint256 claimsIndex = 0;
+    // we store the claims in the response in a single array
+    // we do a loop on the proofs array and on the claims array of each proof
+    for (uint256 i=0; i < proofs.length; i++) {
+      for (uint256 j=0; j < proofs[i].claims.length; j++) {
+        claims[claimsIndex] = proofs[i].claims[j];
+        claimsIndex++;
+      }
+    }
+
     for (uint256 i=0; i < claimRequests.length; i++) {
       uint8 maxMatchingProperties = 0;
       ClaimRequest memory claimRequest = claimRequests[i];
@@ -201,9 +263,9 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       } else if (maxMatchingProperties == 2) {
       // if maxMatchingProperties == 0010, it means that only the isAnon property of the auth in the request matches with one of the auths in the response
       revert AuthTypeUserIdAndExtraDataMismatch(auth.authType, auth.userId, auth.extraData);
-      } else if (maxMatchingProperties == 3) {
-      // if maxMatchingProperties == 0011, it means that only the authType and isAnon properties of the auth in the request matches with one of the auths in the response
-      revert AuthUserIdAndExtraDataMismatch(auth.userId, auth.extraData);
+      // } else if (maxMatchingProperties == 3) {
+      // // if maxMatchingProperties == 0011, it means that only the authType and isAnon properties of the auth in the request matches with one of the auths in the response
+      // revert AuthUserIdAndExtraDataMismatch(auth.userId, auth.extraData);
       } else if (maxMatchingProperties == 4) {
       // if maxMatchingProperties == 0100, it means that only the userId property of the auth in the request matches with one of the auths in the response
       revert AuthTypeIsAnonAndExtraDataMismatch(auth.authType, auth.isAnon, auth.extraData);

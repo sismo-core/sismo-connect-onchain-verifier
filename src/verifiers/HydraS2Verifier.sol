@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "forge-std/console.sol";
 import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
@@ -181,7 +182,10 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
 
     // check that the userId from the proof is the same as the userId in the auth
     // the userId in the proof is the vaultIdentifier for AuthType.VAULT and the destinationIdentifier for other Auth types
-    if (auth.userId != userIdFromProof) {
+    if (
+      auth.userId != userIdFromProof && 
+      !auth.isSelectableByUser // we do NOT check the userId if it has been made selectable by user in the vault app
+    ) {
       revert UserIdMismatch(userIdFromProof, auth.userId);
     }
 
@@ -198,7 +202,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   function _validateSignedMessageInput(
     HydraS2ProofInput memory input,
     bytes memory signedMessage
-  ) private pure {
+  ) private view {
     // don't check extraData if signedMessage is empty
     if (signedMessage.length == 0) {
       return;
@@ -206,6 +210,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     if (input.extraData != uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD) {
       revert InvalidExtraData(input.extraData, uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD);
     }
+    console.log("Signed message validated");
   }
 
   function _checkSnarkProof(HydraS2ProofData memory snarkProof) internal view {

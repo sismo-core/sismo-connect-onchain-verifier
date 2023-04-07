@@ -25,7 +25,7 @@ contract BaseTest is Test {
 
     IAddressesProvider(sismoAddressProvider).set(
       address(sismoConnectVerifier),
-      string("sismoConnectVerifier-v2")
+      string("sismoConnectVerifier-v1")
     );
   }
 }

@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "forge-std/console.sol";
 import "src/libs/utils/Structs.sol";
 import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
+import {ICommitmentMapperRegistry} from "test/mocks/CommitmentMapperRegistryMock.sol";
 
 contract HydraS2Proofs {
   // default value for Claim
@@ -36,11 +37,19 @@ contract HydraS2Proofs {
   }
 
   // simple sismoConnect with 1 statement
-  function getSismoConnectResponse1() public view returns (SismoConnectResponse memory) {
+  function getSismoConnectResponse1(ICommitmentMapperRegistry commitmentMapperRegistry) external returns (SismoConnectResponse memory) {
+    // update EdDSA public key for proof made in dev.beta environment
+    uint256[2] memory devBetaCommitmentMapperPubKey = [
+      0x2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f0256, 
+      0x30423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74
+    ];
+    commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(devBetaCommitmentMapperPubKey);
+    
     Claim memory claim = Claim({
       groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
       groupTimestamp: bytes16("latest"),
       value: 1,
+      isSelectableByUser: true,
       claimType: ClaimType.GTE,
       extraData: ""
     });
@@ -54,7 +63,7 @@ contract HydraS2Proofs {
       auths: auths,
       claims: claims,
       provingScheme: bytes32("hydra-s2.1"),
-      proofData: hex"027e2ac77cccdd6a170377c53d01745477d8e220eea25899bd551a6d93a0287928d68511985e87a2c00e406a9689bfee26975214f087b257c2cfbb0d8422081b177b788f52df265b9a455441d16f1ba2775cbf46e065d956e21abda4170bb23223d275e7e1a049db15f41c5398f1e4cc41e89d4175134bdcc0695142a33c90ca2dd94b68dcb64b88911aa13f5a78e0aa0de1eb6d5b0e911960370d080108961b0df136e1229ccf8d38290fc8287999d2b9fbf0339c45abaacd489b8ff081773710f1270f26800a2b1e86ef3ed8eab23acaef9ec8115865a552f29791e6209060203b8deb2e7d4847bead3fcf406c83aef1a9b25c87676cc73e610f672f1e0c79000000000000000000000000000000000000000000000000000000000000000009f60d972df499264335faccfc437669a97ea2b6c97a1a7ddf3f0105eda34b1d07f6c5612eb579788478789deccb06cf0eb168e457eea490af754922939ebdb920706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa1900027a626c79673bcd47d69cf371248a6ba78feee2ec32c5e83b681af8433904f81599b826fa9b715033e76e5b2fdda881352a9b61360022e30ee33ddccad90744e9b92802056c722ac4b31612e1b1de544d5b99481386b162a0b59862e0850000000000000000000000000000000000000000000000000000000000000001285bf79dc20d58e71b9712cb38c420b9cb91d3438c8e3dbaf07829b03ffffffc00000000000000000000000000000000000000000000000000000000000000000c5e3eb3996b56ed6e60c6c7823f4fa3e972a882bef34f6f35ed769bb60c35f90000000000000000000000000000000011b1de449c6c4adb0b5775b3868b28b300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+      proofData: hex"0f487f6a8182ed2628c890aef1bff29773ea6320437c42e9a3bc58b63c809caa0e22943a9b1bbafc49624d510168c897c1976582fb75cbaf235f76252d97dc942ca3623b27e6b82bea0ca60828803e429930afcad4a9d738f697469a0b71444821f61ff6a0694408c7fc35552af3afd5d419140ae803988271b9b2ac8642e6632a8b6e48fab58cda8500b87b84e11047858635b8931d288cd91e03b42a0471032fb4c6a8d8b47ede9617bf4fd5a22eb46dc7a48bb0c1e1b5f931c5c17fbde8792aa7911b50d49fb6c9ddb1ff862b02ebefcee9ccaff99037da3d1dfe1776665f05698d69bf496ed5f1fddbf0fdf01e7512938cd7d6f1231c260d20d5252badb1000000000000000000000000000000000000000000000000000000000000000009f60d972df499264335faccfc437669a97ea2b6c97a1a7ddf3f0105eda34b1d2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f025630423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74093e6683b2c6feac4f9ceb45edbae9a9e36c111856ec08cc0e00ae218ddc8cd304f81599b826fa9b715033e76e5b2fdda881352a9b61360022e30ee33ddccad90744e9b92802056c722ac4b31612e1b1de544d5b99481386b162a0b59862e0850000000000000000000000000000000000000000000000000000000000000001285bf79dc20d58e71b9712cb38c420b9cb91d3438c8e3dbaf07829b03ffffffc0000000000000000000000000000000000000000000000000000000000000000174c0f7d68550e40962c4ae6db9b04940288cb4aeede625dd8a9b0964939cdeb0000000000000000000000000000000011b1de449c6c4adb0b5775b3868b28b300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
       extraData: ""
     });
 
@@ -62,15 +71,73 @@ contract HydraS2Proofs {
       SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
-        version: bytes32("zk-connect-v2"),
+        version: bytes32("sismo-connect-v1"),
+        signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
+        proofs: proofs
+      });
+  }
+
+  function getSismoConnectResponse2(ICommitmentMapperRegistry commitmentMapperRegistry) external returns (SismoConnectResponse memory) {
+    // update EdDSA public key for proof made in dev.beta environment
+    uint256[2] memory devBetaCommitmentMapperPubKey = [
+      0x2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f0256, 
+      0x30423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74
+    ];
+    commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(devBetaCommitmentMapperPubKey);
+
+    Claim memory claim = Claim({
+      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
+      groupTimestamp: bytes16("latest"),
+      value: 1,
+      isSelectableByUser: true,
+      claimType: ClaimType.GTE,
+      extraData: ""
+    });
+
+    Claim memory claimTwo = Claim({
+      groupId: 0x02d241fdb9d4330c564ffc0a36af05f6,
+      groupTimestamp: bytes16("latest"),
+      value: 1,
+      isSelectableByUser: true,
+      claimType: ClaimType.GTE,
+      extraData: ""
+    });
+
+    Auth[] memory auths = new Auth[](0);
+    Claim[] memory claims = new Claim[](1);
+    Claim[] memory claimsTwo = new Claim[](1);
+    claims[0] = claim;
+    claimsTwo[0] = claimTwo;
+
+    SismoConnectProof[] memory proofs = new SismoConnectProof[](2);
+    proofs[0] = SismoConnectProof({
+      auths: auths,
+      claims: claims,
+      provingScheme: bytes32("hydra-s2.1"),
+      proofData: hex"0f487f6a8182ed2628c890aef1bff29773ea6320437c42e9a3bc58b63c809caa0e22943a9b1bbafc49624d510168c897c1976582fb75cbaf235f76252d97dc942ca3623b27e6b82bea0ca60828803e429930afcad4a9d738f697469a0b71444821f61ff6a0694408c7fc35552af3afd5d419140ae803988271b9b2ac8642e6632a8b6e48fab58cda8500b87b84e11047858635b8931d288cd91e03b42a0471032fb4c6a8d8b47ede9617bf4fd5a22eb46dc7a48bb0c1e1b5f931c5c17fbde8792aa7911b50d49fb6c9ddb1ff862b02ebefcee9ccaff99037da3d1dfe1776665f05698d69bf496ed5f1fddbf0fdf01e7512938cd7d6f1231c260d20d5252badb1000000000000000000000000000000000000000000000000000000000000000009f60d972df499264335faccfc437669a97ea2b6c97a1a7ddf3f0105eda34b1d2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f025630423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74093e6683b2c6feac4f9ceb45edbae9a9e36c111856ec08cc0e00ae218ddc8cd304f81599b826fa9b715033e76e5b2fdda881352a9b61360022e30ee33ddccad90744e9b92802056c722ac4b31612e1b1de544d5b99481386b162a0b59862e0850000000000000000000000000000000000000000000000000000000000000001285bf79dc20d58e71b9712cb38c420b9cb91d3438c8e3dbaf07829b03ffffffc0000000000000000000000000000000000000000000000000000000000000000174c0f7d68550e40962c4ae6db9b04940288cb4aeede625dd8a9b0964939cdeb0000000000000000000000000000000011b1de449c6c4adb0b5775b3868b28b300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+      extraData: ""
+    });
+    proofs[1] = SismoConnectProof({
+      auths: auths,
+      claims: claimsTwo,
+      provingScheme: bytes32("hydra-s2.1"),
+      proofData: hex"19735ce4cb40ccf1f7c39671f8f23aced3a16245122c89020efc5ac75c1dd80312917860861c0d92944b26558d0bba4918d4ded53dc03aff098c6e2042d61a0a0152128611339940b19943a76d2646e6d558e6856b6e8041baf5f28119c7bcc6060459294e408ced6f9c67b4e2c1fa8fae199853f7fe6816a6cb4932a5d1248418f64c33f48bc90e6c19fedfc1acdfb202c636c9d09e49566164da7ee3197fab1997b822a695da2c2ad3804f21401ce66438d3c534696c6f69ab749eff8c0aeb08cf7c754b114f2faaeb18c5018da85e736804d5981a82b16eec03be21aab79824983dd0f8091c2e2d7b7d211cb3eff407dd7c42a83a286930afe2ca41f8a33a000000000000000000000000000000000000000000000000000000000000000009f60d972df499264335faccfc437669a97ea2b6c97a1a7ddf3f0105eda34b1d2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f025630423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74093e6683b2c6feac4f9ceb45edbae9a9e36c111856ec08cc0e00ae218ddc8cd30f1d1d7e673892c9109c8b536253aa86d1d9dbd317ee37e71f22391e3a9fa5b3138cc656a4ed3352a074f68b57d684b33506d71ef40054fa928402c4897d14b8000000000000000000000000000000000000000000000000000000000000000102d241fdb9d4330c564ffc0a36af05f66c6174657374000000000000000000000000000000000000000000000000000000000000000000000000000000000000174c0f7d68550e40962c4ae6db9b04940288cb4aeede625dd8a9b0964939cdeb0000000000000000000000000000000011b1de449c6c4adb0b5775b3868b28b300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000",
+      extraData: ""
+    });
+
+    return
+      SismoConnectResponse({
+        appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
+        namespace: bytes16(keccak256("main")),
+        version: bytes32("sismo-connect-v1"),
         signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
         proofs: proofs
       });
   }
 
   // simple sismoConnect with only auth
-  function getSismoConnectResponse2() public view returns (SismoConnectResponse memory) {
-    Auth memory auth = Auth({authType: AuthType.VAULT, isAnon: false, userId: 0, extraData: ""});
+  function getSismoConnectResponse3() public view returns (SismoConnectResponse memory) {
+    Auth memory auth = Auth({authType: AuthType.VAULT, isAnon: false, isSelectableByUser: true, userId: 0, extraData: ""});
     Auth[] memory auths = new Auth[](1);
     auths[0] = auth;
     Claim[] memory claims = new Claim[](0);
@@ -88,7 +155,7 @@ contract HydraS2Proofs {
       SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
-        version: bytes32("zk-connect-v2"),
+        version: bytes32("sismo-connect-v1"),
         signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
         proofs: proofs
       });
