@@ -81,7 +81,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyX) public {
     // we assume that the incorrectCommitmentMapperPubKeyX is different from the correct commitmentMapperPubKeyX when fuzzing
-    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS2Proofs.getEdDSAPubKey()[0]);
+    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS2Proofs.getEdDSAPubKeyDevBeta()[0]);
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse3(commitmentMapperRegistry);
     // we change the authType to be equal to GITHUB instead of ANON to be able to check the commitmentMapperRegistry public key
     invalidSismoConnectResponse.proofs[0].auths[0] = Auth({authType: AuthType.GITHUB, isAnon: false, isSelectableByUser: true, userId: 0, extraData: ""});
@@ -109,7 +109,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithAuth(uint256 incorrectCommitmentMapperPubKeyY) public {
     // we assume that the incorrectCommitmentMapperPubKeyY is different from the correct commitmentMapperPubKeyY when fuzzing
-    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS2Proofs.getEdDSAPubKey()[1]);
+    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS2Proofs.getEdDSAPubKeyDevBeta()[1]);
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse3(commitmentMapperRegistry);
     // we change the authType to be equal to GITHUB instead of ANON to be able to check the commitmentMapperRegistry public key
     invalidSismoConnectResponse.proofs[0].auths[0] = Auth({authType: AuthType.GITHUB, isAnon: false, isSelectableByUser: true, userId: 0, extraData: ""});
@@ -161,7 +161,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyXMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyX) public {
     // we assume that the incorrectCommitmentMapperPubKeyX is different from the correct commitmentMapperPubKeyX when fuzzing
-    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS2Proofs.getEdDSAPubKey()[0]);
+    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS2Proofs.getEdDSAPubKeyDevBeta()[0]);
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse1(commitmentMapperRegistry);
     // commitmentMapperPubKeyX is at index 2 in snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 2, incorrectCommitmentMapperPubKeyX);
@@ -179,7 +179,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function testFuzz_RevertWith_CommitmentMapperPubKeyYMismatchWithClaim(uint256 incorrectCommitmentMapperPubKeyY) public {
     // we assume that the incorrectCommitmentMapperPubKeyY is different from the correct commitmentMapperPubKeyY when fuzzing
-    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS2Proofs.getEdDSAPubKey()[1]);
+    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS2Proofs.getEdDSAPubKeyDevBeta()[1]);
     SismoConnectResponse memory invalidSismoConnectResponse = hydraS2Proofs.getSismoConnectResponse1(commitmentMapperRegistry);
     // commitmentMapperPubKeyY is at index 3 in the snarkProof's inputs
     invalidSismoConnectResponse = _changeProofDataInSismoConnectResponse(invalidSismoConnectResponse, 3, incorrectCommitmentMapperPubKeyY); 
