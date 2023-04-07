@@ -10,30 +10,22 @@ interface ISismoConnectVerifier {
   error AppIdMismatch(bytes16 requestAppId, bytes16 responseAppId);
   error SignatureMessageMismatch(bytes requestMessageSignature, bytes responseMessageSignature);
   // Auth mismatch errors
-  error AuthInRequestNotFoundInResponse(AuthType requestAuthType, bool requestIsAnon, uint256 requestUserId, bytes requestExtraData);
-  error AuthTypeMismatch(AuthType requestAuthType);
-  error AuthIsAnonMismatch(bool requestIsAnon);
-  error AuthUserIdMismatch(uint256 requestUserId);
-
-  error AuthIsAnonUserIdAndExtraDataMismatch(bool requestIsAnon, uint256 requestUserId, bytes requestExtraData);
-  error AuthTypeUserIdAndExtraDataMismatch(AuthType requestAuthType, uint256 requestUserId, bytes requestExtraData);
-  error AuthUserIdAndExtraDataMismatch(uint256 requestUserId, bytes requestExtraData);
-  error AuthTypeIsAnonAndExtraDataMismatch(AuthType requestAuthType, bool requestIsAnon, bytes requestExtraData);
-  error AuthIsAnonAndExtraDataMismatch(bool requestIsAnon, bytes requestExtraData);
-  error AuthTypeAndExtraDataMismatch(AuthType requestAuthType, bytes requestExtraData);
-  error AuthExtraDataMismatch(bytes requestExtraData);
-  error AuthTypeIsAnonAndUserIdMismatch(AuthType requestAuthType, bool requestIsAnon, uint256 requestUserId);
-  error AuthIsAnonAndUserIdMismatch(bool requestIsAnon, uint256 requestUserId);
-  error AuthTypeAndUserIdMismatch(AuthType requestAuthType, uint256 requestUserId);
-  error AuthTypeAndIsAnonMismatch(AuthType requestAuthType, bool requestIsAnon);
+  error AuthInRequestNotFoundInResponse(uint8 requestAuthType, bool requestIsAnon, uint256 requestUserId, bytes requestExtraData);
+  error AuthIsAnonAndUserIdNotFound(bool requestIsAnon, uint256 requestUserId);
+  error AuthTypeAndUserIdNotFound(uint8 requestAuthType, uint256 requestUserId);
+  error AuthUserIdNotFound(uint256 requestUserId);
+  error AuthTypeAndIsAnonNotFound(uint8 requestAuthType, bool requestIsAnon);
+  error AuthIsAnonNotFound(bool requestIsAnon);
+  error AuthTypeNotFound(uint8 requestAuthType);
 
   // Claim mismatch errors
-  error ClaimInResponseNotFoundInRequest(ClaimType responseClaimType, bytes16 responseClaimGroupId, bytes16 responseClaimGroupTimestamp, uint256 responseClaimValue, bytes responseExtraData);
-  error ClaimTypeMismatch(ClaimType requestClaimType, ClaimType responseClaimType);
-  error ClaimValueMismatch(uint256 requestClaimValue, uint256 responseClaimValue);
-  error ClaimExtraDataMismatch(bytes requestExtraData, bytes responseExtraData);
-  error ClaimGroupIdMismatch(bytes16 requestGroupId, bytes16 responseGroupId);
-  error ClaimGroupTimestampMismatch(bytes16 requestGroupTimestamp, bytes16 responseGroupTimestamp);
+  error ClaimInRequestNotFoundInResponse(uint8 responseClaimType, bytes16 responseClaimGroupId, bytes16 responseClaimGroupTimestamp, uint256 responseClaimValue, bytes responseExtraData);
+  error ClaimGroupIdAndGroupTimestampNotFound(bytes16 requestClaimGroupId, bytes16 requestClaimGroupTimestamp);
+  error ClaimTypeAndGroupTimestampNotFound(uint8 requestClaimType, bytes16 requestClaimGroupTimestamp);
+  error ClaimGroupTimestampNotFound(bytes16 requestClaimGroupTimestamp);
+  error ClaimTypeAndGroupIdNotFound(uint8 requestClaimType, bytes16 requestClaimGroupId);
+  error ClaimGroupIdNotFound(bytes16 requestClaimGroupId);
+  error ClaimTypeNotFound(uint8 requestClaimType);
 
   event VerifierSet(bytes32, address);
 

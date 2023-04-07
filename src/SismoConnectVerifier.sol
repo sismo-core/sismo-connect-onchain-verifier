@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-import "forge-std/console.sol";
 import "./interfaces/ISismoConnectVerifier.sol";
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
@@ -133,10 +132,8 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   ) internal view {
     // we store the auths in the response
     uint256 nbOfAuths = 0;
-    console.log("proofs length", proofs.length);
     for (uint256 i = 0; i < proofs.length; i++) {
       nbOfAuths += proofs[i].auths.length;
-      console.log("auths length for proof", proofs[i].auths.length);
     }
     Auth[] memory auths = new Auth[](nbOfAuths);
     uint256 authsIndex = 0;
@@ -149,7 +146,6 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       }
     }
 
-    console.log("auths length", auths.length);
     // for each auth in the request, we check if it matches with one of the auths in the response
     for (uint256 i = 0; i < authRequests.length; i++) {
       // we store the information about the maximum matching properties in a uint8 
@@ -159,24 +155,26 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       AuthRequest memory authRequest = authRequests[i];
 
       for (uint256 j = 0; j < auths.length; j++) {
-        console.log("auths length", auths.length);
         // we store the matching properties for the current auth in the response in a uint8
         // we will store it in the maxMatchingProperties variable if it is greater than the current value of maxMatchingProperties
         uint8 matchingProperties = 0;
         Auth memory auth = auths[j];
-        console.logBytes(auth.extraData);
         if (auth.authType == authRequest.authType) {
-          matchingProperties += 1; // 0001
+          matchingProperties += 1; // 001
         }
         if (auth.isAnon == authRequest.isAnon) {
-          matchingProperties += 2; // 0010
+          matchingProperties += 2; // 010
         }
-        // if (auth.userId != authRequest.userId) {
-        //   matchingProperties += 4; // 0100
-        // }
-        // if (keccak256(auth.extraData) != keccak256(authRequest.extraData)) {
-        //   matchingProperties += 8; // 1000
-        // }
+        // if the userId in the auth request can NOT be chosen by the user when generating the proof (isSelectableByUser == true)
+        // we check if the userId of the auth in the request matches the userId of the auth in the response
+        if (authRequest.isSelectableByUser == false && auth.userId == authRequest.userId) {
+          matchingProperties += 4; // 100
+        } else if (authRequest.isSelectableByUser == true) {
+          // if the userId in the auth request can be chosen by the user when generating the proof (isSelectableByUser == true)
+          // we dont check if the userId of the auth in the request matches the userId of the auth in the response
+          // the property is considered as matching
+          matchingProperties += 4; // 100
+        }
         // if the matchingProperties are greater than the current value of maxMatchingProperties, we update the value of maxMatchingProperties
         // by doing so we will be able to know how close the auth in the request is to the auth in the response
         if (matchingProperties > maxMatchingProperties) {
@@ -216,19 +214,13 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
         uint8 matchingProperties = 0;
         Claim memory claim = claims[j];
         if (claim.claimType == claimRequest.claimType) {
-          matchingProperties += 1; // 0001
+          matchingProperties += 1; // 001
         }
         if (claim.groupId == claimRequest.groupId) {
-          matchingProperties += 2; // 0010
+          matchingProperties += 2; // 010
         }
         if (claim.groupTimestamp == claimRequest.groupTimestamp) {
-          matchingProperties += 4; // 0100
-        }
-        if (claim.value == claimRequest.value) {
-          matchingProperties += 8; // 1000
-        }
-        if (keccak256(claim.extraData) == keccak256(claimRequest.extraData)) {
-          matchingProperties += 16; // 10000
+          matchingProperties += 4; // 100
         }
         if (matchingProperties > maxMatchingProperties) {
           maxMatchingProperties = matchingProperties;
@@ -252,60 +244,49 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   }
 
   function _handleAuthErrors(uint8 maxMatchingProperties, AuthRequest memory auth) internal pure {
-      // if the maxMatchingProperties is equal to 15 (1111), it means that the auth in the request matches with one of the auths in the response
+      // if the maxMatchingProperties is equal to 7 (0111 in bits), it means that the auth in the request matches with one of the auths in the response 
+      // on the authType and isAnon properties
       // otherwise, we can look at the binary representation of the maxMatchingProperties to know which properties are not matching and throw an error
-      if (maxMatchingProperties == 0) { // 0000
-      // if maxMatchingProperties == 0000, it means that no property of the auth in the request matches with any property of the auths in the response
-      revert AuthInRequestNotFoundInResponse(auth.authType, auth.isAnon, auth.userId, auth.extraData);
-      } else if (maxMatchingProperties == 1) {
-      // if maxMatchingProperties == 0001, it means that only the authType property of the auth in the request matches with one of the auths in the response
-      revert AuthIsAnonUserIdAndExtraDataMismatch(auth.isAnon, auth.userId, auth.extraData);
-      } else if (maxMatchingProperties == 2) {
-      // if maxMatchingProperties == 0010, it means that only the isAnon property of the auth in the request matches with one of the auths in the response
-      revert AuthTypeUserIdAndExtraDataMismatch(auth.authType, auth.userId, auth.extraData);
-      // } else if (maxMatchingProperties == 3) {
-      // // if maxMatchingProperties == 0011, it means that only the authType and isAnon properties of the auth in the request matches with one of the auths in the response
-      // revert AuthUserIdAndExtraDataMismatch(auth.userId, auth.extraData);
-      } else if (maxMatchingProperties == 4) {
-      // if maxMatchingProperties == 0100, it means that only the userId property of the auth in the request matches with one of the auths in the response
-      revert AuthTypeIsAnonAndExtraDataMismatch(auth.authType, auth.isAnon, auth.extraData);
-      } else if (maxMatchingProperties == 5) {
-      // if maxMatchingProperties == 0101, it means that only the authType and userId properties of the auth in the request matches with one of the auths in the response
-      revert AuthIsAnonAndExtraDataMismatch(auth.isAnon, auth.extraData);
-      } else if (maxMatchingProperties == 6) {
-      // if maxMatchingProperties == 0110, it means that only the isAnon and userId properties of the auth in the request matches with one of the auths in the response
-      revert AuthTypeAndExtraDataMismatch(auth.authType, auth.extraData);
-      } else if (maxMatchingProperties == 7) {
-      // if maxMatchingProperties == 0111, it means that only the authType, isAnon and userId properties of the auth in the request matches with one of the auths in the response
-      revert AuthExtraDataMismatch(auth.extraData);
-      } else if (maxMatchingProperties == 8) {
-      // if maxMatchingProperties == 1000, it means that only the extraData property of the auth in the request matches with one of the auths in the response
-      revert AuthTypeIsAnonAndUserIdMismatch(auth.authType, auth.isAnon, auth.userId);
-      } else if (maxMatchingProperties == 9) {
-      // if maxMatchingProperties == 1001, it means that only the authType and extraData properties of the auth in the request matches with one of the auths in the response
-      revert AuthIsAnonAndUserIdMismatch(auth.isAnon, auth.userId);
-      } else if (maxMatchingProperties == 10) {
-      // if maxMatchingProperties == 1010, it means that only the isAnon and extraData properties of the auth in the request matches with one of the auths in the response
-      revert AuthTypeAndUserIdMismatch(auth.authType, auth.userId);
-      } else if (maxMatchingProperties == 11) {
-      // if maxMatchingProperties == 1011, it means that only the authType, isAnon and extraData properties of the auth in the request matches with one of the auths in the response
-      revert AuthUserIdMismatch(auth.userId);
-      } else if (maxMatchingProperties == 12) {
-      // if maxMatchingProperties == 1100, it means that only the userId and extraData properties of the auth in the request matches with one of the auths in the response
-      revert AuthTypeAndIsAnonMismatch(auth.authType, auth.isAnon);
-      } else if (maxMatchingProperties == 13) {
-      // if maxMatchingProperties == 1101, it means that only the authType, userId and extraData properties of the auth in the request matches with one of the auths in the response
-      revert AuthIsAnonMismatch(auth.isAnon);
-      } else if (maxMatchingProperties == 14) {
-      // if maxMatchingProperties == 1110, it means that only the isAnon, userId and extraData properties of the auth in the request matches with one of the auths in the response
-      revert AuthTypeMismatch(auth.authType);
+      if (maxMatchingProperties == 0) { // 000
+        // no property of the auth in the request matches with any property of the auths in the response
+        revert AuthInRequestNotFoundInResponse(uint8(auth.authType), auth.isAnon, auth.userId, auth.extraData);
+      } else if (maxMatchingProperties == 1) { // 001
+        // only the authType property of the auth in the request matches with one of the auths in the response
+        revert AuthIsAnonAndUserIdNotFound(auth.isAnon, auth.userId);
+      } else if (maxMatchingProperties == 2) { // 010
+        // only the isAnon property of the auth in the request matches with one of the auths in the response
+        revert AuthTypeAndUserIdNotFound(uint8(auth.authType), auth.userId);
+      } else if (maxMatchingProperties == 3) { // 011
+        // only the authType and isAnon properties of the auth in the request match with one of the auths in the response
+        revert AuthUserIdNotFound(auth.userId);
+      } else if (maxMatchingProperties == 4) { // 100
+        // only the userId property of the auth in the request matches with one of the auths in the response
+        revert AuthTypeAndIsAnonNotFound(uint8(auth.authType), auth.isAnon);
+      } else if (maxMatchingProperties == 5) { // 101
+        // only the authType and userId properties of the auth in the request matches with one of the auths in the response
+        revert AuthIsAnonNotFound(auth.isAnon);
+      } else if (maxMatchingProperties == 6) { // 110
+        // only the isAnon and userId properties of the auth in the request matches with one of the auths in the response
+        revert AuthTypeNotFound(uint8(auth.authType));
       }
   } 
 
   function _handleClaimErrors(uint8 maxMatchingProperties, ClaimRequest memory claim) internal pure {
       //TODO: implement
-      if (maxMatchingProperties != 31) { // 11111
-        revert ClaimInResponseNotFoundInRequest(claim.claimType, claim.groupId, claim.groupTimestamp, claim.value, claim.extraData);
+      if (maxMatchingProperties == 0) { // 000
+        revert ClaimInRequestNotFoundInResponse(uint8(claim.claimType), claim.groupId, claim.groupTimestamp, claim.value, claim.extraData);
+      } else if (maxMatchingProperties == 1) { // 001
+        revert ClaimGroupIdAndGroupTimestampNotFound(claim.groupId, claim.groupTimestamp);
+      } else if (maxMatchingProperties == 2) { // 010
+        revert ClaimTypeAndGroupTimestampNotFound(uint8(claim.claimType), claim.groupTimestamp);
+      } else if (maxMatchingProperties == 3) { // 011
+        revert ClaimGroupTimestampNotFound(claim.groupTimestamp);
+      } else if (maxMatchingProperties == 4) { // 100
+        revert ClaimTypeAndGroupIdNotFound(uint8(claim.claimType), claim.groupId);
+      } else if (maxMatchingProperties == 5) { // 101
+        revert ClaimGroupIdNotFound(claim.groupId);
+      } else if (maxMatchingProperties == 6) { // 110
+        revert ClaimTypeNotFound(uint8(claim.claimType));
       }
   }
 }

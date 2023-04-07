@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "forge-std/console.sol";
 import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
@@ -210,7 +209,6 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     if (input.extraData != uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD) {
       revert InvalidExtraData(input.extraData, uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD);
     }
-    console.log("Signed message validated");
   }
 
   function _checkSnarkProof(HydraS2ProofData memory snarkProof) internal view {
