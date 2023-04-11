@@ -154,9 +154,10 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     uint256 userIdFromProof;
     if (auth.authType == AuthType.VAULT) {
       // vaultNamespace validity
-      bytes16 appIdFromProof = bytes16(uint128(input.vaultNamespace));
-      if (appIdFromProof != bytes16(appId)) {
-        revert VaultNamespaceMismatch(appIdFromProof, appId);
+      uint256 vaultNamespaceFromProof = input.vaultNamespace;
+      uint256 expectedVaultNamespace = _encodeVaultNamespace(appId);
+      if (vaultNamespaceFromProof != expectedVaultNamespace) {
+        revert VaultNamespaceMismatch(vaultNamespaceFromProof, expectedVaultNamespace);
       }
       userIdFromProof = input.vaultIdentifier;
     } else {
@@ -247,5 +248,10 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
 
   function _encodeServiceId(bytes16 appId, bytes16 namespace) internal pure returns (bytes32) {
     return bytes32(abi.encodePacked(appId, namespace));
+  }
+
+  function _encodeVaultNamespace(bytes16 appId) internal pure returns (uint256) {
+    uint256 appIdWithNonce = uint256(uint128(appId)) + 0;
+    return uint256(keccak256(abi.encode(appIdWithNonce))) % HydraS2Lib.SNARK_FIELD;
   }
 }
