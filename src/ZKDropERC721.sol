@@ -5,6 +5,8 @@ import "./libs/zk-connect/SismoConnectLib.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract ZKDropERC721 is ERC721, SismoConnect {
+  using SismoConnectHelper for SismoConnectVerifiedResult;
+
   bytes16 public immutable GROUP_ID;
 
   string private _baseTokenURI;
@@ -23,26 +25,26 @@ contract ZKDropERC721 is ERC721, SismoConnect {
   }
 
   function claimWithSismoConnect(bytes memory response, address to) public {
-    SismoConnectVerifiedResult memory verifiedResult = verify({
+    SismoConnectVerifiedResult memory result = verify({
       responseBytes: response,
       auth: buildAuth({authType: AuthType.VAULT}),
       claim: buildClaim({groupId: GROUP_ID}),
       signature: buildSignature({message: abi.encode(to)})
     });
 
-    uint256 tokenId = verifiedResult.auths[0].userId;
+    uint256 tokenId = result.getUserId(AuthType.VAULT);
     _mint(to, tokenId);
   }
 
   function transferWithSismoConnect(bytes memory response, address to) public {
-    SismoConnectVerifiedResult memory verifiedResult = verify({
+    SismoConnectVerifiedResult memory result = verify({
       responseBytes: response,
       auth: buildAuth({authType: AuthType.VAULT}),
       claim: buildClaim({groupId: GROUP_ID}),
       signature: buildSignature({message: abi.encode(to)})
     });
 
-    uint256 tokenId = verifiedResult.auths[0].userId;
+    uint256 tokenId = result.getUserId(AuthType.VAULT);
     address from = ownerOf(tokenId);
     _transfer(from, to, tokenId);
   }
