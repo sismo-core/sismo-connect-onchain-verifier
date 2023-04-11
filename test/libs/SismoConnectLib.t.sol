@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {HydraS2BaseTest} from "../verifiers/hydra-s2/HydraS2BaseTest.t.sol";
-import {SismoConnect, RequestBuilder, AuthBuilder, ClaimBuilder} from "src/libs/zk-connect/SismoConnectLib.sol";
+import {SismoConnect, RequestBuilder, AuthRequestBuilder, ClaimRequestBuilder} from "src/libs/zk-connect/SismoConnectLib.sol";
 import {ZKDropERC721} from "src/ZKDropERC721.sol";
 import "src/libs/utils/Structs.sol";
 import {SismoConnectHarness} from "test/harness/SismoConnectHarness.sol";
@@ -268,11 +268,11 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
 
     ClaimRequest[] memory claims = new ClaimRequest[](2);
-    claims[0] = ClaimBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
-    claims[1] = ClaimBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
+    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[1] = ClaimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
 
     AuthRequest[] memory auths = new AuthRequest[](1);
-    auths[0] = AuthBuilder.build({authType: AuthType.VAULT});
+    auths[0] = AuthRequestBuilder.build({authType: AuthType.VAULT});
 
     SismoConnectRequest memory request = RequestBuilder.buildRequest({
       claims: claims,

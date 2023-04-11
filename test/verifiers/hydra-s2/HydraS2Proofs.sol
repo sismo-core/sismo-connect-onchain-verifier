@@ -3,7 +3,8 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import "src/libs/utils/Structs.sol";
-import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
+import {AuthBuilder} from "src/libs/utils/AuthBuilder.sol";
+import {ClaimBuilder} from "src/libs/utils/ClaimBuilder.sol";
 import {ICommitmentMapperRegistry} from "test/mocks/CommitmentMapperRegistryMock.sol";
 
 contract HydraS2Proofs {
@@ -52,13 +53,8 @@ contract HydraS2Proofs {
     ];
     commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(devBetaCommitmentMapperPubKey);
     
-    Claim memory claim = Claim({
-      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
-      groupTimestamp: bytes16("latest"),
-      value: 1,
-      isSelectableByUser: true,
-      claimType: ClaimType.GTE,
-      extraData: ""
+    Claim memory claim = ClaimBuilder.build({
+      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e
     });
 
     Auth[] memory auths = new Auth[](0);
@@ -92,22 +88,12 @@ contract HydraS2Proofs {
     // update EdDSA public key for proof made in dev.beta environment
     commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(getEdDSAPubKeyDevBeta());
 
-    Claim memory claim = Claim({
-      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
-      groupTimestamp: bytes16("latest"),
-      value: 1,
-      isSelectableByUser: true,
-      claimType: ClaimType.GTE,
-      extraData: ""
+    Claim memory claim = ClaimBuilder.build({
+      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e
     });
 
-    Claim memory claimTwo = Claim({
-      groupId: 0x02d241fdb9d4330c564ffc0a36af05f6,
-      groupTimestamp: bytes16("latest"),
-      value: 1,
-      isSelectableByUser: true,
-      claimType: ClaimType.GTE,
-      extraData: ""
+    Claim memory claimTwo = ClaimBuilder.build({
+      groupId: 0x02d241fdb9d4330c564ffc0a36af05f6
     });
 
     Auth[] memory auths = new Auth[](0);
@@ -150,7 +136,7 @@ contract HydraS2Proofs {
     // update EdDSA public key for proof made in dev.beta environment
     commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(getEdDSAPubKeyDevBeta());
 
-    Auth memory auth = Auth({authType: AuthType.VAULT, isAnon: false, isSelectableByUser: true, userId: 0, extraData: ""});
+    Auth memory auth = AuthBuilder.build({authType: AuthType.VAULT});
     Auth[] memory auths = new Auth[](1);
     auths[0] = auth;
     Claim[] memory claims = new Claim[](0);
@@ -182,18 +168,13 @@ contract HydraS2Proofs {
     // update EdDSA public key for proof made in dev.beta environment
     commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(getEdDSAPubKeyDevBeta());
 
-    Claim memory claim = Claim({
-      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
-      groupTimestamp: bytes16("latest"),
-      value: 1,
-      isSelectableByUser: true,
-      claimType: ClaimType.GTE,
-      extraData: ""
+    Claim memory claim = ClaimBuilder.build({
+      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e
     });
     Claim[] memory claims = new Claim[](1);
     claims[0] = claim;
 
-    Auth memory auth = Auth({authType: AuthType.VAULT, isAnon: false, isSelectableByUser: true, userId: 0, extraData: ""});
+    Auth memory auth = AuthBuilder.build({authType: AuthType.VAULT});
     Auth[] memory auths = new Auth[](1);
     auths[0] = auth;
 
@@ -230,22 +211,12 @@ contract HydraS2Proofs {
     // update EdDSA public key for proof made in dev.beta environment
     commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(getEdDSAPubKeyDevBeta());
 
-     Claim memory claim = Claim({
-      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
-      groupTimestamp: bytes16("latest"),
-      value: 1,
-      isSelectableByUser: true,
-      claimType: ClaimType.GTE,
-      extraData: ""
+     Claim memory claim = ClaimBuilder.build({
+      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e
     });
 
-    Claim memory claimTwo = Claim({
-      groupId: 0x02d241fdb9d4330c564ffc0a36af05f6,
-      groupTimestamp: bytes16("latest"),
-      value: 1,
-      isSelectableByUser: true,
-      claimType: ClaimType.GTE,
-      extraData: ""
+    Claim memory claimTwo = ClaimBuilder.build({
+      groupId: 0x02d241fdb9d4330c564ffc0a36af05f6
     });
 
     Auth[] memory authsEmpty = new Auth[](0);
@@ -255,7 +226,7 @@ contract HydraS2Proofs {
     claims[0] = claim;
     claimsTwo[0] = claimTwo;
 
-    Auth memory auth = Auth({authType: AuthType.VAULT, isAnon: false, isSelectableByUser: true, userId: 0, extraData: ""});
+    Auth memory auth = AuthBuilder.build({authType: AuthType.VAULT});
     auths[0] = auth;
     Claim[] memory claimsEmpty = new Claim[](0);
 

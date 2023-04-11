@@ -5,29 +5,26 @@ import "src/libs/utils/Structs.sol";
 
 library ClaimBuilder {
     // default value for Claim Request
-  bytes16 public constant DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP = bytes16("latest");
-  uint256 public constant DEFAULT_CLAIM_REQUEST_VALUE = 1;
-  ClaimType public constant DEFAULT_CLAIM_REQUEST_TYPE = ClaimType.GTE;
-  bool public constant DEFAULT_CLAIM_REQUEST_IS_OPTIONAL = false;
-  bool public constant DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER = true;
-  bytes public constant DEFAULT_CLAIM_REQUEST_EXTRA_DATA = "";
+  bytes16 public constant DEFAULT_CLAIM_GROUP_TIMESTAMP = bytes16("latest");
+  uint256 public constant DEFAULT_CLAIM_VALUE = 1;
+  ClaimType public constant DEFAULT_CLAIM_TYPE = ClaimType.GTE;
+  bool public constant DEFAULT_CLAIM_IS_SELECTABLE_BY_USER = true;
+  bytes public constant DEFAULT_CLAIM_EXTRA_DATA = "";
 
   function build(
     bytes16 groupId,
     bytes16 groupTimestamp,
     uint256 value,
     ClaimType claimType,
-    bool isOptional,
     bool isSelectableByUser,
     bytes memory extraData
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         claimType: claimType,
         groupId: groupId,
         groupTimestamp: groupTimestamp,
         value: value,
-        isOptional: isOptional,
         isSelectableByUser: isSelectableByUser,
         extraData: extraData
       });
@@ -39,80 +36,74 @@ library ClaimBuilder {
     uint256 value,
     ClaimType claimType,
     bytes memory extraData
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         claimType: claimType,
         groupId: groupId,
         groupTimestamp: groupTimestamp,
         value: value,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
   }
 
-  function build(bytes16 groupId) external pure returns (ClaimRequest memory) {
+  function build(bytes16 groupId) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_REQUEST_VALUE,
-        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
-        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
+        value: DEFAULT_CLAIM_VALUE,
+        claimType: DEFAULT_CLAIM_TYPE,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_EXTRA_DATA
       });
   }
 
-  function build(bytes16 groupId, bytes16 groupTimestamp) external pure returns (ClaimRequest memory) {
+  function build(bytes16 groupId, bytes16 groupTimestamp) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
         groupTimestamp: groupTimestamp,
-        value: DEFAULT_CLAIM_REQUEST_VALUE,
-        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
-        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+        value: DEFAULT_CLAIM_VALUE,
+        claimType: DEFAULT_CLAIM_TYPE,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_EXTRA_DATA
       });
   }
 
-  function build(bytes16 groupId, uint256 value) external pure returns (ClaimRequest memory) {
+  function build(bytes16 groupId, uint256 value) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
+        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
         value: value,
-        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
-        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+        claimType: DEFAULT_CLAIM_TYPE,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_EXTRA_DATA
       });
   }
 
-  function build(bytes16 groupId, ClaimType claimType) external pure returns (ClaimRequest memory) {
+  function build(bytes16 groupId, ClaimType claimType) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_REQUEST_VALUE,
+        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
+        value: DEFAULT_CLAIM_VALUE,
         claimType: claimType,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
-        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_EXTRA_DATA
       });
   }
 
-  function build(bytes16 groupId, bytes memory extraData) external pure returns (ClaimRequest memory) {
+  function build(bytes16 groupId, bytes memory extraData) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_REQUEST_VALUE,
-        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
+        value: DEFAULT_CLAIM_VALUE,
+        claimType: DEFAULT_CLAIM_TYPE,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
   }
@@ -121,16 +112,15 @@ library ClaimBuilder {
     bytes16 groupId,
     bytes16 groupTimestamp,
     uint256 value
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
         groupTimestamp: groupTimestamp,
         value: value,
-        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
-        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+        claimType: DEFAULT_CLAIM_TYPE,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_EXTRA_DATA
       });
   }
 
@@ -138,16 +128,15 @@ library ClaimBuilder {
     bytes16 groupId,
     bytes16 groupTimestamp,
     ClaimType claimType
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
         groupTimestamp: groupTimestamp,
-        value: DEFAULT_CLAIM_REQUEST_VALUE,
+        value: DEFAULT_CLAIM_VALUE,
         claimType: claimType,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
-        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_EXTRA_DATA
       });
   }
 
@@ -155,15 +144,14 @@ library ClaimBuilder {
     bytes16 groupId,
     bytes16 groupTimestamp,
     bytes memory extraData
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
         groupTimestamp: groupTimestamp,
-        value: DEFAULT_CLAIM_REQUEST_VALUE,
-        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        value: DEFAULT_CLAIM_VALUE,
+        claimType: DEFAULT_CLAIM_TYPE,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
   }
@@ -172,16 +160,15 @@ library ClaimBuilder {
     bytes16 groupId,
     uint256 value,
     ClaimType claimType
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
+        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
         value: value,
         claimType: claimType,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
-        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_EXTRA_DATA
       });
   }
 
@@ -189,15 +176,14 @@ library ClaimBuilder {
     bytes16 groupId,
     uint256 value,
     bytes memory extraData
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
+        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
         value: value,
-        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        claimType: DEFAULT_CLAIM_TYPE,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
   }
@@ -206,15 +192,14 @@ library ClaimBuilder {
     bytes16 groupId,
     ClaimType claimType,
     bytes memory extraData
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_REQUEST_VALUE,
+        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
+        value: DEFAULT_CLAIM_VALUE,
         claimType: claimType,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
   }
@@ -224,16 +209,15 @@ library ClaimBuilder {
     bytes16 groupTimestamp,
     uint256 value,
     ClaimType claimType
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
         groupTimestamp: groupTimestamp,
         value: value,
         claimType: claimType,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
-        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_EXTRA_DATA
       });
   }
 
@@ -242,15 +226,14 @@ library ClaimBuilder {
     bytes16 groupTimestamp,
     uint256 value,
     bytes memory extraData
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
         groupTimestamp: groupTimestamp,
         value: value,
-        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        claimType: DEFAULT_CLAIM_TYPE,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
   }
@@ -260,15 +243,14 @@ library ClaimBuilder {
     bytes16 groupTimestamp,
     ClaimType claimType,
     bytes memory extraData
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
         groupTimestamp: groupTimestamp,
-        value: DEFAULT_CLAIM_REQUEST_VALUE,
+        value: DEFAULT_CLAIM_VALUE,
         claimType: claimType,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
   }
@@ -278,15 +260,14 @@ library ClaimBuilder {
     uint256 value,
     ClaimType claimType,
     bytes memory extraData
-  ) external pure returns (ClaimRequest memory) {
+  ) external pure returns (Claim memory) {
     return
-      ClaimRequest({
+      Claim({
         groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
+        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
         value: value,
         claimType: claimType,
-        isOptional: DEFAULT_CLAIM_REQUEST_IS_OPTIONAL,
-        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        isSelectableByUser: DEFAULT_CLAIM_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
   }
