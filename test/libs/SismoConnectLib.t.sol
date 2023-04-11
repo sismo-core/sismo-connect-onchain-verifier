@@ -331,4 +331,19 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     });
     console.log("Claims in Verified result: %s", verifiedResult.claims.length);
   }
+
+  function test_GitHubAuth() public {
+    (, bytes memory encodedResponse) = hydraS2Proofs.getResponseWithGitHubAuth(commitmentMapperRegistry);
+
+     SismoConnectRequest memory request = RequestBuilder.buildRequest({
+      auth: sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB}),
+      signature: signature,
+      appId: appId
+    });
+
+    sismoConnect.exposed_verify({
+      responseBytes: encodedResponse,
+      request: request
+    });
+  }
 }
