@@ -120,45 +120,55 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       }
     }
 
+    // we store the auths and claims in the response
+    uint256 nbOfAuths = 0;
+    uint256 nbOfClaims = 0;
+    for (uint256 i = 0; i < response.proofs.length; i++) {
+      nbOfAuths += response.proofs[i].auths.length;
+      nbOfClaims += response.proofs[i].claims.length;
+    }
+
+    Auth[] memory authsInResponse = new Auth[](nbOfAuths);
+    uint256 authsIndex = 0;
+    Claim[] memory claimsInResponse = new Claim[](nbOfClaims);
+    uint256 claimsIndex = 0;
+    // we store the auths and claims in the response in a single respective array
+    for (uint256 i = 0; i < response.proofs.length; i++) {
+      // we do a loop on the proofs array and on the auths array of each proof
+      for (uint256 j = 0; j < response.proofs[i].auths.length; j++) {
+        authsInResponse[authsIndex] = response.proofs[i].auths[j];
+        authsIndex++;
+      }
+      // we do a loop on the proofs array and on the claims array of each proof
+      for (uint256 j = 0; j < response.proofs[i].claims.length; j++) {
+        claimsInResponse[claimsIndex] = response.proofs[i].claims[j];
+        claimsIndex++;
+      }
+    }
+
     // Check if the auths and claims in the request match the auths and claims int the response
-    _checkAuthsInRequestMatchWithAuthsInResponse({proofs: response.proofs, authRequests: request.auths});
-    _checkClaimsInRequestMatchWithClaimsInResponse({proofs: response.proofs, claimRequests: request.claims});
+    _checkAuthsInRequestMatchWithAuthsInResponse({authsInRequest: request.auths, authsInResponse: authsInResponse});
+    _checkClaimsInRequestMatchWithClaimsInResponse({claimsInRequest: request.claims, claimsInResponse: claimsInResponse});
 
   }
 
   function _checkAuthsInRequestMatchWithAuthsInResponse(
-    SismoConnectProof[] memory proofs,
-    AuthRequest[] memory authRequests
+    AuthRequest[] memory authsInRequest,
+    Auth[] memory authsInResponse
   ) internal pure {
-    // we store the auths in the response
-    uint256 nbOfAuths = 0;
-    for (uint256 i = 0; i < proofs.length; i++) {
-      nbOfAuths += proofs[i].auths.length;
-    }
-    Auth[] memory auths = new Auth[](nbOfAuths);
-    uint256 authsIndex = 0;
-    // we store the auths in the response in a single array
-    // we do a loop on the proofs array and on the auths array of each proof
-    for (uint256 i = 0; i < proofs.length; i++) {
-      for (uint256 j = 0; j < proofs[i].auths.length; j++) {
-        auths[authsIndex] = proofs[i].auths[j];
-        authsIndex++;
-      }
-    }
-
     // for each auth in the request, we check if it matches with one of the auths in the response
-    for (uint256 i = 0; i < authRequests.length; i++) {
+    for (uint256 i = 0; i < authsInRequest.length; i++) {
       // we store the information about the maximum matching properties in a uint8 
       // if the auth in the request matches with an auth in the response, the matchingProperties will be equal to 15 (1111)
       // otherwise, we can look at the binary representation of the matchingProperties to know which properties are not matching and throw an error
       uint8 maxMatchingProperties = 0;
-      AuthRequest memory authRequest = authRequests[i];
+      AuthRequest memory authRequest = authsInRequest[i];
 
-      for (uint256 j = 0; j < auths.length; j++) {
+      for (uint256 j = 0; j < authsInResponse.length; j++) {
         // we store the matching properties for the current auth in the response in a uint8
         // we will store it in the maxMatchingProperties variable if it is greater than the current value of maxMatchingProperties
         uint8 matchingProperties = 0;
-        Auth memory auth = auths[j];
+        Auth memory auth = authsInResponse[j];
         if (auth.authType == authRequest.authType) {
           matchingProperties += 1; // 001
         }
@@ -186,33 +196,15 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   }
 
   function _checkClaimsInRequestMatchWithClaimsInResponse(
-    SismoConnectProof[] memory proofs,
-    ClaimRequest[] memory claimRequests
+   ClaimRequest[] memory claimsInRequest,
+    Claim[] memory claimsInResponse
   ) internal pure {
-
-    // we store the claims in the response
-    uint256 nbOfClaims = 0;
-    for (uint256 i=0; i < proofs.length; i++) {
-      nbOfClaims += proofs[i].claims.length;
-    }
-
-    Claim[] memory claims = new Claim[](nbOfClaims);
-    uint256 claimsIndex = 0;
-    // we store the claims in the response in a single array
-    // we do a loop on the proofs array and on the claims array of each proof
-    for (uint256 i=0; i < proofs.length; i++) {
-      for (uint256 j=0; j < proofs[i].claims.length; j++) {
-        claims[claimsIndex] = proofs[i].claims[j];
-        claimsIndex++;
-      }
-    }
-
-    for (uint256 i=0; i < claimRequests.length; i++) {
+    for (uint256 i=0; i < claimsInRequest.length; i++) {
       uint8 maxMatchingProperties = 0;
-      ClaimRequest memory claimRequest = claimRequests[i];
-      for (uint256 j=0; j < claims.length; j++) {
+      ClaimRequest memory claimRequest = claimsInRequest[i];
+      for (uint256 j=0; j < claimsInResponse.length; j++) {
         uint8 matchingProperties = 0;
-        Claim memory claim = claims[j];
+        Claim memory claim = claimsInResponse[j];
         if (claim.claimType == claimRequest.claimType) {
           matchingProperties += 1; // 001
         }

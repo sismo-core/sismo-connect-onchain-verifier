@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "forge-std/console.sol";
 import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
@@ -251,7 +252,6 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   }
 
   function _encodeVaultNamespace(bytes16 appId) internal pure returns (uint256) {
-    uint256 appIdWithNonce = uint256(uint128(appId)) + 0;
-    return uint256(keccak256(abi.encode(appIdWithNonce))) % HydraS2Lib.SNARK_FIELD;
+    return uint256(keccak256(abi.encodePacked(appId, bytes16(0)))) % HydraS2Lib.SNARK_FIELD;
   }
 }
