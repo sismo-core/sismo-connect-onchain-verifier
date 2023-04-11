@@ -289,5 +289,144 @@ library ClaimRequestBuilder {
         isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
+  } 
+
+  // allow dev to choose for isOptional
+
+  function build(bytes16 groupId, bool isOptional) external pure returns (ClaimRequest memory) {
+    return
+      ClaimRequest({
+        groupId: groupId,
+        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
+        value: DEFAULT_CLAIM_REQUEST_VALUE,
+        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
+        isOptional: isOptional,
+        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+      });
+  }
+
+  function build(
+    bytes16 groupId,
+    bytes16 groupTimestamp,
+    bool isOptional
+  ) external pure returns (ClaimRequest memory) {
+    return
+      ClaimRequest({
+        groupId: groupId,
+        groupTimestamp: groupTimestamp,
+        value: DEFAULT_CLAIM_REQUEST_VALUE,
+        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
+        isOptional: isOptional,
+        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+      });
+  }
+
+  function build(
+    bytes16 groupId,
+    uint256 value,
+    bool isOptional
+  ) external pure returns (ClaimRequest memory) {
+    return
+      ClaimRequest({
+        groupId: groupId,
+        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
+        value: value,
+        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
+        isOptional: isOptional,
+        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+      });
+  }
+
+  function build(
+    bytes16 groupId,
+    ClaimType claimType,
+    bool isOptional
+  ) external pure returns (ClaimRequest memory) {
+    return
+      ClaimRequest({
+        groupId: groupId,
+        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
+        value: DEFAULT_CLAIM_REQUEST_VALUE,
+        claimType: claimType,
+        isOptional: isOptional,
+        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+      });
+  }
+
+  function build(
+    bytes16 groupId,
+    bytes16 groupTimestamp,
+    uint256 value,
+    bool isOptional
+  ) external pure returns (ClaimRequest memory) {
+    return
+      ClaimRequest({
+        groupId: groupId,
+        groupTimestamp: groupTimestamp,
+        value: value,
+        claimType: DEFAULT_CLAIM_REQUEST_TYPE,
+        isOptional: isOptional,
+        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+      });
+  }
+
+  function build(
+    bytes16 groupId,
+    bytes16 groupTimestamp,
+    ClaimType claimType,
+    bool isOptional
+  ) external pure returns (ClaimRequest memory) {
+    return
+      ClaimRequest({
+        groupId: groupId,
+        groupTimestamp: groupTimestamp,
+        value: DEFAULT_CLAIM_REQUEST_VALUE,
+        claimType: claimType,
+        isOptional: isOptional,
+        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+      });
+  }
+
+  function build(
+    bytes16 groupId,
+    uint256 value,
+    ClaimType claimType,
+    bool isOptional
+  ) external pure returns (ClaimRequest memory) {
+    return
+      ClaimRequest({
+        groupId: groupId,
+        groupTimestamp: DEFAULT_CLAIM_REQUEST_GROUP_TIMESTAMP,
+        value: value,
+        claimType: claimType,
+        isOptional: isOptional,
+        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+      });
+  }
+
+  function build(
+    bytes16 groupId,
+    bytes16 groupTimestamp,
+    uint256 value,
+    ClaimType claimType,
+    bool isOptional
+  ) external pure returns (ClaimRequest memory) {
+    return
+      ClaimRequest({
+        groupId: groupId,
+        groupTimestamp: groupTimestamp,
+        value: value,
+        claimType: claimType,
+        isOptional: isOptional,
+        isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
+        extraData: DEFAULT_CLAIM_REQUEST_EXTRA_DATA
+      });
   }
 }
