@@ -11,6 +11,7 @@ import {ISismoConnectLib} from "./ISismoConnectLib.sol";
 import {ISismoConnectVerifier} from "src/interfaces/ISismoConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 import {SismoConnectHelper} from "src/libs/utils/SismoConnectHelper.sol";
+import {SismoConnectError} from "src/libs/sismo-connect/SismoConnectError.sol";
 
 contract SismoConnect is ISismoConnectLib, Context {
   uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;

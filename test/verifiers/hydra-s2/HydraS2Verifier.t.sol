@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "forge-std/console.sol";
 import {HydraS2BaseTest} from "./HydraS2BaseTest.t.sol";
 import {SismoConnectHarness} from "test/harness/SismoConnectHarness.sol";
-import "src/libs/zk-connect/SismoConnectLib.sol";
+import "src/libs/sismo-connect/SismoConnectLib.sol";
 import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "src/verifiers/HydraS2Lib.sol";
 
 contract HydraS2VerifierTest is HydraS2BaseTest {

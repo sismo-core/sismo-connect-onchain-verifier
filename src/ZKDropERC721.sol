@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./libs/zk-connect/SismoConnectLib.sol";
+import "./libs/sismo-connect/SismoConnectLib.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract ZKDropERC721 is ERC721, SismoConnect {

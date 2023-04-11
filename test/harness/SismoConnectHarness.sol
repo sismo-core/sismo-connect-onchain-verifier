@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-import "src/libs/zk-connect/SismoConnectLib.sol";
+import "src/libs/sismo-connect/SismoConnectLib.sol";
 
 // This contract is used to expose internal functions of SismoConnect for testing purposes
 // It is NOT deployed in production

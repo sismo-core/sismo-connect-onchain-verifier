@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {HydraS2BaseTest} from "../verifiers/hydra-s2/HydraS2BaseTest.t.sol";
-import {SismoConnect, RequestBuilder, AuthRequestBuilder, ClaimRequestBuilder} from "src/libs/zk-connect/SismoConnectLib.sol";
+import {SismoConnect, RequestBuilder, AuthRequestBuilder, ClaimRequestBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
 import {ZKDropERC721} from "src/ZKDropERC721.sol";
 import "src/libs/utils/Structs.sol";
 import {SismoConnectHarness} from "test/harness/SismoConnectHarness.sol";
