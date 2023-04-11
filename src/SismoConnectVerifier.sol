@@ -191,6 +191,11 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
           maxMatchingProperties = matchingProperties;
         }
       }
+
+      if (authRequest.isOptional) {
+        // if the auth in the request is optional, we consider that its properties are all matching
+        maxMatchingProperties = 7; // 111
+      }
       _handleAuthErrors(maxMatchingProperties, authRequest);
     }
   }
@@ -217,6 +222,9 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
         if (matchingProperties > maxMatchingProperties) {
           maxMatchingProperties = matchingProperties;
         }
+      }
+      if (claimRequest.isOptional) {
+        maxMatchingProperties = 7; // 111
       }
       _handleClaimErrors(maxMatchingProperties, claimRequest);
     }
