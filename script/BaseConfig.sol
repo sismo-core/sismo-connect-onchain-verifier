@@ -124,8 +124,8 @@ contract BaseDeploymentConfig is Script {
         availableRootsRegistry: address(0xF3dAc93c85e92cab8f811b3A3cCaCB93140D9304),
         commitmentMapperRegistry: address(0xa3104F52bF6C8317a49144d864CB04f2A487327B),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0x8BcD02319F29AB2f89b3D424FFc985FF7353E7DC),
-        hydraS2Verifier: address(0xdE270F0107F350954A7D03C0d54021A7Ccf9AABC)
+        sismoConnectVerifier: address(0x157Fc8BaF63B3Bde3A614fEf271392c7468b3342),
+        hydraS2Verifier: address(0x9CEbb9E8eCe53489B9B426c0f17e5E6fd63d0a72)
       });
     } else if (chain == DeployChain.TestnetMumbai) {
       config = DeploymentConfig({
