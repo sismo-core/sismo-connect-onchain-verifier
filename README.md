@@ -23,9 +23,9 @@
 
 sismoConnect onchain verifier is a Solidity library that allows you to verify the zk-proofs of your sismoConnect Application onchain.
 
-Here is the link to the full documentation of the library: [sismoConnect onchain verifier](https://docs.sismo.io/sismo-docs/technical-documentation/zkconnect/zkconnect-solidity-library-verify-on-chain-soon)
+Here is the link to the full documentation of the library: [sismoConnect onchain verifier](https://docs.sismo.io/sismo-docs/technical-documentation/sismo-connect/solidity-library)
 
-You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/zkconnect).
+You can learn more on sismoConnect [here](https://docs.sismo.io/sismo-docs/readme/sismo-connect).
 
 ## License
 

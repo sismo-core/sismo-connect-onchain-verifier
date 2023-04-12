@@ -9,7 +9,7 @@ library SismoConnectError {
   error NamespaceMismatch(bytes16 receivedNamespace, bytes16 expectedNamespace);
 
   ///////////////////////////////////////
-  // ZkConnectVerifier Errors
+  // SismoConnectVerifier Errors
   ///////////////////////////////////////
 
   ////Errors: Request/Response mismatch errors
