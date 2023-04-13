@@ -10,7 +10,8 @@ library AuthRequestBuilder {
   bool public constant DEFAULT_AUTH_REQUEST_IS_OPTIONAL = false;
   bytes public constant DEFAULT_AUTH_REQUEST_EXTRA_DATA = "";
 
-  error InvalidUserIdAndIsSelectableByUserAuthTypeParams();
+  error InvalidUserIdAndIsSelectableByUserAuthType();
+  error InvalidUserIdAndAuthType();
 
   function build(
     AuthType authType,
@@ -214,7 +215,7 @@ library AuthRequestBuilder {
         isAnon: isAnon,
         userId: userId,
         isOptional: isOptional,
-        isSelectableByUser: _authIsSelectableDefaultValue(userId),
+        isSelectableByUser: _authIsSelectableDefaultValue(authType, userId),
         extraData: extraData
       });
   }
@@ -232,8 +233,12 @@ library AuthRequestBuilder {
     // When `isSelectableByUser` is true, the user can select the account they want to use.
     // The combination of `userId = 0` and `isSelectableByUser = false` does not make sense and should not be used.
     // If this combination is detected, the function will revert with an error.
-    if (userId == 0 && isSelectableByUser == false) {
-      revert InvalidUserIdAndIsSelectableByUserAuthTypeParams();
+    if (authType != AuthType.VAULT && userId == 0 && isSelectableByUser == false) {
+      revert InvalidUserIdAndIsSelectableByUserAuthType();
+    }
+    // When requesting an authType VAULT, the `userId` must be 0 and isSelectableByUser must be true.
+    if (authType == AuthType.VAULT && userId != 0 && isSelectableByUser == false) {
+      revert InvalidUserIdAndAuthType();
     }
     return
       AuthRequest({
@@ -246,7 +251,16 @@ library AuthRequestBuilder {
       });
   }
 
-  function _authIsSelectableDefaultValue(uint256 requestedUserId) internal pure returns (bool) {
+  function _authIsSelectableDefaultValue(
+    AuthType authType,
+    uint256 requestedUserId
+  ) internal pure returns (bool) {
+    // isSelectableByUser value should always be false in case of VAULT authType.
+    // This is because the user can't select the account they want to use for the app.
+    // the userId = Hash(VaultSecret, AppId) in the case of VAULT authType.
+    if (authType == AuthType.VAULT) {
+      return false;
+    }
     // When `requestedUserId` is 0, it means no specific auth account is requested by the app,
     // so we want the default value for `isSelectableByUser` to be `true`.
     if (requestedUserId == 0) {
