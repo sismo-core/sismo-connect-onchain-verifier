@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 import "forge-std/console.sol";
 import {IBaseVerifier} from "src/interfaces/IBaseVerifier.sol";
 import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
-import {SismoConnectError} from "src/libs/sismo-connect/SismoConnectError.sol";
 
 contract ProvingSchemeVerifierMock is IBaseVerifier {
   function verify(

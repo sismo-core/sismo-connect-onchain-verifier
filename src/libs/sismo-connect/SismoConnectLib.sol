@@ -7,13 +7,12 @@ import {AuthRequestBuilder} from "src/libs/utils/AuthRequestBuilder.sol";
 import {ClaimRequestBuilder} from "src/libs/utils/ClaimRequestBuilder.sol";
 import {SignatureBuilder} from "src/libs/utils/SignatureBuilder.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {ISismoConnectLib} from "./ISismoConnectLib.sol";
 import {ISismoConnectVerifier} from "src/interfaces/ISismoConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 import {SismoConnectHelper} from "src/libs/utils/SismoConnectHelper.sol";
-import {SismoConnectError} from "src/libs/sismo-connect/SismoConnectError.sol";
+import {IHydraS2Verifier} from "src/verifiers/IHydraS2Verifier.sol";
 
-contract SismoConnect is ISismoConnectLib, Context {
+contract SismoConnect is Context {
   uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;
 
   IAddressesProvider public constant ADDRESSES_PROVIDER =

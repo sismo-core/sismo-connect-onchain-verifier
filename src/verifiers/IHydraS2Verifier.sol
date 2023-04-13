@@ -1,26 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Structs.sol";
-
-library SismoConnectError {
-  error SismoConnectResponseIsEmpty();
-  error AppIdMismatch(bytes16 receivedAppId, bytes16 expectedAppId);
-  error NamespaceMismatch(bytes16 receivedNamespace, bytes16 expectedNamespace);
-
-  ///////////////////////////////////////
-  // SismoConnectVerifier Errors
-  ///////////////////////////////////////
-
-  ////Errors: Request/Response mismatch errors
-  error VersionMismatch(bytes32 requestVersion, bytes32 responseVersion);
-  error SignatureMessageMismatch(bytes requestMessageSignature, bytes responseMessageSignature);
-
-  ///////////////////////////////////////
-  // HydraS2Verifier Errors
-  ///////////////////////////////////////
+contract IHydraS2Verifier {
   error InvalidProof();
-  error AnonModeIsNotYetSupported();
   error OnlyOneAuthAndOneClaimIsSupported();
 
   error InvalidVersion(bytes32 version);

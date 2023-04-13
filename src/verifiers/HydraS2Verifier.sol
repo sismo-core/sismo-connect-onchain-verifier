@@ -3,15 +3,15 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
+import {IHydraS2Verifier} from "./IHydraS2Verifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "./HydraS2Lib.sol";
 import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
-import {SismoConnectError} from "src/libs/sismo-connect/SismoConnectError.sol";
 
-contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
+contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifier, Initializable {
   using HydraS2Lib for HydraS2ProofData;
   using HydraS2Lib for Auth;
   using HydraS2Lib for Claim;
@@ -39,21 +39,24 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
   ) external view override returns (VerifiedAuth memory, VerifiedClaim memory) {
     // Verify the sismoConnectProof version corresponds to the current verifier.
     if (sismoConnectProof.provingScheme != HYDRA_S2_VERSION) {
-      revert SismoConnectError.InvalidVersion(sismoConnectProof.provingScheme);
+      revert InvalidVersion(sismoConnectProof.provingScheme);
     }
 
     // Decode the snark proof from the sismoConnectProof
     // This snark proof is specify to this proving scheme
-    HydraS2ProofData memory snarkProof = abi.decode(sismoConnectProof.proofData, (HydraS2ProofData));
+    HydraS2ProofData memory snarkProof = abi.decode(
+      sismoConnectProof.proofData,
+      (HydraS2ProofData)
+    );
     HydraS2ProofInput memory snarkInput = snarkProof._input();
 
     // We only support one Auth and one Claim in the hydra-s2 proving scheme
     // We revert if there is more than one Auth or Claim in the sismoConnectProof
     if (sismoConnectProof.auths.length > 1 || sismoConnectProof.claims.length > 1) {
-      revert SismoConnectError.OnlyOneAuthAndOneClaimIsSupported();
+      revert OnlyOneAuthAndOneClaimIsSupported();
     }
 
-     // Verify Claim, Auth and SignedMessage validity by checking corresponding
+    // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
     VerifiedAuth memory verifiedAuth;
     VerifiedClaim memory verifiedClaim;
@@ -67,7 +70,13 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
       // Get the Claim from the sismoConnectProof
       // We only support one Claim in the hydra-s2 proving scheme
       Claim memory claim = sismoConnectProof.claims[0];
-      verifiedClaim = _verifyClaimValidity(snarkInput, sismoConnectProof.proofData, claim, appId, namespace);
+      verifiedClaim = _verifyClaimValidity(
+        snarkInput,
+        sismoConnectProof.proofData,
+        claim,
+        appId,
+        namespace
+      );
     }
 
     _validateSignedMessageInput(snarkInput, signedMessage);
@@ -87,7 +96,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
   ) private view returns (VerifiedClaim memory) {
     // Check claim value validity
     if (input.claimValue != claim.value) {
-      revert SismoConnectError.ClaimValueMismatch();
+      revert ClaimValueMismatch();
     }
 
     // Check requestIdentifier validity
@@ -98,7 +107,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
       namespace
     );
     if (input.requestIdentifier != expectedRequestIdentifier) {
-      revert SismoConnectError.RequestIdentifierMismatch(input.requestIdentifier, expectedRequestIdentifier);
+      revert RequestIdentifierMismatch(input.requestIdentifier, expectedRequestIdentifier);
     }
 
     // commitmentMapperPubKey
@@ -107,7 +116,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
       input.commitmentMapperPubKey[0] != commitmentMapperPubKey[0] ||
       input.commitmentMapperPubKey[1] != commitmentMapperPubKey[1]
     ) {
-      revert SismoConnectError.CommitmentMapperPubKeyMismatch(
+      revert CommitmentMapperPubKeyMismatch(
         bytes32(commitmentMapperPubKey[0]),
         bytes32(commitmentMapperPubKey[1]),
         bytes32(input.commitmentMapperPubKey[0]),
@@ -117,33 +126,34 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
 
     // sourceVerificationEnabled
     if (input.sourceVerificationEnabled == false) {
-      revert SismoConnectError.SourceVerificationNotEnabled();
+      revert SourceVerificationNotEnabled();
     }
     // isRootAvailable
     if (!AVAILABLE_ROOTS_REGISTRY.isRootAvailable(input.registryTreeRoot)) {
-      revert SismoConnectError.RegistryRootNotAvailable(input.registryTreeRoot);
+      revert RegistryRootNotAvailable(input.registryTreeRoot);
     }
     // accountsTreeValue
     uint256 groupSnapshotId = _encodeAccountsTreeValue(claim.groupId, claim.groupTimestamp);
     if (input.accountsTreeValue != groupSnapshotId) {
-      revert SismoConnectError.AccountsTreeValueMismatch(input.accountsTreeValue, groupSnapshotId);
+      revert AccountsTreeValueMismatch(input.accountsTreeValue, groupSnapshotId);
     }
 
     bool claimComparatorEQ = input.claimComparator == 1;
     bool isClaimTypeFromClaimEqualToEQ = claim.claimType == ClaimType.EQ;
     if (claimComparatorEQ != isClaimTypeFromClaimEqualToEQ) {
-      revert SismoConnectError.ClaimTypeMismatch(input.claimComparator, uint256(claim.claimType));
+      revert ClaimTypeMismatch(input.claimComparator, uint256(claim.claimType));
     }
 
-    return VerifiedClaim({
-      groupId: claim.groupId,
-      groupTimestamp: claim.groupTimestamp,
-      value: claim.value,
-      claimType: claim.claimType,
-      proofId: input.proofIdentifier,
-      proofData: proofData,
-      extraData: claim.extraData
-    });
+    return
+      VerifiedClaim({
+        groupId: claim.groupId,
+        groupTimestamp: claim.groupTimestamp,
+        value: claim.value,
+        claimType: claim.claimType,
+        proofId: input.proofIdentifier,
+        proofData: proofData,
+        extraData: claim.extraData
+      });
   }
 
   function _verifyAuthValidity(
@@ -158,12 +168,12 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
       uint256 vaultNamespaceFromProof = input.vaultNamespace;
       uint256 expectedVaultNamespace = _encodeVaultNamespace(appId);
       if (vaultNamespaceFromProof != expectedVaultNamespace) {
-        revert SismoConnectError.VaultNamespaceMismatch(vaultNamespaceFromProof, expectedVaultNamespace);
+        revert VaultNamespaceMismatch(vaultNamespaceFromProof, expectedVaultNamespace);
       }
       userIdFromProof = input.vaultIdentifier;
     } else {
       if (input.destinationVerificationEnabled == false) {
-        revert SismoConnectError.DestinationVerificationNotEnabled();
+        revert DestinationVerificationNotEnabled();
       }
       // commitmentMapperPubKey
       uint256[2] memory commitmentMapperPubKey = COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
@@ -171,7 +181,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
         input.commitmentMapperPubKey[0] != commitmentMapperPubKey[0] ||
         input.commitmentMapperPubKey[1] != commitmentMapperPubKey[1]
       ) {
-        revert SismoConnectError.CommitmentMapperPubKeyMismatch(
+        revert CommitmentMapperPubKeyMismatch(
           bytes32(commitmentMapperPubKey[0]),
           bytes32(commitmentMapperPubKey[1]),
           bytes32(input.commitmentMapperPubKey[0]),
@@ -184,10 +194,9 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
     // check that the userId from the proof is the same as the userId in the auth
     // the userId in the proof is the vaultIdentifier for AuthType.VAULT and the destinationIdentifier for other Auth types
     if (
-      auth.userId != userIdFromProof && 
-      !auth.isSelectableByUser // we do NOT check the userId if it has been made selectable by user in the vault app
+      auth.userId != userIdFromProof && !auth.isSelectableByUser // we do NOT check the userId if it has been made selectable by user in the vault app
     ) {
-      revert SismoConnectError.UserIdMismatch(userIdFromProof, auth.userId);
+      revert UserIdMismatch(userIdFromProof, auth.userId);
     }
 
     return
@@ -209,7 +218,10 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
       return;
     }
     if (input.extraData != uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD) {
-      revert SismoConnectError.InvalidExtraData(input.extraData, uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD);
+      revert InvalidExtraData(
+        input.extraData,
+        uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD
+      );
     }
   }
 
@@ -217,7 +229,7 @@ contract HydraS2Verifier is IBaseVerifier, HydraS2SnarkVerifier, Initializable {
     if (
       !verifyProof(snarkProof.proof.a, snarkProof.proof.b, snarkProof.proof.c, snarkProof.input)
     ) {
-      revert SismoConnectError.InvalidProof();
+      revert InvalidProof();
     }
   }
 

@@ -7,7 +7,6 @@ import {ClaimMatchingLib} from "./libs/sismo-connect/ClaimMatchingLib.sol";
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {SismoConnectError} from "./libs/sismo-connect/SismoConnectError.sol";
 
 contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   using AuthMatchingLib for Auth;
@@ -100,15 +99,15 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     SismoConnectRequest memory request
   ) internal view {
     if (response.version != SISMO_CONNECT_VERSION) {
-      revert SismoConnectError.VersionMismatch(response.version, SISMO_CONNECT_VERSION);
+      revert VersionMismatch(response.version, SISMO_CONNECT_VERSION);
     }
 
     if (response.namespace != request.namespace) {
-      revert SismoConnectError.NamespaceMismatch(response.namespace, request.namespace);
+      revert NamespaceMismatch(response.namespace, request.namespace);
     }
 
     if (response.appId != request.appId) {
-      revert SismoConnectError.AppIdMismatch(response.appId, request.appId);
+      revert AppIdMismatch(response.appId, request.appId);
     }
 
     // Check if the message of the signature matches between the request and the response
@@ -121,10 +120,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
         // we hash the messages to be able to compare them (as they are of type bytes)
         keccak256(request.signature.message) != keccak256(response.signedMessage)
       ) {
-        revert SismoConnectError.SignatureMessageMismatch(
-          request.signature.message,
-          response.signedMessage
-        );
+        revert SignatureMessageMismatch(request.signature.message, response.signedMessage);
       }
     }
 
