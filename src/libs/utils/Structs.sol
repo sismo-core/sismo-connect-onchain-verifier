@@ -1,99 +1,119 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.17;
 
-struct ZkConnectRequest {
+struct SismoConnectRequest {
   bytes16 appId;
   bytes16 namespace;
-  ZkConnectRequestContent content;
+  AuthRequest[] auths;
+	ClaimRequest[] claims;
+  SignatureRequest signature;
 }
 
-struct ZkConnectRequestContent {
-  DataRequest[] dataRequests;
-  LogicalOperator[] operators;
-}
-
-struct DataRequest {
-  Auth authRequest;
-  Claim claimRequest;
-  bytes messageSignatureRequest;
-}
-
-struct Claim {
-  bytes16 groupId;
-  bytes16 groupTimestamp;
-  uint256 value;
-  ClaimType claimType;
-  bytes extraData;
-}
-
-struct Auth {
+struct AuthRequest {
   AuthType authType;
-  bool anonMode;
-  uint256 userId;
-  bytes extraData;
+  uint256 userId; // default: 0
+  // flags
+  bool isAnon; // default: false -> true not supported yet, need to throw if true
+  bool isOptional; // default: false
+  bool isSelectableByUser; // default: true
+  // 
+  bytes extraData; // default: ""
 }
 
-enum ClaimType {
-  EMPTY,
-  GTE,
-  GT,
-  EQ,
-  LT,
-  LTE,
-  USER_SELECT
+struct ClaimRequest {
+  ClaimType claimType; // default: GTE
+  bytes16 groupId;
+  bytes16 groupTimestamp; // default: bytes16("latest")
+  uint256 value; // default: 1
+  // flags
+  bool isOptional; // default: false 
+  bool isSelectableByUser; // default: true
+  // 
+  bytes extraData; // default: ""
+}
+
+struct SignatureRequest {
+  bytes message; // default: "MESSAGE_SELECTED_BY_USER"
+  bool isSelectableByUser; // default: false
+  bytes extraData; // default: ""
 }
 
 enum AuthType {
-  EMPTY,
-  ANON,
+  VAULT,
   GITHUB,
   TWITTER,
   EVM_ACCOUNT
 }
 
-enum LogicalOperator {
-  AND,
-  OR
+enum ClaimType {
+  GTE,
+  GT,
+  EQ,
+  LT,
+  LTE
 }
 
-struct ZkConnectResponse {
+struct Auth {
+  AuthType authType;
+  bool isAnon;
+  bool isSelectableByUser;
+  uint256 userId;
+  bytes extraData;
+}
+
+struct Claim {
+  ClaimType claimType;
+  bytes16 groupId;
+  bytes16 groupTimestamp;
+  bool isSelectableByUser;
+  uint256 value;
+  bytes extraData;
+}
+
+struct Signature {
+  bytes message;
+  bytes extraData;
+}
+
+struct SismoConnectResponse {
   bytes16 appId;
   bytes16 namespace;
   bytes32 version;
-  ZkConnectProof[] proofs;
+  bytes signedMessage;
+  SismoConnectProof[] proofs;
 }
 
-struct ZkConnectProof {
-  Claim claim;
-  Auth auth;
-  bytes signedMessage;
+struct SismoConnectProof {
+  Auth[] auths;
+  Claim[] claims;
   bytes32 provingScheme;
   bytes proofData;
   bytes extraData;
 }
 
-struct ZkConnectVerifiedResult {
+struct SismoConnectVerifiedResult {
   bytes16 appId;
   bytes16 namespace;
   bytes32 version;
-  VerifiedAuth[] verifiedAuths;
-  VerifiedClaim[] verifiedClaims;
-  bytes[] signedMessages;
-}
-
-struct VerifiedClaim {
-  bytes16 groupId;
-  bytes16 groupTimestamp;
-  ClaimType claimType;
-  uint256 value;
-  bytes extraData;
-  uint256 proofId;
+  VerifiedAuth[] auths;
+  VerifiedClaim[] claims;
+  bytes signedMessage; 
 }
 
 struct VerifiedAuth {
   AuthType authType;
-  bool anonMode;
+  bool isAnon;
   uint256 userId;
   bytes extraData;
+  bytes proofData;
+}
+
+struct VerifiedClaim {
+  ClaimType claimType;
+  bytes16 groupId;
+  bytes16 groupTimestamp;
+  uint256 value;
+  bytes extraData;
   uint256 proofId;
+  bytes proofData;
 }

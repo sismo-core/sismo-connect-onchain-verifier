@@ -11,7 +11,7 @@ struct AccountData {
 }
 
 library GroupLib {
-  function build(AccountData[] memory accountsData) public returns (Group memory) {
+  function build(AccountData[] memory accountsData) public pure returns (Group memory) {
     return Group({accountsData: accountsData});
   }
 }

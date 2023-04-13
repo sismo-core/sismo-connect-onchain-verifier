@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "forge-std/console.sol";
 import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
+import {IHydraS2Verifier} from "./IHydraS2Verifier.sol";
 import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "./HydraS2Lib.sol";
-import {IHydraS2Verifier} from "./IHydraS2Verifier.sol";
-import {Auth, ClaimType, AuthType, Claim, ZkConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
+import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
 
 contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifier, Initializable {
   using HydraS2Lib for HydraS2ProofData;
@@ -33,45 +34,66 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   function verify(
     bytes16 appId,
     bytes16 namespace,
-    ZkConnectProof memory zkConnectProof
-  ) external view override returns (VerifiedAuth memory, VerifiedClaim memory, bytes memory) {
-    // Verify the zkConnectProof version corresponds to the current verifier.
-    if (zkConnectProof.provingScheme != HYDRA_S2_VERSION) {
-      revert InvalidVersion(zkConnectProof.provingScheme);
+    bytes memory signedMessage,
+    SismoConnectProof memory sismoConnectProof
+  ) external view override returns (VerifiedAuth memory, VerifiedClaim memory) {
+    // Verify the sismoConnectProof version corresponds to the current verifier.
+    if (sismoConnectProof.provingScheme != HYDRA_S2_VERSION) {
+      revert InvalidVersion(sismoConnectProof.provingScheme);
     }
 
-    Auth memory auth = zkConnectProof.auth;
-    Claim memory claim = zkConnectProof.claim;
-    bytes memory signedMessage = zkConnectProof.signedMessage;
-
-    // Decode the snark proof from the zkConnectProof
+    // Decode the snark proof from the sismoConnectProof
     // This snark proof is specify to this proving scheme
-    HydraS2ProofData memory snarkProof = abi.decode(zkConnectProof.proofData, (HydraS2ProofData));
+    HydraS2ProofData memory snarkProof = abi.decode(
+      sismoConnectProof.proofData,
+      (HydraS2ProofData)
+    );
     HydraS2ProofInput memory snarkInput = snarkProof._input();
+
+    // We only support one Auth and one Claim in the hydra-s2 proving scheme
+    // We revert if there is more than one Auth or Claim in the sismoConnectProof
+    if (sismoConnectProof.auths.length > 1 || sismoConnectProof.claims.length > 1) {
+      revert OnlyOneAuthAndOneClaimIsSupported();
+    }
 
     // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
-    VerifiedAuth memory verifiedAuth = _verifyAuthValidity(snarkInput, auth, appId);
-    VerifiedClaim memory verifiedClaim = _verifyClaimValidity(snarkInput, claim, appId, namespace);
+    VerifiedAuth memory verifiedAuth;
+    VerifiedClaim memory verifiedClaim;
+    if (sismoConnectProof.auths.length == 1) {
+      // Get the Auth from the sismoConnectProof
+      // We only support one Auth in the hydra-s2 proving scheme
+      Auth memory auth = sismoConnectProof.auths[0];
+      verifiedAuth = _verifyAuthValidity(snarkInput, sismoConnectProof.proofData, auth, appId);
+    }
+    if (sismoConnectProof.claims.length == 1) {
+      // Get the Claim from the sismoConnectProof
+      // We only support one Claim in the hydra-s2 proving scheme
+      Claim memory claim = sismoConnectProof.claims[0];
+      verifiedClaim = _verifyClaimValidity(
+        snarkInput,
+        sismoConnectProof.proofData,
+        claim,
+        appId,
+        namespace
+      );
+    }
+
     _validateSignedMessageInput(snarkInput, signedMessage);
 
     // Check the snarkProof is valid
     _checkSnarkProof(snarkProof);
 
-    return (verifiedAuth, verifiedClaim, signedMessage);
+    return (verifiedAuth, verifiedClaim);
   }
 
   function _verifyClaimValidity(
     HydraS2ProofInput memory input,
+    bytes memory proofData,
     Claim memory claim,
     bytes16 appId,
     bytes16 namespace
   ) private view returns (VerifiedClaim memory) {
-    if (claim.claimType == ClaimType.EMPTY) {
-      VerifiedClaim memory emptyVerifiedClaim;
-      return emptyVerifiedClaim;
-    }
-
     // Check claim value validity
     if (input.claimValue != claim.value) {
       revert ClaimValueMismatch();
@@ -122,34 +144,33 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       revert ClaimTypeMismatch(input.claimComparator, uint256(claim.claimType));
     }
 
-    VerifiedClaim({
-      groupId: claim.groupId,
-      groupTimestamp: claim.groupTimestamp,
-      value: claim.value,
-      claimType: claim.claimType,
-      proofId: input.proofIdentifier,
-      extraData: claim.extraData
-    });
+    return
+      VerifiedClaim({
+        groupId: claim.groupId,
+        groupTimestamp: claim.groupTimestamp,
+        value: claim.value,
+        claimType: claim.claimType,
+        proofId: input.proofIdentifier,
+        proofData: proofData,
+        extraData: claim.extraData
+      });
   }
 
   function _verifyAuthValidity(
     HydraS2ProofInput memory input,
+    bytes memory proofData,
     Auth memory auth,
     bytes16 appId
   ) private view returns (VerifiedAuth memory) {
-    if (auth.authType == AuthType.EMPTY) {
-      VerifiedAuth memory emptyVerifiedAuth;
-      return emptyVerifiedAuth;
-    }
-    uint256 userId;
-    if (auth.authType == AuthType.ANON) {
+    uint256 userIdFromProof;
+    if (auth.authType == AuthType.VAULT) {
       // vaultNamespace validity
-      bytes16 appIdFromProof = bytes16(uint128(input.vaultNamespace));
-      if (appIdFromProof != bytes16(appId)) {
-        revert VaultNamespaceMismatch(appIdFromProof, appId);
+      uint256 vaultNamespaceFromProof = input.vaultNamespace;
+      uint256 expectedVaultNamespace = _encodeVaultNamespace(appId);
+      if (vaultNamespaceFromProof != expectedVaultNamespace) {
+        revert VaultNamespaceMismatch(vaultNamespaceFromProof, expectedVaultNamespace);
       }
-
-      userId = input.vaultIdentifier;
+      userIdFromProof = input.vaultIdentifier;
     } else {
       if (input.destinationVerificationEnabled == false) {
         revert DestinationVerificationNotEnabled();
@@ -167,30 +188,40 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
           bytes32(input.commitmentMapperPubKey[1])
         );
       }
+      userIdFromProof = uint256(uint160(input.destinationIdentifier));
+    }
 
-      userId = uint256(uint160(input.destinationIdentifier));
+    // check that the userId from the proof is the same as the userId in the auth
+    // the userId in the proof is the vaultIdentifier for AuthType.VAULT and the destinationIdentifier for other Auth types
+    if (
+      auth.userId != userIdFromProof && !auth.isSelectableByUser // we do NOT check the userId if it has been made selectable by user in the vault app
+    ) {
+      revert UserIdMismatch(userIdFromProof, auth.userId);
     }
 
     return
       VerifiedAuth({
         authType: auth.authType,
-        anonMode: auth.anonMode,
-        userId: userId,
+        isAnon: auth.isAnon,
+        userId: userIdFromProof,
         extraData: auth.extraData,
-        proofId: 0
+        proofData: proofData
       });
   }
 
   function _validateSignedMessageInput(
     HydraS2ProofInput memory input,
     bytes memory signedMessage
-  ) private view {
+  ) private pure {
     // don't check extraData if signedMessage is empty
     if (signedMessage.length == 0) {
       return;
     }
     if (input.extraData != uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD) {
-      revert InvalidExtraData(input.extraData, uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD);
+      revert InvalidExtraData(
+        input.extraData,
+        uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD
+      );
     }
   }
 
@@ -230,5 +261,9 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
 
   function _encodeServiceId(bytes16 appId, bytes16 namespace) internal pure returns (bytes32) {
     return bytes32(abi.encodePacked(appId, namespace));
+  }
+
+  function _encodeVaultNamespace(bytes16 appId) internal pure returns (uint256) {
+    return uint256(keccak256(abi.encodePacked(appId, bytes16(0)))) % HydraS2Lib.SNARK_FIELD;
   }
 }

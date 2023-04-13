@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-interface IHydraS2Verifier {
+contract IHydraS2Verifier {
   error InvalidProof();
-  error AnonModeIsNotYetSupported();
+  error OnlyOneAuthAndOneClaimIsSupported();
 
   error InvalidVersion(bytes32 version);
   error RegistryRootNotAvailable(uint256 inputRoot);
@@ -28,5 +28,6 @@ interface IHydraS2Verifier {
     uint256 accountsTreeValueFromProof,
     uint256 expectedAccountsTreeValue
   );
-  error VaultNamespaceMismatch(bytes16 appIdFromProof, bytes16 expectedAppId);
+  error VaultNamespaceMismatch(uint256 vaultNamespaceFromProof, uint256 expectedVaultNamespace);
+  error UserIdMismatch(uint256 userIdFromProof, uint256 expectedUserId);
 }

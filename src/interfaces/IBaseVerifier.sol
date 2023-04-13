@@ -2,12 +2,13 @@
 
 pragma solidity ^0.8.17;
 
-import {ZkConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
+import {SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
 
 interface IBaseVerifier {
   function verify(
     bytes16 appId,
     bytes16 namespace,
-    ZkConnectProof memory zkConnectProof
-  ) external view returns (VerifiedAuth memory, VerifiedClaim memory, bytes memory);
+    bytes memory signedMessage,
+    SismoConnectProof memory sismoConnectProof
+  ) external view returns (VerifiedAuth memory, VerifiedClaim memory);
 }

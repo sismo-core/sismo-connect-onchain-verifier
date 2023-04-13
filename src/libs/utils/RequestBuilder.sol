@@ -2,582 +2,453 @@
 pragma solidity ^0.8.17;
 
 import "src/libs/utils/Structs.sol";
+import {SignatureBuilder} from "src/libs/utils/SignatureBuilder.sol";
 
 library RequestBuilder {
-  // default value for Claim
-  bytes16 public constant DEFAULT_CLAIM_GROUP_TIMESTAMP = bytes16("latest");
-  uint256 public constant DEFAULT_CLAIM_VALUE = 1;
-  bytes16 public constant DEFAULT_CLAIM_GROUP_ID = "";
-  ClaimType public constant DEFAULT_CLAIM_TYPE = ClaimType.GTE;
-  bytes public constant DEFAULT_CLAIM_EXTRA_DATA = "";
-
-  // default values for Auth
-  bool public constant DEFAULT_AUTH_ANON_MODE = false;
-  uint256 public constant DEFAULT_AUTH_USER_ID = 0;
-  bytes public constant DEFAULT_AUTH_EXTRA_DATA = "";
-
-  // default values for MessageSignature
-  bytes public constant DEFAULT_MESSAGE_SIGNATURE_REQUEST = "MESSAGE_SELECTED_BY_USER";
-
   // default value for namespace
   bytes16 public constant DEFAULT_NAMESPACE = bytes16(keccak256("main"));
 
-  function GET_DEFAULT_CLAIM_REQUEST() public pure returns (Claim memory) {
-    return
-      Claim({
-        claimType: ClaimType.EMPTY,
-        groupId: DEFAULT_CLAIM_GROUP_ID,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_VALUE,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function GET_DEFAULT_AUTH_REQUEST() public pure returns (Auth memory) {
-    return
-      Auth({
-        authType: AuthType.EMPTY,
-        anonMode: DEFAULT_AUTH_ANON_MODE,
-        userId: DEFAULT_AUTH_USER_ID,
-        extraData: DEFAULT_AUTH_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    bytes16 groupTimestamp,
-    uint256 value,
-    ClaimType claimType,
-    bytes memory extraData
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: groupTimestamp,
-        value: value,
-        claimType: claimType,
-        extraData: extraData
-      });
-  }
-
-  function buildClaim(bytes16 groupId) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_VALUE,
-        claimType: DEFAULT_CLAIM_TYPE,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(bytes16 groupId, bytes16 groupTimestamp) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: groupTimestamp,
-        value: DEFAULT_CLAIM_VALUE,
-        claimType: DEFAULT_CLAIM_TYPE,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(bytes16 groupId, uint256 value) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: value,
-        claimType: DEFAULT_CLAIM_TYPE,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(bytes16 groupId, ClaimType claimType) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_VALUE,
-        claimType: claimType,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(bytes16 groupId, bytes memory extraData) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_VALUE,
-        claimType: DEFAULT_CLAIM_TYPE,
-        extraData: extraData
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    bytes16 groupTimestamp,
-    uint256 value
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: groupTimestamp,
-        value: value,
-        claimType: DEFAULT_CLAIM_TYPE,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    bytes16 groupTimestamp,
-    ClaimType claimType
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: groupTimestamp,
-        value: DEFAULT_CLAIM_VALUE,
-        claimType: claimType,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    bytes16 groupTimestamp,
-    bytes memory extraData
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: groupTimestamp,
-        value: DEFAULT_CLAIM_VALUE,
-        claimType: DEFAULT_CLAIM_TYPE,
-        extraData: extraData
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    uint256 value,
-    ClaimType claimType
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: value,
-        claimType: claimType,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    uint256 value,
-    bytes memory extraData
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: value,
-        claimType: DEFAULT_CLAIM_TYPE,
-        extraData: extraData
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    ClaimType claimType,
-    bytes memory extraData
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: DEFAULT_CLAIM_VALUE,
-        claimType: claimType,
-        extraData: extraData
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    bytes16 groupTimestamp,
-    uint256 value,
-    ClaimType claimType
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: groupTimestamp,
-        value: value,
-        claimType: claimType,
-        extraData: DEFAULT_CLAIM_EXTRA_DATA
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    bytes16 groupTimestamp,
-    uint256 value,
-    bytes memory extraData
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: groupTimestamp,
-        value: value,
-        claimType: DEFAULT_CLAIM_TYPE,
-        extraData: extraData
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    bytes16 groupTimestamp,
-    ClaimType claimType,
-    bytes memory extraData
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: groupTimestamp,
-        value: DEFAULT_CLAIM_VALUE,
-        claimType: claimType,
-        extraData: extraData
-      });
-  }
-
-  function buildClaim(
-    bytes16 groupId,
-    uint256 value,
-    ClaimType claimType,
-    bytes memory extraData
-  ) public pure returns (Claim memory) {
-    return
-      Claim({
-        groupId: groupId,
-        groupTimestamp: DEFAULT_CLAIM_GROUP_TIMESTAMP,
-        value: value,
-        claimType: claimType,
-        extraData: extraData
-      });
-  }
-
-  function buildAuth(
-    AuthType authType,
-    bool anonMode,
-    uint256 userId,
-    bytes memory extraData
-  ) public pure returns (Auth memory) {
-    return Auth({authType: authType, anonMode: anonMode, userId: userId, extraData: extraData});
-  }
-
-  function buildAuth(AuthType authType) public pure returns (Auth memory) {
-    return
-      Auth({
-        authType: authType,
-        anonMode: DEFAULT_AUTH_ANON_MODE,
-        userId: DEFAULT_AUTH_USER_ID,
-        extraData: DEFAULT_AUTH_EXTRA_DATA
-      });
-  }
-
-  function buildAuth(AuthType authType, bool anonMode) public pure returns (Auth memory) {
-    return
-      Auth({
-        authType: authType,
-        anonMode: anonMode,
-        userId: DEFAULT_AUTH_USER_ID,
-        extraData: DEFAULT_AUTH_EXTRA_DATA
-      });
-  }
-
-  function buildAuth(AuthType authType, uint256 userId) public pure returns (Auth memory) {
-    return
-      Auth({
-        authType: authType,
-        anonMode: DEFAULT_AUTH_ANON_MODE,
-        userId: userId,
-        extraData: DEFAULT_AUTH_EXTRA_DATA
-      });
-  }
-
-  function buildAuth(AuthType authType, bytes memory extraData) public pure returns (Auth memory) {
-    return
-      Auth({
-        authType: authType,
-        anonMode: DEFAULT_AUTH_ANON_MODE,
-        userId: DEFAULT_AUTH_USER_ID,
-        extraData: extraData
-      });
-  }
-
-  function buildAuth(
-    AuthType authType,
-    bool anonMode,
-    uint256 userId
-  ) public pure returns (Auth memory) {
-    return
-      Auth({
-        authType: authType,
-        anonMode: anonMode,
-        userId: userId,
-        extraData: DEFAULT_AUTH_EXTRA_DATA
-      });
-  }
-
-  function buildAuth(
-    AuthType authType,
-    bool anonMode,
-    bytes memory extraData
-  ) public pure returns (Auth memory) {
-    return
-      Auth({
-        authType: authType,
-        anonMode: anonMode,
-        userId: DEFAULT_AUTH_USER_ID,
-        extraData: extraData
-      });
-  }
-
-  function buildAuth(
-    AuthType authType,
-    uint256 userId,
-    bytes memory extraData
-  ) public pure returns (Auth memory) {
-    return
-      Auth({
-        authType: authType,
-        anonMode: DEFAULT_AUTH_ANON_MODE,
-        userId: userId,
-        extraData: extraData
-      });
-  }
-
-  function buildRequestContent(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest
-  ) public pure returns (ZkConnectRequestContent memory) {
-    DataRequest[] memory dataRequests = new DataRequest[](1);
-    dataRequests[0] = DataRequest({
-      authRequest: authRequest,
-      claimRequest: claimRequest,
-      messageSignatureRequest: messageSignatureRequest
-    });
-    LogicalOperator[] memory operators = new LogicalOperator[](1);
-    operators[0] = LogicalOperator.AND;
-
-    return ZkConnectRequestContent({dataRequests: dataRequests, operators: operators});
-  }
-
-  function buildRequestContent(
-    Claim memory claimRequest,
-    Auth memory authRequest
-  ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(claimRequest, authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST);
-  }
-
-  function buildRequestContent(
-    Claim memory claimRequest,
-    bytes memory messageSignatureRequest
-  ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(claimRequest, GET_DEFAULT_AUTH_REQUEST(), messageSignatureRequest);
-  }
-
-  function buildRequestContent(
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest
-  ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(GET_DEFAULT_CLAIM_REQUEST(), authRequest, messageSignatureRequest);
-  }
-
-  function buildRequestContent(
-    Claim memory claimRequest
-  ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(claimRequest, GET_DEFAULT_AUTH_REQUEST());
-  }
-
-  function buildRequestContent(
-    Auth memory authRequest
-  ) public returns (ZkConnectRequestContent memory) {
-    return buildRequestContent(GET_DEFAULT_CLAIM_REQUEST(), authRequest);
+  function _GET_EMPTY_SIGNATURE_REQUEST() internal pure returns (SignatureRequest memory) {
+    return SignatureBuilder.buildEmpty();
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest,
+    AuthRequest memory auth,
+    ClaimRequest memory claim,
+    SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        content: buildRequestContent(claimRequest, authRequest, messageSignatureRequest)
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    bytes memory messageSignatureRequest,
+    ClaimRequest memory claim,
+    SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        content: buildRequestContent(claimRequest, messageSignatureRequest)
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
+    AuthRequest memory auth,
+    SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        content: buildRequestContent(claimRequest, authRequest)
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest,
+    AuthRequest memory auth,
+    ClaimRequest memory claim,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        content: buildRequestContent(authRequest, messageSignatureRequest)
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    Claim memory claimRequest,
+    ClaimRequest memory claim,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        content: buildRequestContent(claimRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    Auth memory authRequest,
+    AuthRequest memory auth,
     bytes16 appId,
     bytes16 namespace
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        content: buildRequestContent(authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest,
+    AuthRequest memory auth,
+    ClaimRequest memory claim,
+    SignatureRequest memory signature,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(claimRequest, authRequest, messageSignatureRequest)
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    bytes memory messageSignatureRequest,
+    AuthRequest memory auth,
+    ClaimRequest memory claim,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(claimRequest, messageSignatureRequest)
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    Claim memory claimRequest,
-    Auth memory authRequest,
+    ClaimRequest memory claim,
+    SignatureRequest memory signature,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(claimRequest, authRequest)
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    Auth memory authRequest,
-    bytes memory messageSignatureRequest,
+    AuthRequest memory auth,
+    SignatureRequest memory signature,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(authRequest, messageSignatureRequest)
+        auths: auths,
+        claims: claims,
+        signature: signature
       })
     );
   }
 
   function buildRequest(
-    Claim memory claimRequest,
+    ClaimRequest memory claim,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(claimRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }
 
   function buildRequest(
-    Auth memory authRequest,
+    AuthRequest memory auth,
     bytes16 appId
-  ) public returns (ZkConnectRequest memory) {
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
-      ZkConnectRequest({
+      SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        content: buildRequestContent(authRequest, DEFAULT_MESSAGE_SIGNATURE_REQUEST)
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
+      })
+    );
+  }
+
+  // buildRequest with arrays for auths and claims
+  function buildRequest(
+    AuthRequest[] memory auths,
+    ClaimRequest[] memory claims,
+    SignatureRequest memory signature,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (SismoConnectRequest memory) {
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function buildRequest(
+    ClaimRequest[] memory claims,
+    SignatureRequest memory signature,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function buildRequest(
+    AuthRequest[] memory auths,
+    SignatureRequest memory signature,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (SismoConnectRequest memory) {
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function buildRequest(
+    AuthRequest[] memory auths,
+    ClaimRequest[] memory claims,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (SismoConnectRequest memory) {
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
+      })
+    );
+  }
+
+  function buildRequest(
+    ClaimRequest[] memory claims,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
+      })
+    );
+  }
+
+  function buildRequest(
+    AuthRequest[] memory auths,
+    bytes16 appId,
+    bytes16 namespace
+  ) external pure returns (SismoConnectRequest memory) {
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
+      })
+    );
+  }
+
+  function buildRequest(
+    AuthRequest[] memory auths,
+    ClaimRequest[] memory claims,
+    SignatureRequest memory signature,
+    bytes16 appId
+  ) external pure returns (SismoConnectRequest memory) {
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function buildRequest(
+    AuthRequest[] memory auths,
+    ClaimRequest[] memory claims,
+    bytes16 appId
+  ) external pure returns (SismoConnectRequest memory) {
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
+      })
+    );
+  }
+
+  function buildRequest(
+    ClaimRequest[] memory claims,
+    SignatureRequest memory signature,
+    bytes16 appId
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function buildRequest(
+    AuthRequest[] memory auths,
+    SignatureRequest memory signature,
+    bytes16 appId
+  ) external pure returns (SismoConnectRequest memory) {
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function buildRequest(
+    AuthRequest[] memory auths,
+    bytes16 appId
+  ) external pure returns (SismoConnectRequest memory) {
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
+      })
+    );
+  }
+
+  function buildRequest(
+    ClaimRequest[] memory claims,
+    bytes16 appId
+  ) external pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        auths: auths,
+        claims: claims,
+        signature: _GET_EMPTY_SIGNATURE_REQUEST()
       })
     );
   }

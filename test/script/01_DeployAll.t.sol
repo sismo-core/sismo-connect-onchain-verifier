@@ -24,7 +24,7 @@ contract DeployAllTest is Test {
     contracts = abi.decode(result, (ScriptTypes.DeployAllContracts));
   }
 
-  function testDeployment() public {
+  function testDeployment() public view {
     console.log(address(contracts.availableRootsRegistry));
   }
 
@@ -50,13 +50,13 @@ contract DeployAllTest is Test {
     );
   }
 
-  function testZkConnectVerifier() public {
-    _expectDeployedWithProxy(address(contracts.zkConnectVerifier), PROXY_ADMIN);
+  function testSismoConnectVerifier() public {
+    _expectDeployedWithProxy(address(contracts.sismoConnectVerifier), PROXY_ADMIN);
     assertEq(
-      contracts.zkConnectVerifier.getVerifier("hydra-s2.1"),
+      contracts.sismoConnectVerifier.getVerifier("hydra-s2.1"),
       address(contracts.hydraS2Verifier)
     );
-    assertEq(contracts.zkConnectVerifier.owner(), OWNER);
+    assertEq(contracts.sismoConnectVerifier.owner(), OWNER);
   }
 
   function _expectDeployedWithProxy(address proxy, address expectedAdmin) internal {

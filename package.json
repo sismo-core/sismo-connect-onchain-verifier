@@ -1,8 +1,8 @@
 {
-  "name": "zk-connect-onchain-verifier",
+  "name": "sismo-connect-onchain-verifier",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "git@github.com:sismo-core/zk-connect-onchain-verifier.git",
+  "repository": "git@github.com:sismo-core/sismo-connect-onchain-verifier.git",
   "author": "Hadrien Charlanes <35774097+dhadrien@users.noreply.github.com>",
   "license": "MIT",
   "devDependencies": {
