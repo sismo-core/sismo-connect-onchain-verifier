@@ -9,13 +9,12 @@ library RequestBuilder {
   bytes16 public constant DEFAULT_NAMESPACE = bytes16(keccak256("main"));
 
   function _GET_EMPTY_SIGNATURE_REQUEST() internal pure returns (SignatureRequest memory) {
-    return
-      SignatureBuilder.buildEmpty();
+    return SignatureBuilder.buildEmpty();
   }
 
   function buildRequest(
-    ClaimRequest memory claim,
     AuthRequest memory auth,
+    ClaimRequest memory claim,
     SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
@@ -76,8 +75,8 @@ library RequestBuilder {
   }
 
   function buildRequest(
-    ClaimRequest memory claim,
     AuthRequest memory auth,
+    ClaimRequest memory claim,
     bytes16 appId,
     bytes16 namespace
   ) external pure returns (SismoConnectRequest memory) {
@@ -95,7 +94,6 @@ library RequestBuilder {
       })
     );
   }
-
 
   function buildRequest(
     ClaimRequest memory claim,
@@ -136,8 +134,8 @@ library RequestBuilder {
   }
 
   function buildRequest(
-    ClaimRequest memory claim,
     AuthRequest memory auth,
+    ClaimRequest memory claim,
     SignatureRequest memory signature,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
@@ -156,10 +154,9 @@ library RequestBuilder {
     );
   }
 
-
   function buildRequest(
-    ClaimRequest memory claim,
     AuthRequest memory auth,
+    ClaimRequest memory claim,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
     AuthRequest[] memory auths = new AuthRequest[](1);
@@ -307,8 +304,8 @@ library RequestBuilder {
   }
 
   function buildRequest(
-    ClaimRequest[] memory claims,
     AuthRequest[] memory auths,
+    ClaimRequest[] memory claims,
     bytes16 appId,
     bytes16 namespace
   ) external pure returns (SismoConnectRequest memory) {
@@ -358,8 +355,8 @@ library RequestBuilder {
   }
 
   function buildRequest(
-    ClaimRequest[] memory claims,
     AuthRequest[] memory auths,
+    ClaimRequest[] memory claims,
     SignatureRequest memory signature,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
@@ -375,8 +372,8 @@ library RequestBuilder {
   }
 
   function buildRequest(
-    ClaimRequest[] memory claims,
     AuthRequest[] memory auths,
+    ClaimRequest[] memory claims,
     bytes16 appId
   ) external pure returns (SismoConnectRequest memory) {
     return (
@@ -447,7 +444,7 @@ library RequestBuilder {
     AuthRequest[] memory auths = new AuthRequest[](0);
     return (
       SismoConnectRequest({
-        appId: appId, 
+        appId: appId,
         namespace: DEFAULT_NAMESPACE,
         auths: auths,
         claims: claims,
