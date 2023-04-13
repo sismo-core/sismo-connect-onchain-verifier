@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.17;
 
 contract AddressesProviderMock {
   mapping(bytes32 => address) private _contractAddresses;

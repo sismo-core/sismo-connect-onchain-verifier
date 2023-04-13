@@ -2,12 +2,17 @@
 pragma solidity ^0.8.17;
 
 import "./interfaces/ISismoConnectVerifier.sol";
+import {AuthMatchingLib} from "./libs/sismo-connect/AuthMatchingLib.sol";
+import {ClaimMatchingLib} from "./libs/sismo-connect/ClaimMatchingLib.sol";
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {SismoConnectError} from "./libs/sismo-connect/SismoConnectError.sol";
 
 contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
+  using AuthMatchingLib for Auth;
+  using ClaimMatchingLib for Claim;
+
   uint8 public constant IMPLEMENTATION_VERSION = 1;
   bytes32 public immutable SISMO_CONNECT_VERSION = "sismo-connect-v1";
 
@@ -166,51 +171,30 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   ) internal pure {
     // for each auth in the request, we check if it matches with one of the auths in the response
     for (uint256 i = 0; i < authsInRequest.length; i++) {
-      // we store the information about the maximum matching properties in a uint8
-      // if the auth in the request matches with an auth in the response, the matchingProperties will be equal to 15 (1111)
-      // otherwise, we can look at the binary representation of the matchingProperties to know which properties are not matching and throw an error
-      uint8 maxMatchingProperties = 0;
       AuthRequest memory authRequest = authsInRequest[i];
+      if (authRequest.isOptional) {
+        // if the auth in the request is optional, we consider that its properties are all matching
+        // and we don't need to check for errors
+        continue;
+      }
+      // we store the information about the maximum matching properties in a uint8
+      // if the auth in the request matches with an auth in the response, the matchingProperties will be equal to 7 (111)
+      // otherwise, we can look at the binary representation of the matchingProperties to know which properties are not matching and throw an error
+      uint8 maxMatchingPropertiesLevel = 0;
 
       for (uint256 j = 0; j < authsInResponse.length; j++) {
         // we store the matching properties for the current auth in the response in a uint8
-        // we will store it in the maxMatchingProperties variable if it is greater than the current value of maxMatchingProperties
-        uint8 matchingProperties = 0;
+        // we will store it in the maxMatchingPropertiesLevel variable if it is greater than the current value of maxMatchingPropertiesLevel
         Auth memory auth = authsInResponse[j];
-        if (auth.authType == authRequest.authType) {
-          matchingProperties += 1; // 001
-        }
-        if (auth.isAnon == authRequest.isAnon) {
-          matchingProperties += 2; // 010
-        }
+        uint8 matchingPropertiesLevel = auth._matchLevel(authRequest);
 
-        if (authRequest.authType == AuthType.VAULT) {
-          // If authType is Vault the user can't choose a particular userId
-          // It will be always defined as userId = Hash(VaultSecret, AppId)
-          // There is then no specific constraint on the isSelectableByUser and userId properties)
-          matchingProperties += 4; // 100
-        } else if (authRequest.isSelectableByUser == false && auth.userId == authRequest.userId) {
-          // if the userId in the auth request can NOT be chosen by the user when generating the proof (isSelectableByUser == true)
-          // we check if the userId of the auth in the request matches the userId of the auth in the response
-          matchingProperties += 4; // 100
-        } else if (authRequest.isSelectableByUser == true) {
-          // if the userId in the auth request can be chosen by the user when generating the proof (isSelectableByUser == true)
-          // we dont check if the userId of the auth in the request matches the userId of the auth in the response
-          // the property is considered as matching
-          matchingProperties += 4; // 100
-        }
-        // if the matchingProperties are greater than the current value of maxMatchingProperties, we update the value of maxMatchingProperties
+        // if the matchingPropertiesLevel are greater than the current value of maxMatchingPropertiesLevel, we update the value of maxMatchingPropertiesLevel
         // by doing so we will be able to know how close the auth in the request is to the auth in the response
-        if (matchingProperties > maxMatchingProperties) {
-          maxMatchingProperties = matchingProperties;
+        if (matchingPropertiesLevel > maxMatchingPropertiesLevel) {
+          maxMatchingPropertiesLevel = matchingPropertiesLevel;
         }
       }
-
-      if (authRequest.isOptional) {
-        // if the auth in the request is optional, we consider that its properties are all matching
-        maxMatchingProperties = 7; // 111
-      }
-      _handleAuthErrors(maxMatchingProperties, authRequest);
+      AuthMatchingLib.handleAuthErrors(maxMatchingPropertiesLevel, authRequest);
     }
   }
 
@@ -218,29 +202,29 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     ClaimRequest[] memory claimsInRequest,
     Claim[] memory claimsInResponse
   ) internal pure {
+    // for each claim in the request, we check if it matches with one of the claims in the response
     for (uint256 i = 0; i < claimsInRequest.length; i++) {
-      uint8 maxMatchingProperties = 0;
       ClaimRequest memory claimRequest = claimsInRequest[i];
+      if (claimRequest.isOptional) {
+        // if the claim in the request is optional, we consider that its properties are all matching
+        continue;
+      }
+      // we store the information about the maximum matching properties in a uint8
+      // if the claim in the request matches with a claim in the response, the matchingProperties will be equal to 7 (111)
+      // otherwise, we can look at the binary representation of the matchingProperties to know which properties are not matching and throw an error
+      uint8 maxMatchingProperties = 0;
+
       for (uint256 j = 0; j < claimsInResponse.length; j++) {
-        uint8 matchingProperties = 0;
         Claim memory claim = claimsInResponse[j];
-        if (claim.claimType == claimRequest.claimType) {
-          matchingProperties += 1; // 001
-        }
-        if (claim.groupId == claimRequest.groupId) {
-          matchingProperties += 2; // 010
-        }
-        if (claim.groupTimestamp == claimRequest.groupTimestamp) {
-          matchingProperties += 4; // 100
-        }
+        uint8 matchingProperties = claim._matchLevel(claimRequest);
+
+        // if the matchingProperties are greater than the current value of maxMatchingProperties, we update the value of maxMatchingProperties
+        // by doing so we will be able to know how close the claim in the request is to the claim in the response
         if (matchingProperties > maxMatchingProperties) {
           maxMatchingProperties = matchingProperties;
         }
       }
-      if (claimRequest.isOptional) {
-        maxMatchingProperties = 7; // 111
-      }
-      _handleClaimErrors(maxMatchingProperties, claimRequest);
+      ClaimMatchingLib.handleClaimErrors(maxMatchingProperties, claimRequest);
     }
   }
 
@@ -255,93 +239,5 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   function _setVerifier(bytes32 provingScheme, address verifierAddress) internal {
     _verifiers[provingScheme] = IBaseVerifier(verifierAddress);
     emit VerifierSet(provingScheme, verifierAddress);
-  }
-
-  function _handleAuthErrors(uint8 maxMatchingProperties, AuthRequest memory auth) internal pure {
-    // if the maxMatchingProperties is equal to 7 (111 in bits), it means that the auth in the request matches with one of the auths in the response
-    // otherwise, we can look at the binary representation of the maxMatchingProperties to know which properties are not matching and throw an error (the 0 bits represent the properties that are not matching)
-    if (maxMatchingProperties == 0) {
-      // 000
-      // no property of the auth in the request matches with any property of the auths in the response
-      revert SismoConnectError.AuthInRequestNotFoundInResponse(
-        uint8(auth.authType),
-        auth.isAnon,
-        auth.userId,
-        auth.extraData
-      );
-    } else if (maxMatchingProperties == 1) {
-      // 001
-      // only the authType property of the auth in the request matches with one of the auths in the response
-      revert SismoConnectError.AuthIsAnonAndUserIdNotFound(auth.isAnon, auth.userId);
-    } else if (maxMatchingProperties == 2) {
-      // 010
-      // only the isAnon property of the auth in the request matches with one of the auths in the response
-      revert SismoConnectError.AuthTypeAndUserIdNotFound(uint8(auth.authType), auth.userId);
-    } else if (maxMatchingProperties == 3) {
-      // 011
-      // only the authType and isAnon properties of the auth in the request match with one of the auths in the response
-      revert SismoConnectError.AuthUserIdNotFound(auth.userId);
-    } else if (maxMatchingProperties == 4) {
-      // 100
-      // only the userId property of the auth in the request matches with one of the auths in the response
-      revert SismoConnectError.AuthTypeAndIsAnonNotFound(uint8(auth.authType), auth.isAnon);
-    } else if (maxMatchingProperties == 5) {
-      // 101
-      // only the authType and userId properties of the auth in the request matches with one of the auths in the response
-      revert SismoConnectError.AuthIsAnonNotFound(auth.isAnon);
-    } else if (maxMatchingProperties == 6) {
-      // 110
-      // only the isAnon and userId properties of the auth in the request matches with one of the auths in the response
-      revert SismoConnectError.AuthTypeNotFound(uint8(auth.authType));
-    }
-  }
-
-  function _handleClaimErrors(
-    uint8 maxMatchingProperties,
-    ClaimRequest memory claim
-  ) internal pure {
-    // if the maxMatchingProperties is equal to 7 (111 in bits), it means that the claim in the request matches with one of the claims in the response
-    // otherwise, we can look at the binary representation of the maxMatchingProperties to know which properties are not matching and throw an error (the 0 bits represent the properties that are not matching)
-    if (maxMatchingProperties == 0) {
-      // 000
-      // no property of the claim in the request matches with any property of the claims in the response
-      revert SismoConnectError.ClaimInRequestNotFoundInResponse(
-        uint8(claim.claimType),
-        claim.groupId,
-        claim.groupTimestamp,
-        claim.value,
-        claim.extraData
-      );
-    } else if (maxMatchingProperties == 1) {
-      // 001
-      // only the claimType property of the claim in the request matches with one of the claims in the response
-      revert SismoConnectError.ClaimGroupIdAndGroupTimestampNotFound(
-        claim.groupId,
-        claim.groupTimestamp
-      );
-    } else if (maxMatchingProperties == 2) {
-      // 010
-      // only the groupId property of the claim in the request matches with one of the claims in the response
-      revert SismoConnectError.ClaimTypeAndGroupTimestampNotFound(
-        uint8(claim.claimType),
-        claim.groupTimestamp
-      );
-    } else if (maxMatchingProperties == 3) {
-      // 011
-      // only the claimType and groupId properties of the claim in the request match with one of the claims in the response
-      revert SismoConnectError.ClaimGroupTimestampNotFound(claim.groupTimestamp);
-    } else if (maxMatchingProperties == 4) {
-      // 100
-      // only the groupTimestamp property of the claim in the request matches with one of the claims in the response
-      revert SismoConnectError.ClaimTypeAndGroupIdNotFound(uint8(claim.claimType), claim.groupId);
-    } else if (maxMatchingProperties == 5) {
-      // 101
-      // only the claimType and groupTimestamp properties of the claim in the request matches with one of the claims in the response
-      revert SismoConnectError.ClaimGroupIdNotFound(claim.groupId);
-    } else if (maxMatchingProperties == 6) {
-      // 110
-      // only the groupId and groupTimestamp properties of the claim in the request matches with one of the claims in the response
-      revert SismoConnectError.ClaimTypeNotFound(uint8(claim.claimType));
-    }
   }
 }
