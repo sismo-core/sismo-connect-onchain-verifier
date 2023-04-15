@@ -17,9 +17,32 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
 
     vm.startBroadcast();
 
-    IAddressesProvider sismoAddressProvider = IAddressesProvider(config.sismoAddressesProvider);
-    sismoAddressProvider.set(config.sismoConnectVerifier, string("sismoConnectVerifier-v1"));
+    _setAddress(config.sismoConnectVerifier, string("sismoConnectVerifier-v1"));
+    _setAddress(config.hydraS2Verifier, string("hydraS2Verifier"));
+    _setAddress(config.availableRootsRegistry, string("sismoConnectAvailableRootsRegistry"));
+    _setAddress(config.commitmentMapperRegistry, string("sismoConnectCommitmentMapperRegistry"));
 
     vm.stopBroadcast();
+  }
+
+  function _setAddress(address contractAddress, string memory contractName) internal {
+    IAddressesProvider sismoAddressProvider = IAddressesProvider(config.sismoAddressesProvider);
+    address currentContractAddress = sismoAddressProvider.get(contractName);
+
+    if (currentContractAddress != contractAddress) {
+      console.log(
+        "current contract address for ",
+        contractName,
+        " is different. Updating address to ",
+        contractAddress
+      );
+      sismoAddressProvider.set(contractAddress, contractName);
+    } else {
+      console.log(
+        "current contract address for ",
+        contractName,
+        " is already the expected one. skipping update"
+      );
+    }
   }
 }

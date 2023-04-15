@@ -139,8 +139,8 @@ contract BaseDeploymentConfig is Script {
         availableRootsRegistry: address(0x5449Cc7A7E4024a7192d70c9Ce60Bb823993fd81),
         commitmentMapperRegistry: address(0x041B342b3F114F58983A9179D2c90Da01b822BE0),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0)
+        sismoConnectVerifier: address(0xd3a60301E7725c46978DFDf67ecfDBECb72049F0),
+        hydraS2Verifier: address(0x38ee920F097E9E12Eb5C2A5949cBc1A9Fb72B6CE)
       });
     } else if (chain == DeployChain.StagingGoerli) {
       config = DeploymentConfig({
