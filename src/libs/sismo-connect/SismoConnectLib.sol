@@ -11,8 +11,8 @@ import {ISismoConnectVerifier} from "src/interfaces/ISismoConnectVerifier.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 import {SismoConnectHelper} from "src/libs/utils/SismoConnectHelper.sol";
 import {IHydraS2Verifier} from "src/verifiers/IHydraS2Verifier.sol";
-import {AuthMatchingLib} from "src/libs/sismo-connect/AuthMatchingLib.sol";
-import {ClaimMatchingLib} from "src/libs/sismo-connect/ClaimMatchingLib.sol";
+import {AuthMatchingLib} from "src/libs/utils/AuthMatchingLib.sol";
+import {ClaimMatchingLib} from "src/libs/utils/ClaimMatchingLib.sol";
 
 contract SismoConnect is Context {
   uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;
