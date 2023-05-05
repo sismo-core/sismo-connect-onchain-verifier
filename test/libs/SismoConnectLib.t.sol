@@ -174,18 +174,52 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
   }
 
-  function test_RevertWith_ClaimTypeNotFound() public {
+  function test_RevertWith_ClaimInRequestNotFoundInResponse() public {
+    // we expect a revert since no proofs are provided in the response
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.build();
+    vm.expectRevert(
+      abi.encodeWithSignature("ClaimInRequestNotFoundInResponse(uint8,bytes16,bytes16,uint256,bytes)", 
+      claimRequest.claimType, claimRequest.groupId, claimRequest.groupTimestamp, claimRequest.value, claimRequest.extraData)
+    );
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
+  }
+
+  function test_RevertWith_ClaimGroupIdAndGroupTimestampNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withClaim({claim: ClaimBuilder.build({groupId: bytes16(0xc0dec0dec0dec0dec0dec0dec0dec0de), groupTimestamp: bytes16("fake-timestamp")})});
+    vm.expectRevert(
+      abi.encodeWithSignature("ClaimGroupIdAndGroupTimestampNotFound(bytes16,bytes16)", claimRequest.groupId, claimRequest.groupTimestamp)
+    );
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
+  }
+
+  function test_RevertWith_ClaimTypeAndGroupTimestampNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withClaim({claim: ClaimBuilder.build({groupId: claimRequest.groupId, groupTimestamp: bytes16("fake-timestamp"), claimType: ClaimType.LTE})});
+    vm.expectRevert(
+      abi.encodeWithSignature("ClaimTypeAndGroupTimestampNotFound(uint8,bytes16)", claimRequest.claimType, claimRequest.groupTimestamp)
+    );
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
+  }
+
+  function test_RevertWith_ClaimGroupTimestampNotFound() public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
       .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
-    invalidResponse.proofs[0].claims[0].claimType = ClaimType.LTE;
+    invalidResponse.proofs[0].claims[0].groupTimestamp = bytes16("fake-timestamp");
     vm.expectRevert(
-      abi.encodeWithSignature("ClaimTypeNotFound(uint8)", uint8(claimRequest.claimType))
+      abi.encodeWithSignature("ClaimGroupTimestampNotFound(bytes16)", claimRequest.groupTimestamp)
     );
     sismoConnect.exposed_verify({
       responseBytes: abi.encode(invalidResponse),
       claim: claimRequest,
       signature: signature
     });
+  }
+
+  function test_RevertWith_ClaimTypeAndGroupIdNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withClaim({claim: ClaimBuilder.build({groupId: bytes16(0xc0dec0dec0dec0dec0dec0dec0dec0de), claimType: ClaimType.LTE})});
+    vm.expectRevert(
+      abi.encodeWithSignature("ClaimTypeAndGroupIdNotFound(uint8,bytes16)", claimRequest.claimType, claimRequest.groupId)
+    );
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_ClaimGroupIdNotFound() public {
@@ -200,12 +234,12 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     });
   }
 
-  function test_RevertWith_ClaimGroupTimestampNotFound() public {
+    function test_RevertWith_ClaimTypeNotFound() public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
       .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
-    invalidResponse.proofs[0].claims[0].groupTimestamp = bytes16("fake-timestamp");
+    invalidResponse.proofs[0].claims[0].claimType = ClaimType.LTE;
     vm.expectRevert(
-      abi.encodeWithSignature("ClaimGroupTimestampNotFound(bytes16)", claimRequest.groupTimestamp)
+      abi.encodeWithSignature("ClaimTypeNotFound(uint8)", uint8(claimRequest.claimType))
     );
     sismoConnect.exposed_verify({
       responseBytes: abi.encode(invalidResponse),
