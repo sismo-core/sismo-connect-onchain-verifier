@@ -24,6 +24,10 @@ contract SismoConnectHarness is SismoConnect {
         return buildAuth({authType: authType, isAnon: isAnon});
     }
 
+    function exposed_buildAuth(AuthType authType, bool isOptional, bool isSelectableByUser) external view returns (AuthRequest memory) {
+        return buildAuth({authType: authType, isOptional: isOptional, isSelectableByUser: isSelectableByUser});
+    }
+
     function exposed_buildAuth(AuthType authType, uint256 userId) external view returns (AuthRequest memory) {
         return buildAuth({authType: authType, userId: userId});
     }

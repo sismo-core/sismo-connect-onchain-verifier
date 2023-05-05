@@ -484,6 +484,15 @@ contract SismoConnect is Context {
   function buildAuth(
     AuthType authType,
     bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (AuthRequest memory) {
+    return _authRequestBuilder.build(authType, isOptional, isSelectableByUser);
+  }
+
+
+  function buildAuth(
+    AuthType authType,
+    bool isOptional,
     bool isSelectableByUser,
     uint256 userId
   ) internal view returns (AuthRequest memory) {
