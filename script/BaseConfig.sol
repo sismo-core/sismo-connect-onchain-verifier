@@ -13,6 +13,12 @@ struct DeploymentConfig {
   address sismoAddressesProvider;
   address sismoConnectVerifier;
   address hydraS2Verifier;
+
+  // external libraries
+  address authRequestBuilder;
+  address claimRequestBuilder;
+  address signatureBuilder;
+  address requestBuilder;
 }
 
 contract BaseDeploymentConfig is Script {
@@ -95,7 +101,12 @@ contract BaseDeploymentConfig is Script {
         commitmentMapperRegistry: address(0x653245dE30B901e507B1b09f619ce5B4b161e583),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
         sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0)
+        hydraS2Verifier: address(0),
+        // external libraries
+        authRequestBuilder: address(0),
+        claimRequestBuilder: address(0),
+        signatureBuilder: address(0),
+        requestBuilder: address(0)
       });
     } else if (chain == DeployChain.Polygon) {
       config = DeploymentConfig({
@@ -110,7 +121,12 @@ contract BaseDeploymentConfig is Script {
         commitmentMapperRegistry: address(0x2607c31e104bcF96F7Bc78e8e9BCA356C4D5ebBb),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
         sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0)
+        hydraS2Verifier: address(0),
+        // external libraries
+        authRequestBuilder: address(0),
+        claimRequestBuilder: address(0),
+        signatureBuilder: address(0),
+        requestBuilder: address(0)
       });
     } else if (chain == DeployChain.TestnetGoerli) {
       config = DeploymentConfig({
@@ -125,7 +141,12 @@ contract BaseDeploymentConfig is Script {
         commitmentMapperRegistry: address(0xa3104F52bF6C8317a49144d864CB04f2A487327B),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
         sismoConnectVerifier: address(0x7E69774d46d46EB0C3aF309f477ded8008Ac1996),
-        hydraS2Verifier: address(0xaa7cc4E3E06D1Fb76184ae294f75619C5dDCE1b4)
+        hydraS2Verifier: address(0xaa7cc4E3E06D1Fb76184ae294f75619C5dDCE1b4),
+        // external libraries
+        authRequestBuilder: address(0),
+        claimRequestBuilder: address(0),
+        signatureBuilder: address(0),
+        requestBuilder: address(0)
       });
     } else if (chain == DeployChain.TestnetMumbai) {
       config = DeploymentConfig({
@@ -140,7 +161,12 @@ contract BaseDeploymentConfig is Script {
         commitmentMapperRegistry: address(0x041B342b3F114F58983A9179D2c90Da01b822BE0),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
         sismoConnectVerifier: address(0xd3a60301E7725c46978DFDf67ecfDBECb72049F0),
-        hydraS2Verifier: address(0x38ee920F097E9E12Eb5C2A5949cBc1A9Fb72B6CE)
+        hydraS2Verifier: address(0x38ee920F097E9E12Eb5C2A5949cBc1A9Fb72B6CE),
+        // external libraries
+        authRequestBuilder: address(0),
+        claimRequestBuilder: address(0),
+        signatureBuilder: address(0),
+        requestBuilder: address(0)
       });
     } else if (chain == DeployChain.StagingGoerli) {
       config = DeploymentConfig({
@@ -155,7 +181,12 @@ contract BaseDeploymentConfig is Script {
         commitmentMapperRegistry: address(0x5840b39264b9fc7B294Ef4D8De1c8d25b136201B),
         sismoAddressesProvider: address(0),
         sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0)
+        hydraS2Verifier: address(0),
+        // external libraries
+        authRequestBuilder: address(0),
+        claimRequestBuilder: address(0),
+        signatureBuilder: address(0),
+        requestBuilder: address(0)
       });
     } else if (chain == DeployChain.StagingMumbai) {
       config = DeploymentConfig({
@@ -170,7 +201,12 @@ contract BaseDeploymentConfig is Script {
         commitmentMapperRegistry: address(0x09Dca2AC5BB0b9E23beF5723D0203Bc9B1033D1f),
         sismoAddressesProvider: address(0),
         sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0)
+        hydraS2Verifier: address(0),
+        // external libraries
+        authRequestBuilder: address(0),
+        claimRequestBuilder: address(0),
+        signatureBuilder: address(0),
+        requestBuilder: address(0)
       });
     } else if (chain == DeployChain.Test) {
       config = DeploymentConfig({
@@ -182,7 +218,12 @@ contract BaseDeploymentConfig is Script {
         commitmentMapperRegistry: address(0),
         sismoAddressesProvider: address(0),
         sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0)
+        hydraS2Verifier: address(0),
+        // external libraries
+        authRequestBuilder: address(0),
+        claimRequestBuilder: address(0),
+        signatureBuilder: address(0),
+        requestBuilder: address(0)
       });
     } else {
       revert ChainNotConfigured(chain);

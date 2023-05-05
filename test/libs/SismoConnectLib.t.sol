@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {HydraS2BaseTest} from "../verifiers/hydra-s2/HydraS2BaseTest.t.sol";
-import {SismoConnect, RequestBuilder, AuthRequestBuilder, ClaimRequestBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
+import {SismoConnect, RequestBuilder, ClaimRequestBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
 import {ZKDropERC721} from "src/ZKDropERC721.sol";
 import "src/libs/utils/Structs.sol";
 import {SismoConnectHarness} from "test/harness/SismoConnectHarness.sol";
@@ -181,7 +181,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
     sismoConnect.exposed_verify({
       responseBytes: responseEncoded,
-      request: RequestBuilder.buildRequest({
+      request: requestBuilder.build({
         claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
         signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)}),
         appId: appId
@@ -200,7 +200,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
     sismoConnect.exposed_verify({
       responseBytes: responseEncoded,
-      request: RequestBuilder.buildRequest({
+      request: requestBuilder.build({
         claims: claims,
         signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)}),
         appId: appId
@@ -213,7 +213,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
       commitmentMapperRegistry
     );
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
       signature: signature,
       appId: appId
@@ -230,9 +230,9 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithOneClaimOneAuthAndOneMessage(
       commitmentMapperRegistry
     );
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
-      claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
+    SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
+      claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
       signature: signature,
       appId: appId
     });
@@ -266,13 +266,13 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
   function test_TwoClaimsOneVaultAuthWithSignature() public {
     ClaimRequest[] memory claims = new ClaimRequest[](2);
-    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
-    claims[1] = ClaimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
+    claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
 
     AuthRequest[] memory auths = new AuthRequest[](1);
-    auths[0] = AuthRequestBuilder.build({authType: AuthType.VAULT});
+    auths[0] = authRequestBuilder.build({authType: AuthType.VAULT});
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
       signature: signature,
@@ -292,17 +292,18 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
   function test_ThreeClaimsOneVaultAuthWithSignatureOneClaimOptional() public {
     ClaimRequest[] memory claims = new ClaimRequest[](3);
-    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
-    claims[1] = ClaimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
-    claims[2] = ClaimRequestBuilder.build({
+    claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
+    claims[2] = claimRequestBuilder.build({
       groupId: 0x42c768bb8ae79e4c5c05d3b51a4ec74a,
-      isOptional: true
+      isOptional: true,
+      isSelectableByUser: false
     });
 
     AuthRequest[] memory auths = new AuthRequest[](1);
-    auths[0] = AuthRequestBuilder.build({authType: AuthType.VAULT});
+    auths[0] = authRequestBuilder.build({authType: AuthType.VAULT});
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
       signature: signature,
@@ -324,18 +325,19 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     public
   {
     ClaimRequest[] memory claims = new ClaimRequest[](3);
-    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
-    claims[1] = ClaimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
-    claims[2] = ClaimRequestBuilder.build({
+    claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
+    claims[2] = claimRequestBuilder.build({
       groupId: 0x42c768bb8ae79e4c5c05d3b51a4ec74a,
-      isOptional: true
+      isOptional: true,
+      isSelectableByUser: false
     });
 
     AuthRequest[] memory auths = new AuthRequest[](2);
-    auths[0] = AuthRequestBuilder.build({authType: AuthType.VAULT});
-    auths[1] = AuthRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true});
+    auths[0] = authRequestBuilder.build({authType: AuthType.VAULT});
+    auths[1] = authRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true, isSelectableByUser: true});
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
       signature: signature,
@@ -359,13 +361,13 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     );
 
     ClaimRequest[] memory claims = new ClaimRequest[](1);
-    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
 
     AuthRequest[] memory auths = new AuthRequest[](2);
-    auths[0] = AuthRequestBuilder.build({authType: AuthType.GITHUB});
-    auths[1] = AuthRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true});
+    auths[0] = authRequestBuilder.build({authType: AuthType.GITHUB});
+    auths[1] = authRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true, isSelectableByUser: true});
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
       signature: signature,
@@ -387,7 +389,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
       commitmentMapperRegistry
     );
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB}),
       signature: signature,
       appId: appId

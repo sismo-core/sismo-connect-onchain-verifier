@@ -12,15 +12,15 @@ contract SismoConnectHarness is SismoConnect {
         bytes16 appId
     ) SismoConnect(appId) {}
 
-    function exposed_buildClaim(bytes16 groupId) external pure returns (ClaimRequest memory) {
+    function exposed_buildClaim(bytes16 groupId) external view returns (ClaimRequest memory) {
         return buildClaim(groupId);
     }
 
-    function exposed_buildAuth(AuthType authType) external pure returns (AuthRequest memory) {
+    function exposed_buildAuth(AuthType authType) external view returns (AuthRequest memory) {
         return buildAuth(authType);
     }
 
-    function exposed_buildSignature(bytes memory message) external pure returns (SignatureRequest memory) {
+    function exposed_buildSignature(bytes memory message) external view returns (SignatureRequest memory) {
         return buildSignature(message);
     }
 
