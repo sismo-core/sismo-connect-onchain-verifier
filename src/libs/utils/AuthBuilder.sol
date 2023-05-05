@@ -5,6 +5,7 @@ import "src/libs/utils/Structs.sol";
 
 library AuthBuilder {
    // default values for Auth Request
+  AuthType public constant DEFAULT_AUTH_TYPE = AuthType.VAULT;
   bool public constant DEFAULT_AUTH_IS_ANON = false;
   uint256 public constant DEFAULT_AUTH_USER_ID = 0;
   bool public constant DEFAULT_AUTH_IS_SELECTABLE_BY_USER = true;
@@ -123,6 +124,22 @@ library AuthBuilder {
         userId: userId,
         isSelectableByUser: DEFAULT_AUTH_IS_SELECTABLE_BY_USER,
         extraData: extraData
+      });
+  }
+
+  function build(
+    AuthType authType,
+    bool isAnon,
+    uint256 userId,
+    bool isSelectableByUser
+  ) external pure returns (Auth memory) {
+    return
+      Auth({
+        authType: authType,
+        isAnon: isAnon,
+        userId: userId,
+        isSelectableByUser: isSelectableByUser,
+        extraData: DEFAULT_AUTH_EXTRA_DATA
       });
   }
 }

@@ -156,6 +156,18 @@ contract AuthRequestBuilder {
       });
   }
 
+  function build(AuthType authType, bool isOptional, bool isSelectableByUser, uint256 userId) external pure returns (AuthRequest memory) {
+    return
+      _build({
+        authType: authType,
+        isAnon: DEFAULT_AUTH_REQUEST_IS_ANON,
+        userId: userId,
+        isOptional: isOptional,
+        isSelectableByUser: isSelectableByUser,
+        extraData: DEFAULT_AUTH_REQUEST_EXTRA_DATA
+      });
+  }
+
   // the user is ask to choose isSelectableByUser to avoid the function signature collision
   // between build(AuthType authType, bool isAnon, bool isOptional) and build(AuthType authType, bool isOptional, bool isSelectableByUser)
 

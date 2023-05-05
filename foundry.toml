@@ -3,6 +3,9 @@ optimizer_runs = 1000000
 verbosity = 1
 # via_ir = true
 
+[fmt]
+ignore = ["test/libs/SimoConnectLib.t.sol"]
+
 [rpc_endpoints]
 polygon = "${RPC_URL}"
 gnosis = "${RPC_URL}"
