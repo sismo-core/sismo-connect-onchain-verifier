@@ -90,14 +90,18 @@ library ResponseBuilder {
     });
   }
 
-  function withAuth(SismoConnectResponse memory response, Auth memory auth, bytes memory proofData) external pure returns (SismoConnectResponse memory) {
+  function withAuth(SismoConnectResponse memory response, Auth memory auth, bytes memory proofData) public pure returns (SismoConnectResponse memory) {
     SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
     proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData});
     response.proofs = proofs;
     return response;
   }
 
-  function withAuth(ResponseWithoutProofs memory response, Auth memory auth, bytes memory proofData) external pure returns (SismoConnectResponse memory) {
+  function withAuth(SismoConnectResponse memory response, Auth memory auth) external pure returns (SismoConnectResponse memory) {
+    return withAuth(response, auth, "");
+  }
+
+  function withAuth(ResponseWithoutProofs memory response, Auth memory auth, bytes memory proofData) public pure returns (SismoConnectResponse memory) {
     SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
     proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData});
     SismoConnectResponse memory responseWithProofs = build(response);
@@ -105,6 +109,9 @@ library ResponseBuilder {
     return responseWithProofs;
   }
 
+  function withAuth(ResponseWithoutProofs memory response, Auth memory auth) external pure returns (SismoConnectResponse memory) {
+    return withAuth(response, auth, "");
+  }
 
   ////////////////////////////////
   //       Empty structs       //

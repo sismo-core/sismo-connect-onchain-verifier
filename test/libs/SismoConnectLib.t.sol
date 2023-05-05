@@ -87,60 +87,63 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
   function test_RevertWith_SignatureMessageMismatch() public {
     SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withSignedMessage("fake-signed-message").build();
-    vm.expectRevert(abi.encodeWithSignature("SignatureMessageMismatch(bytes,bytes)", signature.message, "fake-signed-message"));
+    vm.expectRevert(abi.encodeWithSignature("SignatureMessageMismatch(bytes,bytes)", signature.message, invalidResponse.signedMessage));
     sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_AuthInRequestNotFoundInResponse() public {
     // we expect a revert since no proofs are provided in the response
     SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.build();
-    vm.expectRevert(abi.encodeWithSignature("AuthInRequestNotFoundInResponse(uint8,bool,uint256,bytes)", uint8(AuthType.VAULT), false, 0, bytes("")));
+    vm.expectRevert(abi.encodeWithSignature("AuthInRequestNotFoundInResponse(uint8,bool,uint256,bytes)", authRequest.authType, authRequest.isAnon, authRequest.userId, authRequest.extraData));
     sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: authRequest, signature: signature});
   }
 
   function test_RevertWith_AuthIsAnonAndUserIdNotFound() public {
-    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.GITHUB, isAnon: true, userId: uint256(0xc0de)}) , proofData: hex""});
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.GITHUB, isAnon: true, userId: uint256(0xc0de)})});
     // we need to choose a different AuthType than AUthType.VAULT to be able to test if the userId error is thrown
     // we also need to set the userId different from zero since isSelectableByUser is false
     // it means that we are waiting for a userId in the response that actually means something so different from zero
     AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, isOptional: false, isSelectableByUser: false, userId: uint256(0xf00)});
 
-    vm.expectRevert(abi.encodeWithSignature("AuthIsAnonAndUserIdNotFound(bool,uint256)", false, uint256(0xf00)));
+    vm.expectRevert(abi.encodeWithSignature("AuthIsAnonAndUserIdNotFound(bool,uint256)", auth.isAnon, auth.userId));
     sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
   }
 
   function test_RevertWith_AuthTypeAndUserIdNotFound() public {
-    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT, userId: uint256(0xc0de)}) , proofData: hex""});
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT, userId: uint256(0xc0de)})});
     // we need to choose a different AuthType than AUthType.VAULT to be able to test if the userId error is thrown
     AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, userId: uint256(0xf00)});
-    vm.expectRevert(abi.encodeWithSignature("AuthTypeAndUserIdNotFound(uint8,uint256)", uint8(AuthType.GITHUB), uint256(0xf00)));
+    vm.expectRevert(abi.encodeWithSignature("AuthTypeAndUserIdNotFound(uint8,uint256)", auth.authType, auth.userId));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
+  }
+
+  function test_RevertWith_AuthUserIdNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.GITHUB, userId: uint256(0xc0de)})});
+    // we need to choose a different AuthType than AUthType.VAULT to be able to test if the userId error is thrown
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, userId: uint256(0xf00)});
+    vm.expectRevert(abi.encodeWithSignature("AuthUserIdNotFound(uint256)", auth.userId));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
+  }
+
+  function test_RevertWith_AuthTypeAndIsAnonNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT, isAnon: true})});
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, isAnon: false});
+    vm.expectRevert(abi.encodeWithSignature("AuthTypeAndIsAnonNotFound(uint8,bool)", auth.authType, auth.isAnon));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
+  }
+
+  function test_RevertWith_AuthIsAnonNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT, isAnon: true})});
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT, isAnon: false});
+    vm.expectRevert(abi.encodeWithSignature("AuthIsAnonNotFound(bool)", auth.isAnon));
     sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
   }
 
   function test_RevertWith_AuthTypeNotFound() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOnlyOneAuthAndMessage(commitmentMapperRegistry);
-    invalidResponse.proofs[0].auths[0].authType = AuthType.GITHUB;
-    vm.expectRevert(
-      abi.encodeWithSignature("AuthTypeNotFound(uint8)", uint8(authRequest.authType))
-    );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      auth: authRequest,
-      signature: signature
-    });
-  }
-
-  function test_RevertWith_AuthAnonModeNotFound() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOnlyOneAuthAndMessage(commitmentMapperRegistry);
-    invalidResponse.proofs[0].auths[0].isAnon = true;
-    vm.expectRevert(abi.encodeWithSignature("AuthIsAnonNotFound(bool)", authRequest.isAnon));
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      auth: authRequest,
-      signature: signature
-    });
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT})});
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
+    vm.expectRevert(abi.encodeWithSignature("AuthTypeNotFound(uint8)", auth.authType));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
   }
 
   function test_RevertWith_ClaimTypeNotFound() public {
