@@ -31,8 +31,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
   RequestBuilder requestBuilder;
 
   function runFor(
-    string memory chainName,
-    bool deployLibraries
+    string memory chainName
   ) public returns (ScriptTypes.DeployAllContracts memory contracts) {
     console.log("Run for CHAIN_NAME:", chainName);
     console.log("Deployer:", msg.sender);
@@ -61,12 +60,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
     contracts.sismoConnectVerifier = sismoConnectVerifier;
 
     // external libraries
-    // We want to ensure that the libraries are wanted to be deployed by the user
-    if (deployLibraries == false) {
-      console.log("Skipping external libraries deployment");
-      vm.stopBroadcast();
-      return contracts;
-    }
+
     authRequestBuilder = _deployAuthRequestBuilder();
     claimRequestBuilder = _deployClaimRequestBuilder();
     signatureBuilder = _deploySignatureBuilder();
@@ -128,6 +122,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
     CommitmentMapperRegistry _commitmentMapperRegistry,
     AvailableRootsRegistry _availableRootsRegistry
   ) private returns (HydraS2Verifier) {
+    if (config.hydraS2Verifier != address(0)) {
+      console.log("Using existing hydraS2Verifier:", config.hydraS2Verifier);
+      return HydraS2Verifier(config.hydraS2Verifier);
+    }
     address commitmentMapperRegistryAddr = address(_commitmentMapperRegistry);
     address availableRootsRegistryAddr = address(_availableRootsRegistry);
     HydraS2Verifier hydraS2VerifierImplem = new HydraS2Verifier(
@@ -146,6 +144,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deploySismoConnectVerifier(address owner) private returns (SismoConnectVerifier) {
+    if (config.sismoConnectVerifier != address(0)) {
+      console.log("Using existing sismoConnectVerifier:", config.sismoConnectVerifier);
+      return SismoConnectVerifier(config.sismoConnectVerifier);
+    }
     SismoConnectVerifier sismoConnectVerifierImplem = new SismoConnectVerifier(owner);
     console.log("sismoConnectVerifier Implem Deployed:", address(sismoConnectVerifierImplem));
 
@@ -161,24 +163,40 @@ contract DeployAll is Script, BaseDeploymentConfig {
   // External libraries
 
   function _deployAuthRequestBuilder() private returns (AuthRequestBuilder) {
+    if (config.authRequestBuilder != address(0)) {
+      console.log("Using existing authrequestBuilder:", config.authRequestBuilder);
+      return AuthRequestBuilder(config.authRequestBuilder);
+    }
     authRequestBuilder = new AuthRequestBuilder();
     console.log("authRequestBuilder Deployed:", address(authRequestBuilder));
     return authRequestBuilder;
   }
 
   function _deployClaimRequestBuilder() private returns (ClaimRequestBuilder) {
+    if (config.claimRequestBuilder != address(0)) {
+      console.log("Using existing claimRequestBuilder:", config.claimRequestBuilder);
+      return ClaimRequestBuilder(config.claimRequestBuilder);
+    }
     claimRequestBuilder = new ClaimRequestBuilder();
     console.log("claimRequestBuilder Deployed:", address(claimRequestBuilder));
     return claimRequestBuilder;
   }
 
   function _deploySignatureBuilder() private returns (SignatureBuilder) {
+    if (config.signatureBuilder != address(0)) {
+      console.log("Using existing signatureBuilder:", config.signatureBuilder);
+      return SignatureBuilder(config.signatureBuilder);
+    }
     signatureBuilder = new SignatureBuilder();
     console.log("signatureBuilder Deployed:", address(signatureBuilder));
     return signatureBuilder;
   }
 
   function _deployRequestBuilder() private returns (RequestBuilder) {
+    if (config.requestBuilder != address(0)) {
+      console.log("Using existing requestBuilder:", config.requestBuilder);
+      return RequestBuilder(config.requestBuilder);
+    }
     requestBuilder = new RequestBuilder();
     console.log("requestBuilder Deployed:", address(requestBuilder));
     return requestBuilder;
@@ -186,8 +204,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
   function run() public returns (ScriptTypes.DeployAllContracts memory contracts) {
     string memory chainName = vm.envString("CHAIN_NAME");
-    bool deployLibraries = vm.envBool("DEPLOY_LIBRARIES");
-    return runFor(chainName, deployLibraries);
+    return runFor(chainName);
   }
 }
 

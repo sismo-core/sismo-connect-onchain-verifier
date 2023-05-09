@@ -23,12 +23,7 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
     _setAddress(config.commitmentMapperRegistry, string("sismoConnectCommitmentMapperRegistry"));
 
     // external libraries
-    // We want to ensure that the libraries are wanted to be set by the user
-    if (vm.envBool("SET_LIBRARIES") == false) {
-      console.log("Skipping external libraries when setting addresses");
-      vm.stopBroadcast();
-      return;
-    }
+
     _setAddress(config.authRequestBuilder, string("authRequestBuilder-v1"));
     _setAddress(config.claimRequestBuilder, string("claimRequestBuilder-v1"));
     _setAddress(config.signatureBuilder, string("signatureBuilder-v1"));
