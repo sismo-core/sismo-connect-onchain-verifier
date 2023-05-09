@@ -5,7 +5,10 @@ import "forge-std/console.sol";
 import {IBaseVerifier} from "src/interfaces/IBaseVerifier.sol";
 import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
 
-contract ProvingSchemeVerifierMock is IBaseVerifier {
+contract VerifierMock is IBaseVerifier {
+
+  bytes32 public immutable VERSION = "mock-scheme";
+
   function verify(
     bytes16,
     bytes16,
