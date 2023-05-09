@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Structs.sol";
+import "./Structs.sol";
 
 contract ClaimRequestBuilder {
   // default value for Claim Request

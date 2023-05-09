@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Structs.sol";
-import {SignatureBuilder} from "src/libs/utils/SignatureBuilder.sol";
+import "./Structs.sol";
+import {SignatureBuilder} from "./SignatureBuilder.sol";
 
 contract RequestBuilder {
   // default value for namespace

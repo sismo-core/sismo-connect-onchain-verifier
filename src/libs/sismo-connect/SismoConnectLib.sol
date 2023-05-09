@@ -1,20 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Structs.sol";
-import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
-import {AuthRequestBuilder} from "src/libs/utils/AuthRequestBuilder.sol";
-import {ClaimRequestBuilder} from "src/libs/utils/ClaimRequestBuilder.sol";
-import {SignatureBuilder} from "src/libs/utils/SignatureBuilder.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {ISismoConnectVerifier} from "src/interfaces/ISismoConnectVerifier.sol";
-import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
-import {SismoConnectHelper} from "src/libs/utils/SismoConnectHelper.sol";
-import {IHydraS2Verifier} from "src/verifiers/IHydraS2Verifier.sol";
-import {AuthMatchingLib} from "src/libs/utils/AuthMatchingLib.sol";
-import {ClaimMatchingLib} from "src/libs/utils/ClaimMatchingLib.sol";
+import {RequestBuilder, SismoConnectRequest, SismoConnectResponse} from "../utils/RequestBuilder.sol";
+import {AuthRequestBuilder, AuthRequest, Auth, VerifiedAuth, AuthType} from "../utils/AuthRequestBuilder.sol";
+import {ClaimRequestBuilder, ClaimRequest, Claim, VerifiedClaim, ClaimType} from "../utils/ClaimRequestBuilder.sol";
+import {SignatureBuilder, SignatureRequest, Signature} from "../utils/SignatureBuilder.sol";
+import {ISismoConnectVerifier, SismoConnectVerifiedResult} from "../../interfaces/ISismoConnectVerifier.sol";
+import {IAddressesProvider} from "../../periphery/interfaces/IAddressesProvider.sol";
+import {SismoConnectHelper} from "../utils/SismoConnectHelper.sol";
+import {IHydraS2Verifier} from "../../verifiers/IHydraS2Verifier.sol";
 
-contract SismoConnect is Context {
+contract SismoConnect {
   uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;
 
   IAddressesProvider public constant ADDRESSES_PROVIDER =
@@ -42,12 +38,8 @@ contract SismoConnect is Context {
     _claimRequestBuilder = ClaimRequestBuilder(
       ADDRESSES_PROVIDER.get(string("claimRequestBuilder-v1"))
     );
-    _signatureBuilder = SignatureBuilder(
-      ADDRESSES_PROVIDER.get(string("signatureBuilder-v1"))
-    );
-    _requestBuilder = RequestBuilder(
-      ADDRESSES_PROVIDER.get(string("requestBuilder-v1"))
-    );
+    _signatureBuilder = SignatureBuilder(ADDRESSES_PROVIDER.get(string("signatureBuilder-v1")));
+    _requestBuilder = RequestBuilder(ADDRESSES_PROVIDER.get(string("requestBuilder-v1")));
   }
 
   function verify(
@@ -488,7 +480,6 @@ contract SismoConnect is Context {
   ) internal view returns (AuthRequest memory) {
     return _authRequestBuilder.build(authType, isOptional, isSelectableByUser);
   }
-
 
   function buildAuth(
     AuthType authType,

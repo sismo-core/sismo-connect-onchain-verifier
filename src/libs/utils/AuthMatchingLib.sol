@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Structs.sol";
+import "./Structs.sol";
 
 // The role of this library is to check for a given AuthRequest if there is a matching Auth in the response
 // It returns a level of matching between the AuthRequest and the Auth in the response
