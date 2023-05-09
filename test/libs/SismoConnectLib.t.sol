@@ -474,6 +474,19 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
   }
 
+  function test_GitHubAuthWithoutSignature() public {
+    (, bytes memory encodedResponse) = hydraS2Proofs.getResponseWithGitHubAuthWithoutSignature(
+      commitmentMapperRegistry
+    );
+
+    SismoConnectRequest memory request = requestBuilder.build({
+      auth: sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB}),
+      appId: DEFAULT_APP_ID
+    });
+
+    sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
+  }
+  
   // helpers
 
   function emptyResponse() private pure returns (SismoConnectResponse memory) {
