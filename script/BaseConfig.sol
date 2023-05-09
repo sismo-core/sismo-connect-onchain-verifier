@@ -13,7 +13,6 @@ struct DeploymentConfig {
   address sismoAddressesProvider;
   address sismoConnectVerifier;
   address hydraS2Verifier;
-
   // external libraries
   address authRequestBuilder;
   address claimRequestBuilder;
@@ -140,8 +139,8 @@ contract BaseDeploymentConfig is Script {
         availableRootsRegistry: address(0xF3dAc93c85e92cab8f811b3A3cCaCB93140D9304),
         commitmentMapperRegistry: address(0xa3104F52bF6C8317a49144d864CB04f2A487327B),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0x7E69774d46d46EB0C3aF309f477ded8008Ac1996),
-        hydraS2Verifier: address(0xaa7cc4E3E06D1Fb76184ae294f75619C5dDCE1b4),
+        sismoConnectVerifier: address(0),
+        hydraS2Verifier: address(0),
         // external libraries
         authRequestBuilder: address(0),
         claimRequestBuilder: address(0),
@@ -160,13 +159,13 @@ contract BaseDeploymentConfig is Script {
         availableRootsRegistry: address(0x5449Cc7A7E4024a7192d70c9Ce60Bb823993fd81),
         commitmentMapperRegistry: address(0x041B342b3F114F58983A9179D2c90Da01b822BE0),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0xd3a60301E7725c46978DFDf67ecfDBECb72049F0),
-        hydraS2Verifier: address(0x38ee920F097E9E12Eb5C2A5949cBc1A9Fb72B6CE),
+        sismoConnectVerifier: address(0x0e2428989CD77D851b3Cc04ecbcAdAb834657290),
+        hydraS2Verifier: address(0x817ba96B4bB47733b1F827239B5C549267340398),
         // external libraries
-        authRequestBuilder: address(0),
-        claimRequestBuilder: address(0),
-        signatureBuilder: address(0),
-        requestBuilder: address(0)
+        authRequestBuilder: address(0x72D73a403D25BA22E020729e1CB5153A15c2Ab86),
+        claimRequestBuilder: address(0x7484fE8b8A9cF5485D6499d909fFf706d923a4aA),
+        signatureBuilder: address(0x5c7166025Eb98e4a479844e57148e2bd8DaC122f),
+        requestBuilder: address(0xdE8e8317408b7e935B4931f624354cd8B45AE01E)
       });
     } else if (chain == DeployChain.StagingGoerli) {
       config = DeploymentConfig({
