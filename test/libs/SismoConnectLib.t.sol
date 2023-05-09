@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import "src/libs/utils/Fmt.sol";
-import {VerifierMockBaseTest} from "test/verifiers/mocks/VerifierMockBasetest.t.sol";
+import {VerifierMockBaseTest} from "test/verifiers/mocks/VerifierMockBaseTest.t.sol";
 import {SismoConnect, RequestBuilder, ClaimRequestBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
 import {ZKDropERC721} from "src/ZKDropERC721.sol";
 import "src/libs/utils/Structs.sol";
@@ -26,6 +26,8 @@ contract SismoConnectLibTest is VerifierMockBaseTest {
   bytes16 public DEFAULT_NAMESPACE = bytes16(keccak256("main"));
   bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1");
   bytes public DEFAULT_SIGNED_MESSAGE = abi.encode(user);
+
+  bytes32 public DEFAULT_PROVING_SCHEME = bytes32("mock-scheme");
 
   ResponseWithoutProofs public DEFAULT_RESPONSE = ResponseBuilder.emptyResponseWithoutProofs().withAppId(DEFAULT_APP_ID)
                                                                                               .withVersion(DEFAULT_VERSION)
@@ -234,7 +236,7 @@ contract SismoConnectLibTest is VerifierMockBaseTest {
     });
   }
 
-    function test_RevertWith_ClaimTypeNotFound() public {
+  function test_RevertWith_ClaimTypeNotFound() public {
     SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withClaim({claim: ClaimBuilder.build({groupId: claimRequest.groupId, claimType: ClaimType.LTE})});
     vm.expectRevert(
       abi.encodeWithSignature("ClaimTypeNotFound(uint8)", uint8(claimRequest.claimType))
@@ -244,6 +246,12 @@ contract SismoConnectLibTest is VerifierMockBaseTest {
       claim: claimRequest,
       signature: signature
     });
+  }
+
+  function test_OneAuthOneClaimOneSignature() public {
+    SismoConnectResponse memory validResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT}), provingScheme: DEFAULT_PROVING_SCHEME})
+                                                                .withClaim({claim: ClaimBuilder.build({groupId: claimRequest.groupId}), provingScheme: DEFAULT_PROVING_SCHEME});
+    sismoConnect.exposed_verify({responseBytes: abi.encode(validResponse), claim: claimRequest, signature: signature});
   }
   
   // helpers

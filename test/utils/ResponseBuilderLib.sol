@@ -83,9 +83,16 @@ library ResponseBuilder {
     });
   }
 
+  function withAuth(SismoConnectResponse memory response, Auth memory auth, bytes memory proofData, bytes32 provingScheme) public pure returns (SismoConnectResponse memory) {
+    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
+    proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData, provingScheme: provingScheme});
+    response.proofs = proofs;
+    return response;
+  }
+
   function withAuth(SismoConnectResponse memory response, Auth memory auth, bytes memory proofData) public pure returns (SismoConnectResponse memory) {
     SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
-    proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData});
+    proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData, provingScheme: ""});
     response.proofs = proofs;
     return response;
   }
@@ -94,27 +101,57 @@ library ResponseBuilder {
     return withAuth(response, auth, "");
   }
 
+  function withAuth(ResponseWithoutProofs memory response, Auth memory auth, bytes memory proofData, bytes32 provingScheme) public pure returns (SismoConnectResponse memory) {
+    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
+    proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData, provingScheme: provingScheme});
+    SismoConnectResponse memory responseWithProofs = build(response);
+    responseWithProofs.proofs = proofs;
+    return responseWithProofs;
+  }
+
   function withAuth(ResponseWithoutProofs memory response, Auth memory auth, bytes memory proofData) public pure returns (SismoConnectResponse memory) {
     SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
-    proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData});
+    proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData, provingScheme: ""});
+    SismoConnectResponse memory responseWithProofs = build(response);
+    responseWithProofs.proofs = proofs;
+    return responseWithProofs;
+  }
+
+  function withAuth(ResponseWithoutProofs memory response, Auth memory auth, bytes32 provingScheme) public pure returns (SismoConnectResponse memory) {
+    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
+    proofs[0] = ProofBuilder.build({auth: auth, proofData: "", provingScheme: provingScheme});
     SismoConnectResponse memory responseWithProofs = build(response);
     responseWithProofs.proofs = proofs;
     return responseWithProofs;
   }
 
   function withAuth(ResponseWithoutProofs memory response, Auth memory auth) external pure returns (SismoConnectResponse memory) {
-    return withAuth(response, auth, "");
+    return withAuth({response: response, auth: auth, proofData: ""});
+  }
+
+  function withClaim(SismoConnectResponse memory response, Claim memory claim, bytes memory proofData, bytes32 provingScheme) public pure returns (SismoConnectResponse memory) {
+    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
+    proofs[0] = ProofBuilder.build({claim: claim, proofData: proofData, provingScheme: provingScheme});
+    response.proofs = proofs;
+    return response;
   }
 
   function withClaim(SismoConnectResponse memory response, Claim memory claim, bytes memory proofData) public pure returns (SismoConnectResponse memory) {
     SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
-    proofs[0] = ProofBuilder.build({claim: claim, proofData: proofData});
+    proofs[0] = ProofBuilder.build({claim: claim, proofData: proofData, provingScheme: ""});
+    response.proofs = proofs;
+    return response;
+  }
+
+  function withClaim(SismoConnectResponse memory response, Claim memory claim, bytes32 provingScheme) public pure returns (SismoConnectResponse memory) {
+    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
+    proofs[0] = ProofBuilder.build({claim: claim, proofData: "", provingScheme: provingScheme});
     response.proofs = proofs;
     return response;
   }
 
   function withClaim(SismoConnectResponse memory response, Claim memory claim) external pure returns (SismoConnectResponse memory) {
-    return withClaim(response, claim, "");
+    return withClaim({response: response, claim: claim, proofData: ""});
   }
 
   function withClaim(ResponseWithoutProofs memory response, Claim memory claim, bytes memory proofData) public pure returns (SismoConnectResponse memory) {
