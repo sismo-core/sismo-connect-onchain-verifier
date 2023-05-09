@@ -45,7 +45,7 @@ library AuthMatchingLib {
       // It will be always defined as userId = Hash(VaultSecret, AppId)
       // There is then no specific constraint on the isSelectableByUser and userId properties)
       matchingPropertiesLevel += 4; // 100
-    } else if (authRequest.isSelectableByUser == false && auth.userId == authRequest.userId) {
+    } else if ((authRequest.isSelectableByUser == false) && (auth.userId == authRequest.userId)) {
       // if the userId in the auth request can NOT be chosen by the user when generating the proof (isSelectableByUser == true)
       // we check if the userId of the auth in the request matches the userId of the auth in the response
       matchingPropertiesLevel += 4; // 100

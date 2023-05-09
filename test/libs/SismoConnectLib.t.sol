@@ -2,17 +2,36 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
+import "src/libs/utils/Fmt.sol";
 import {HydraS2BaseTest} from "../verifiers/hydra-s2/HydraS2BaseTest.t.sol";
-import {SismoConnect, RequestBuilder, AuthRequestBuilder, ClaimRequestBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
+import {SismoConnect, RequestBuilder, ClaimRequestBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
 import {ZKDropERC721} from "src/ZKDropERC721.sol";
 import "src/libs/utils/Structs.sol";
 import {SismoConnectHarness} from "test/harness/SismoConnectHarness.sol";
+
+import {AuthBuilder} from "src/libs/utils/AuthBuilder.sol";
+import {ClaimBuilder} from "src/libs/utils/ClaimBuilder.sol";
+import {ResponseBuilder, ResponseWithoutProofs} from "test/utils/ResponseBuilderLib.sol";
 import {BaseDeploymentConfig} from "script/BaseConfig.sol";
 
 contract SismoConnectLibTest is HydraS2BaseTest {
+  using ResponseBuilder for SismoConnectResponse;
+  using ResponseBuilder for ResponseWithoutProofs;
+
   SismoConnectHarness sismoConnect;
   address user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
-  bytes16 immutable appId = 0x11b1de449c6c4adb0b5775b3868b28b3;
+
+  // default values for tests
+  bytes16 public DEFAULT_APP_ID = 0x11b1de449c6c4adb0b5775b3868b28b3;
+  bytes16 public DEFAULT_NAMESPACE = bytes16(keccak256("main"));
+  bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1");
+  bytes public DEFAULT_SIGNED_MESSAGE = abi.encode(user);
+
+  ResponseWithoutProofs public DEFAULT_RESPONSE = ResponseBuilder.emptyResponseWithoutProofs().withAppId(DEFAULT_APP_ID)
+                                                                                              .withVersion(DEFAULT_VERSION)
+                                                                                              .withNamespace(DEFAULT_NAMESPACE)
+                                                                                              .withSignedMessage(DEFAULT_SIGNED_MESSAGE);
+
   ClaimRequest claimRequest;
   AuthRequest authRequest;
   SignatureRequest signature;
@@ -23,7 +42,7 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    sismoConnect = new SismoConnectHarness(appId);
+    sismoConnect = new SismoConnectHarness(DEFAULT_APP_ID);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
@@ -47,115 +66,138 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     sismoConnect.exposed_verify({responseBytes: responseBytes, claim: claimRequest});
   }
 
-  function test_RevertWith_VersionMismatch() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
-    invalidResponse.version = bytes32("fake-version");
-    bytes32 expectedVersion = bytes32("sismo-connect-v1");
-    vm.expectRevert(
-      abi.encodeWithSignature(
-        "VersionMismatch(bytes32,bytes32)",
-        invalidResponse.version,
-        expectedVersion
-      )
-    );
-    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest});
+  function test_RevertWith_InvalidUserIdAndIsSelectableByUserAuthType() public {
+    // When `userId` is 0, it means the app does not require a specific auth account and the user needs
+    // to choose the account they want to use for the app.
+    // When `isSelectableByUser` is true, the user can select the account they want to use.
+    // The combination of `userId = 0` and `isSelectableByUser = false` does not make sense and should not be used.
+
+    // Here we do expect the revert since we set isSelectableByUser to false
+    // and we keep the default value for userId which is 0
+    // effectivelly triggering the revert
+    // Note: we use an AuthType different from VAULT to not trigger another revert
+    vm.expectRevert(abi.encodeWithSignature("InvalidUserIdAndIsSelectableByUserAuthType()"));
+    sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, isOptional: false, isSelectableByUser: false});
   }
 
-  function test_RevertWith_AppIdMismatch() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
-    invalidResponse.appId = 0x00000000000000000000000000000f00;
-    vm.expectRevert(
-      abi.encodeWithSignature("AppIdMismatch(bytes16,bytes16)", invalidResponse.appId, appId)
-    );
+  function test_RevertWith_InvalidUserIdAndAuthType() public {
+    // When `userId` is 0, it means the app does not require a specific auth account and the user needs
+    // to choose the account they want to use for the app.
+    // When `isSelectableByUser` is true, the user can select the account they want to use.
+    // The combination of `userId = 0` and `isSelectableByUser = false` does not make sense and should not be used.
+
+    // Here we set isSelectableByUser to false but we add a userId different from zero
+    // while choosing The AuthType VAULT, which does NOT make sense since it states that we allow the user to choose a vault account in his vault
+    // but in the case of the AuthType VAULT, the account is the vault itself and therefore there is no choice to make
+    // we should definitely revert based on this reasoning
+    vm.expectRevert(abi.encodeWithSignature("InvalidUserIdAndAuthType()"));
+    sismoConnect.exposed_buildAuth({authType: AuthType.VAULT, isOptional: false, isSelectableByUser: false, userId: uint256(0xc0de)});
+  }
+
+  function test_RevertWith_VersionMismatch() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withVersion(bytes32("invalid-version")).build();
+    vm.expectRevert(abi.encodeWithSignature("VersionMismatch(bytes32,bytes32)", invalidResponse.version, DEFAULT_VERSION));
     sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest});
   }
 
   function test_RevertWith_NamespaceMismatch() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
-    bytes16 correctNamespace = invalidResponse.namespace;
-    invalidResponse.namespace = bytes16(keccak256("fake-namespace"));
-    vm.expectRevert(
-      abi.encodeWithSignature(
-        "NamespaceMismatch(bytes16,bytes16)",
-        invalidResponse.namespace,
-        correctNamespace
-      )
-    );
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withNamespace(bytes16(keccak256("fake-namespace"))).build();
+                                                                 
+    vm.expectRevert(abi.encodeWithSignature("NamespaceMismatch(bytes16,bytes16)", invalidResponse.namespace, DEFAULT_NAMESPACE));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest});
+  }
+
+  function test_RevertWith_AppIdMismatch() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAppId(0xc0dec0dec0dec0dec0dec0dec0dec0de).build();
+    vm.expectRevert(abi.encodeWithSignature("AppIdMismatch(bytes16,bytes16)", invalidResponse.appId, DEFAULT_APP_ID));
     sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest});
   }
 
   function test_RevertWith_SignatureMessageMismatch() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
-    bytes memory correctSignedMessage = invalidResponse.signedMessage;
-    signature = sismoConnect.exposed_buildSignature({message: abi.encode("fake-signature")});
-    vm.expectRevert(
-      abi.encodeWithSignature(
-        "SignatureMessageMismatch(bytes,bytes)",
-        signature.message,
-        correctSignedMessage
-      )
-    );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
-    });
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withSignedMessage("fake-signed-message").build();
+    vm.expectRevert(abi.encodeWithSignature("SignatureMessageMismatch(bytes,bytes)", signature.message, invalidResponse.signedMessage));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
+  }
+
+  function test_RevertWith_AuthInRequestNotFoundInResponse() public {
+    // we expect a revert since no proofs are provided in the response
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.build();
+    vm.expectRevert(abi.encodeWithSignature("AuthInRequestNotFoundInResponse(uint8,bool,uint256,bytes)", authRequest.authType, authRequest.isAnon, authRequest.userId, authRequest.extraData));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: authRequest, signature: signature});
+  }
+
+  function test_RevertWith_AuthIsAnonAndUserIdNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.GITHUB, isAnon: true, userId: uint256(0xc0de)})});
+    // we need to choose a different AuthType than AUthType.VAULT to be able to test if the userId error is thrown
+    // we also need to set the userId different from zero since isSelectableByUser is false
+    // it means that we are waiting for a userId in the response that actually means something so different from zero
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, isOptional: false, isSelectableByUser: false, userId: uint256(0xf00)});
+
+    vm.expectRevert(abi.encodeWithSignature("AuthIsAnonAndUserIdNotFound(bool,uint256)", auth.isAnon, auth.userId));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
+  }
+
+  function test_RevertWith_AuthTypeAndUserIdNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT, userId: uint256(0xc0de)})});
+    // we need to choose a different AuthType than AUthType.VAULT to be able to test if the userId error is thrown
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, userId: uint256(0xf00)});
+    vm.expectRevert(abi.encodeWithSignature("AuthTypeAndUserIdNotFound(uint8,uint256)", auth.authType, auth.userId));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
+  }
+
+  function test_RevertWith_AuthUserIdNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.GITHUB, userId: uint256(0xc0de)})});
+    // we need to choose a different AuthType than AUthType.VAULT to be able to test if the userId error is thrown
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, userId: uint256(0xf00)});
+    vm.expectRevert(abi.encodeWithSignature("AuthUserIdNotFound(uint256)", auth.userId));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
+  }
+
+  function test_RevertWith_AuthTypeAndIsAnonNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT, isAnon: true})});
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB, isAnon: false});
+    vm.expectRevert(abi.encodeWithSignature("AuthTypeAndIsAnonNotFound(uint8,bool)", auth.authType, auth.isAnon));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
+  }
+
+  function test_RevertWith_AuthIsAnonNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT, isAnon: true})});
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT, isAnon: false});
+    vm.expectRevert(abi.encodeWithSignature("AuthIsAnonNotFound(bool)", auth.isAnon));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
   }
 
   function test_RevertWith_AuthTypeNotFound() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOnlyOneAuthAndMessage(commitmentMapperRegistry);
-    invalidResponse.proofs[0].auths[0].authType = AuthType.GITHUB;
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withAuth({auth: AuthBuilder.build({authType: AuthType.VAULT})});
+    AuthRequest memory auth = sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB});
+    vm.expectRevert(abi.encodeWithSignature("AuthTypeNotFound(uint8)", auth.authType));
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), auth: auth, signature: signature});
+  }
+
+  function test_RevertWith_ClaimInRequestNotFoundInResponse() public {
+    // we expect a revert since no proofs are provided in the response
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.build();
     vm.expectRevert(
-      abi.encodeWithSignature("AuthTypeNotFound(uint8)", uint8(authRequest.authType))
+      abi.encodeWithSignature("ClaimInRequestNotFoundInResponse(uint8,bytes16,bytes16,uint256,bytes)", 
+      claimRequest.claimType, claimRequest.groupId, claimRequest.groupTimestamp, claimRequest.value, claimRequest.extraData)
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      auth: authRequest,
-      signature: signature
-    });
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
   }
 
-  function test_RevertWith_AuthAnonModeNotFound() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOnlyOneAuthAndMessage(commitmentMapperRegistry);
-    invalidResponse.proofs[0].auths[0].isAnon = true;
-    vm.expectRevert(abi.encodeWithSignature("AuthIsAnonNotFound(bool)", authRequest.isAnon));
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      auth: authRequest,
-      signature: signature
-    });
-  }
-
-  function test_RevertWith_ClaimTypeNotFound() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
-    invalidResponse.proofs[0].claims[0].claimType = ClaimType.LTE;
+  function test_RevertWith_ClaimGroupIdAndGroupTimestampNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withClaim({claim: ClaimBuilder.build({groupId: bytes16(0xc0dec0dec0dec0dec0dec0dec0dec0de), groupTimestamp: bytes16("fake-timestamp")})});
     vm.expectRevert(
-      abi.encodeWithSignature("ClaimTypeNotFound(uint8)", uint8(claimRequest.claimType))
+      abi.encodeWithSignature("ClaimGroupIdAndGroupTimestampNotFound(bytes16,bytes16)", claimRequest.groupId, claimRequest.groupTimestamp)
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
-    });
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
   }
 
-  function test_RevertWith_ClaimGroupIdNotFound() public {
-    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
-    invalidResponse.proofs[0].claims[0].groupId = 0xf0000000000000000000000000000000;
-    vm.expectRevert(abi.encodeWithSignature("ClaimGroupIdNotFound(bytes16)", claimRequest.groupId));
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
-    });
+  function test_RevertWith_ClaimTypeAndGroupTimestampNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withClaim({claim: ClaimBuilder.build({groupId: claimRequest.groupId, groupTimestamp: bytes16("fake-timestamp"), claimType: ClaimType.LTE})});
+    vm.expectRevert(
+      abi.encodeWithSignature("ClaimTypeAndGroupTimestampNotFound(uint8,bytes16)", claimRequest.claimType, claimRequest.groupTimestamp)
+    );
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
   }
 
   function test_RevertWith_ClaimGroupTimestampNotFound() public {
@@ -164,6 +206,40 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     invalidResponse.proofs[0].claims[0].groupTimestamp = bytes16("fake-timestamp");
     vm.expectRevert(
       abi.encodeWithSignature("ClaimGroupTimestampNotFound(bytes16)", claimRequest.groupTimestamp)
+    );
+    sismoConnect.exposed_verify({
+      responseBytes: abi.encode(invalidResponse),
+      claim: claimRequest,
+      signature: signature
+    });
+  }
+
+  function test_RevertWith_ClaimTypeAndGroupIdNotFound() public {
+    SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.withClaim({claim: ClaimBuilder.build({groupId: bytes16(0xc0dec0dec0dec0dec0dec0dec0dec0de), claimType: ClaimType.LTE})});
+    vm.expectRevert(
+      abi.encodeWithSignature("ClaimTypeAndGroupIdNotFound(uint8,bytes16)", claimRequest.claimType, claimRequest.groupId)
+    );
+    sismoConnect.exposed_verify({responseBytes: abi.encode(invalidResponse), claim: claimRequest, signature: signature});
+  }
+
+  function test_RevertWith_ClaimGroupIdNotFound() public {
+    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
+      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+    invalidResponse.proofs[0].claims[0].groupId = 0xc0dec0dec0dec0dec0dec0dec0dec0de;
+    vm.expectRevert(abi.encodeWithSignature("ClaimGroupIdNotFound(bytes16)", claimRequest.groupId));
+    sismoConnect.exposed_verify({
+      responseBytes: abi.encode(invalidResponse),
+      claim: claimRequest,
+      signature: signature
+    });
+  }
+
+    function test_RevertWith_ClaimTypeNotFound() public {
+    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
+      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+    invalidResponse.proofs[0].claims[0].claimType = ClaimType.LTE;
+    vm.expectRevert(
+      abi.encodeWithSignature("ClaimTypeNotFound(uint8)", uint8(claimRequest.claimType))
     );
     sismoConnect.exposed_verify({
       responseBytes: abi.encode(invalidResponse),
@@ -181,10 +257,10 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
     sismoConnect.exposed_verify({
       responseBytes: responseEncoded,
-      request: RequestBuilder.buildRequest({
+      request: requestBuilder.build({
         claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
         signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)}),
-        appId: appId
+        appId: DEFAULT_APP_ID
       })
     });
   }
@@ -200,10 +276,10 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
     sismoConnect.exposed_verify({
       responseBytes: responseEncoded,
-      request: RequestBuilder.buildRequest({
+      request: requestBuilder.build({
         claims: claims,
         signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)}),
-        appId: appId
+        appId: DEFAULT_APP_ID
       })
     });
   }
@@ -213,10 +289,10 @@ contract SismoConnectLibTest is HydraS2BaseTest {
       commitmentMapperRegistry
     );
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
       signature: signature,
-      appId: appId
+      appId: DEFAULT_APP_ID
     });
 
     SismoConnectVerifiedResult memory verifiedResult = sismoConnect.exposed_verify(
@@ -230,11 +306,11 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithOneClaimOneAuthAndOneMessage(
       commitmentMapperRegistry
     );
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
-      claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
+    SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
+      claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
       signature: signature,
-      appId: appId
+      appId: DEFAULT_APP_ID
     });
 
     SismoConnectVerifiedResult memory verifiedResult = sismoConnect.exposed_verify(
@@ -266,17 +342,17 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
   function test_TwoClaimsOneVaultAuthWithSignature() public {
     ClaimRequest[] memory claims = new ClaimRequest[](2);
-    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
-    claims[1] = ClaimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
+    claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
 
     AuthRequest[] memory auths = new AuthRequest[](1);
-    auths[0] = AuthRequestBuilder.build({authType: AuthType.VAULT});
+    auths[0] = authRequestBuilder.build({authType: AuthType.VAULT});
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
       signature: signature,
-      appId: appId
+      appId: DEFAULT_APP_ID
     });
 
     (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
@@ -292,21 +368,22 @@ contract SismoConnectLibTest is HydraS2BaseTest {
 
   function test_ThreeClaimsOneVaultAuthWithSignatureOneClaimOptional() public {
     ClaimRequest[] memory claims = new ClaimRequest[](3);
-    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
-    claims[1] = ClaimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
-    claims[2] = ClaimRequestBuilder.build({
+    claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
+    claims[2] = claimRequestBuilder.build({
       groupId: 0x42c768bb8ae79e4c5c05d3b51a4ec74a,
-      isOptional: true
+      isOptional: true,
+      isSelectableByUser: false
     });
 
     AuthRequest[] memory auths = new AuthRequest[](1);
-    auths[0] = AuthRequestBuilder.build({authType: AuthType.VAULT});
+    auths[0] = authRequestBuilder.build({authType: AuthType.VAULT});
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
       signature: signature,
-      appId: appId
+      appId: DEFAULT_APP_ID
     });
 
     (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
@@ -324,22 +401,23 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     public
   {
     ClaimRequest[] memory claims = new ClaimRequest[](3);
-    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
-    claims[1] = ClaimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
-    claims[2] = ClaimRequestBuilder.build({
+    claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
+    claims[2] = claimRequestBuilder.build({
       groupId: 0x42c768bb8ae79e4c5c05d3b51a4ec74a,
-      isOptional: true
+      isOptional: true,
+      isSelectableByUser: false
     });
 
     AuthRequest[] memory auths = new AuthRequest[](2);
-    auths[0] = AuthRequestBuilder.build({authType: AuthType.VAULT});
-    auths[1] = AuthRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true});
+    auths[0] = authRequestBuilder.build({authType: AuthType.VAULT});
+    auths[1] = authRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true, isSelectableByUser: true});
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
       signature: signature,
-      appId: appId
+      appId: DEFAULT_APP_ID
     });
 
     (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
@@ -359,17 +437,17 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     );
 
     ClaimRequest[] memory claims = new ClaimRequest[](1);
-    claims[0] = ClaimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
+    claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
 
     AuthRequest[] memory auths = new AuthRequest[](2);
-    auths[0] = AuthRequestBuilder.build({authType: AuthType.GITHUB});
-    auths[1] = AuthRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true});
+    auths[0] = authRequestBuilder.build({authType: AuthType.GITHUB});
+    auths[1] = authRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true, isSelectableByUser: true});
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
       signature: signature,
-      appId: appId
+      appId: DEFAULT_APP_ID
     });
 
     bytes
@@ -387,10 +465,10 @@ contract SismoConnectLibTest is HydraS2BaseTest {
       commitmentMapperRegistry
     );
 
-    SismoConnectRequest memory request = RequestBuilder.buildRequest({
+    SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB}),
       signature: signature,
-      appId: appId
+      appId: DEFAULT_APP_ID
     });
 
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
@@ -407,5 +485,11 @@ contract SismoConnectLibTest is HydraS2BaseTest {
     });
 
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
+  }
+  
+  // helpers
+
+  function emptyResponse() private pure returns (SismoConnectResponse memory) {
+    return ResponseBuilder.empty();
   }
 }

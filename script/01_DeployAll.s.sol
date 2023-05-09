@@ -11,7 +11,12 @@ import "src/periphery/CommitmentMapperRegistry.sol";
 import {HydraS2Verifier} from "src/verifiers/HydraS2Verifier.sol";
 
 import {SismoConnectVerifier} from "src/SismoConnectVerifier.sol";
+import {AuthRequestBuilder} from "src/libs/utils/AuthRequestBuilder.sol";
+import {ClaimRequestBuilder} from "src/libs/utils/ClaimRequestBuilder.sol";
+import {SignatureBuilder} from "src/libs/utils/SignatureBuilder.sol";
+import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
 import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
+import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 
 contract DeployAll is Script, BaseDeploymentConfig {
   AvailableRootsRegistry availableRootsRegistry;
@@ -19,8 +24,15 @@ contract DeployAll is Script, BaseDeploymentConfig {
   HydraS2Verifier hydraS2Verifier;
   SismoConnectVerifier sismoConnectVerifier;
 
+  // external libraries
+  AuthRequestBuilder authRequestBuilder;
+  ClaimRequestBuilder claimRequestBuilder;
+  SignatureBuilder signatureBuilder;
+  RequestBuilder requestBuilder;
+
   function runFor(
-    string memory chainName
+    string memory chainName,
+    bool deployLibraries
   ) public returns (ScriptTypes.DeployAllContracts memory contracts) {
     console.log("Run for CHAIN_NAME:", chainName);
     console.log("Deployer:", msg.sender);
@@ -47,6 +59,23 @@ contract DeployAll is Script, BaseDeploymentConfig {
     contracts.commitmentMapperRegistry = commitmentMapperRegistry;
     contracts.hydraS2Verifier = hydraS2Verifier;
     contracts.sismoConnectVerifier = sismoConnectVerifier;
+
+    // external libraries
+    // We want to ensure that the libraries are wanted to be deployed by the user
+    if (deployLibraries == false) {
+      console.log("Skipping external libraries deployment");
+      vm.stopBroadcast();
+      return contracts;
+    }
+    authRequestBuilder = _deployAuthRequestBuilder();
+    claimRequestBuilder = _deployClaimRequestBuilder();
+    signatureBuilder = _deploySignatureBuilder();
+    requestBuilder = _deployRequestBuilder();
+
+    contracts.authRequestBuilder = authRequestBuilder;
+    contracts.claimRequestBuilder = claimRequestBuilder;
+    contracts.signatureBuilder = signatureBuilder;
+    contracts.requestBuilder = requestBuilder;
 
     vm.stopBroadcast();
   }
@@ -129,9 +158,36 @@ contract DeployAll is Script, BaseDeploymentConfig {
     return SismoConnectVerifier(address(proxy));
   }
 
+  // External libraries
+
+  function _deployAuthRequestBuilder() private returns (AuthRequestBuilder) {
+    authRequestBuilder = new AuthRequestBuilder();
+    console.log("authRequestBuilder Deployed:", address(authRequestBuilder));
+    return authRequestBuilder;
+  }
+
+  function _deployClaimRequestBuilder() private returns (ClaimRequestBuilder) {
+    claimRequestBuilder = new ClaimRequestBuilder();
+    console.log("claimRequestBuilder Deployed:", address(claimRequestBuilder));
+    return claimRequestBuilder;
+  }
+
+  function _deploySignatureBuilder() private returns (SignatureBuilder) {
+    signatureBuilder = new SignatureBuilder();
+    console.log("signatureBuilder Deployed:", address(signatureBuilder));
+    return signatureBuilder;
+  }
+
+  function _deployRequestBuilder() private returns (RequestBuilder) {
+    requestBuilder = new RequestBuilder();
+    console.log("requestBuilder Deployed:", address(requestBuilder));
+    return requestBuilder;
+  }
+
   function run() public returns (ScriptTypes.DeployAllContracts memory contracts) {
     string memory chainName = vm.envString("CHAIN_NAME");
-    return runFor(chainName);
+    bool deployLibraries = vm.envBool("DEPLOY_LIBRARIES");
+    return runFor(chainName, deployLibraries);
   }
 }
 
@@ -141,5 +197,10 @@ library ScriptTypes {
     CommitmentMapperRegistry commitmentMapperRegistry;
     HydraS2Verifier hydraS2Verifier;
     SismoConnectVerifier sismoConnectVerifier;
+    // external libraries
+    AuthRequestBuilder authRequestBuilder;
+    ClaimRequestBuilder claimRequestBuilder;
+    SignatureBuilder signatureBuilder;
+    RequestBuilder requestBuilder;
   }
 }

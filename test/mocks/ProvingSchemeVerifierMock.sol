@@ -7,11 +7,11 @@ import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, Verif
 
 contract ProvingSchemeVerifierMock is IBaseVerifier {
   function verify(
-    bytes16 appId,
-    bytes16 namespace,
-    bytes memory signedMessage,
+    bytes16,
+    bytes16,
+    bytes memory,
     SismoConnectProof memory sismoConnectProof
-  ) external view override returns (VerifiedAuth memory, VerifiedClaim memory) {
+  ) external pure override returns (VerifiedAuth memory, VerifiedClaim memory) {
     // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
     VerifiedAuth memory verifiedAuth;
