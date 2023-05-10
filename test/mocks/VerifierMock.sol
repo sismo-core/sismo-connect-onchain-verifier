@@ -5,13 +5,16 @@ import "forge-std/console.sol";
 import {IBaseVerifier} from "src/interfaces/IBaseVerifier.sol";
 import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
 
-contract ProvingSchemeVerifierMock is IBaseVerifier {
+contract VerifierMock is IBaseVerifier {
+
+  bytes32 public immutable VERSION = "mock-scheme";
+
   function verify(
-    bytes16 appId,
-    bytes16 namespace,
-    bytes memory signedMessage,
+    bytes16,
+    bytes16,
+    bytes memory,
     SismoConnectProof memory sismoConnectProof
-  ) external view override returns (VerifiedAuth memory, VerifiedClaim memory) {
+  ) external pure override returns (VerifiedAuth memory, VerifiedClaim memory) {
     // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
     VerifiedAuth memory verifiedAuth;

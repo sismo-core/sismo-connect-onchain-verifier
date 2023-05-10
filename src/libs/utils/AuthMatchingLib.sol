@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Structs.sol";
+import "./Structs.sol";
 
 // The role of this library is to check for a given AuthRequest if there is a matching Auth in the response
 // It returns a level of matching between the AuthRequest and the Auth in the response
@@ -45,7 +45,7 @@ library AuthMatchingLib {
       // It will be always defined as userId = Hash(VaultSecret, AppId)
       // There is then no specific constraint on the isSelectableByUser and userId properties)
       matchingPropertiesLevel += 4; // 100
-    } else if (authRequest.isSelectableByUser == false && auth.userId == authRequest.userId) {
+    } else if ((authRequest.isSelectableByUser == false) && (auth.userId == authRequest.userId)) {
       // if the userId in the auth request can NOT be chosen by the user when generating the proof (isSelectableByUser == true)
       // we check if the userId of the auth in the request matches the userId of the auth in the response
       matchingPropertiesLevel += 4; // 100

@@ -22,6 +22,13 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
     _setAddress(config.availableRootsRegistry, string("sismoConnectAvailableRootsRegistry"));
     _setAddress(config.commitmentMapperRegistry, string("sismoConnectCommitmentMapperRegistry"));
 
+    // external libraries
+
+    _setAddress(config.authRequestBuilder, string("authRequestBuilder-v1"));
+    _setAddress(config.claimRequestBuilder, string("claimRequestBuilder-v1"));
+    _setAddress(config.signatureBuilder, string("signatureBuilder-v1"));
+    _setAddress(config.requestBuilder, string("requestBuilder-v1"));
+
     vm.stopBroadcast();
   }
 

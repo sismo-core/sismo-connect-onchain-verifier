@@ -11,13 +11,24 @@ import "src/periphery/CommitmentMapperRegistry.sol";
 import {HydraS2Verifier} from "src/verifiers/HydraS2Verifier.sol";
 
 import {SismoConnectVerifier} from "src/SismoConnectVerifier.sol";
+import {AuthRequestBuilder} from "src/libs/utils/AuthRequestBuilder.sol";
+import {ClaimRequestBuilder} from "src/libs/utils/ClaimRequestBuilder.sol";
+import {SignatureBuilder} from "src/libs/utils/SignatureBuilder.sol";
+import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
 import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
+import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 
 contract DeployAll is Script, BaseDeploymentConfig {
   AvailableRootsRegistry availableRootsRegistry;
   CommitmentMapperRegistry commitmentMapperRegistry;
   HydraS2Verifier hydraS2Verifier;
   SismoConnectVerifier sismoConnectVerifier;
+
+  // external libraries
+  AuthRequestBuilder authRequestBuilder;
+  ClaimRequestBuilder claimRequestBuilder;
+  SignatureBuilder signatureBuilder;
+  RequestBuilder requestBuilder;
 
   function runFor(
     string memory chainName
@@ -47,6 +58,18 @@ contract DeployAll is Script, BaseDeploymentConfig {
     contracts.commitmentMapperRegistry = commitmentMapperRegistry;
     contracts.hydraS2Verifier = hydraS2Verifier;
     contracts.sismoConnectVerifier = sismoConnectVerifier;
+
+    // external libraries
+
+    authRequestBuilder = _deployAuthRequestBuilder();
+    claimRequestBuilder = _deployClaimRequestBuilder();
+    signatureBuilder = _deploySignatureBuilder();
+    requestBuilder = _deployRequestBuilder();
+
+    contracts.authRequestBuilder = authRequestBuilder;
+    contracts.claimRequestBuilder = claimRequestBuilder;
+    contracts.signatureBuilder = signatureBuilder;
+    contracts.requestBuilder = requestBuilder;
 
     vm.stopBroadcast();
   }
@@ -99,6 +122,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
     CommitmentMapperRegistry _commitmentMapperRegistry,
     AvailableRootsRegistry _availableRootsRegistry
   ) private returns (HydraS2Verifier) {
+    if (config.hydraS2Verifier != address(0)) {
+      console.log("Using existing hydraS2Verifier:", config.hydraS2Verifier);
+      return HydraS2Verifier(config.hydraS2Verifier);
+    }
     address commitmentMapperRegistryAddr = address(_commitmentMapperRegistry);
     address availableRootsRegistryAddr = address(_availableRootsRegistry);
     HydraS2Verifier hydraS2VerifierImplem = new HydraS2Verifier(
@@ -117,6 +144,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deploySismoConnectVerifier(address owner) private returns (SismoConnectVerifier) {
+    if (config.sismoConnectVerifier != address(0)) {
+      console.log("Using existing sismoConnectVerifier:", config.sismoConnectVerifier);
+      return SismoConnectVerifier(config.sismoConnectVerifier);
+    }
     SismoConnectVerifier sismoConnectVerifierImplem = new SismoConnectVerifier(owner);
     console.log("sismoConnectVerifier Implem Deployed:", address(sismoConnectVerifierImplem));
 
@@ -127,6 +158,48 @@ contract DeployAll is Script, BaseDeploymentConfig {
     );
     console.log("sismoConnectVerifier Proxy Deployed:", address(proxy));
     return SismoConnectVerifier(address(proxy));
+  }
+
+  // External libraries
+
+  function _deployAuthRequestBuilder() private returns (AuthRequestBuilder) {
+    if (config.authRequestBuilder != address(0)) {
+      console.log("Using existing authrequestBuilder:", config.authRequestBuilder);
+      return AuthRequestBuilder(config.authRequestBuilder);
+    }
+    authRequestBuilder = new AuthRequestBuilder();
+    console.log("authRequestBuilder Deployed:", address(authRequestBuilder));
+    return authRequestBuilder;
+  }
+
+  function _deployClaimRequestBuilder() private returns (ClaimRequestBuilder) {
+    if (config.claimRequestBuilder != address(0)) {
+      console.log("Using existing claimRequestBuilder:", config.claimRequestBuilder);
+      return ClaimRequestBuilder(config.claimRequestBuilder);
+    }
+    claimRequestBuilder = new ClaimRequestBuilder();
+    console.log("claimRequestBuilder Deployed:", address(claimRequestBuilder));
+    return claimRequestBuilder;
+  }
+
+  function _deploySignatureBuilder() private returns (SignatureBuilder) {
+    if (config.signatureBuilder != address(0)) {
+      console.log("Using existing signatureBuilder:", config.signatureBuilder);
+      return SignatureBuilder(config.signatureBuilder);
+    }
+    signatureBuilder = new SignatureBuilder();
+    console.log("signatureBuilder Deployed:", address(signatureBuilder));
+    return signatureBuilder;
+  }
+
+  function _deployRequestBuilder() private returns (RequestBuilder) {
+    if (config.requestBuilder != address(0)) {
+      console.log("Using existing requestBuilder:", config.requestBuilder);
+      return RequestBuilder(config.requestBuilder);
+    }
+    requestBuilder = new RequestBuilder();
+    console.log("requestBuilder Deployed:", address(requestBuilder));
+    return requestBuilder;
   }
 
   function run() public returns (ScriptTypes.DeployAllContracts memory contracts) {
@@ -141,5 +214,10 @@ library ScriptTypes {
     CommitmentMapperRegistry commitmentMapperRegistry;
     HydraS2Verifier hydraS2Verifier;
     SismoConnectVerifier sismoConnectVerifier;
+    // external libraries
+    AuthRequestBuilder authRequestBuilder;
+    ClaimRequestBuilder claimRequestBuilder;
+    SignatureBuilder signatureBuilder;
+    RequestBuilder requestBuilder;
   }
 }

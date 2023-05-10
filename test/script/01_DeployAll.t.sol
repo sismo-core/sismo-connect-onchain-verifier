@@ -18,7 +18,7 @@ contract DeployAllTest is Test {
     DeployAll deploy = new DeployAll();
 
     (bool success, bytes memory result) = address(deploy).delegatecall(
-      abi.encodeWithSelector(DeployAll.runFor.selector, "test")
+      abi.encodeWithSelector(DeployAll.runFor.selector, "test", true)
     );
     require(success, "Deploy script did not run successfully!");
     contracts = abi.decode(result, (ScriptTypes.DeployAllContracts));

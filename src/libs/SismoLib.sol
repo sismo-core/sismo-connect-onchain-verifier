@@ -9,5 +9,4 @@ pragma solidity ^0.8.17;
  * Its aim is to provide a set of sub-libraries with high-level functions to interact with the Sismo protocol easily.
  */
 
-import {SismoConnect} from "./sismo-connect/SismoConnectLib.sol";
-import "./utils/Structs.sol";
+import "./sismo-connect/SismoConnectLib.sol";

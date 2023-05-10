@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Structs.sol";
+import "./Structs.sol";
 
-library AuthRequestBuilder {
+contract AuthRequestBuilder {
   // default values for Auth Request
   bool public constant DEFAULT_AUTH_REQUEST_IS_ANON = false;
   uint256 public constant DEFAULT_AUTH_REQUEST_USER_ID = 0;
@@ -59,19 +59,16 @@ library AuthRequestBuilder {
       });
   }
 
-  // we comment this function because it has the same signature as build(AuthType authType, bool isOptional)
-  // but this one is not used for now since the anonymous auth is not implemented
-
-  // function build(AuthType authType, bool isAnon) external pure returns (AuthRequest memory) {
-  //   return
-  //     _build({
-  //       authType: authType,
-  //       isAnon: isAnon,
-  //       userId: DEFAULT_AUTH_REQUEST_USER_ID,
-  //       isOptional: DEFAULT_AUTH_REQUEST_IS_OPTIONAL,
-  //       extraData: DEFAULT_AUTH_REQUEST_EXTRA_DATA
-  //     });
-  // }
+  function build(AuthType authType, bool isAnon) external pure returns (AuthRequest memory) {
+    return
+      _build({
+        authType: authType,
+        isAnon: isAnon,
+        userId: DEFAULT_AUTH_REQUEST_USER_ID,
+        isOptional: DEFAULT_AUTH_REQUEST_IS_OPTIONAL,
+        extraData: DEFAULT_AUTH_REQUEST_EXTRA_DATA
+      });
+  }
 
   function build(AuthType authType, uint256 userId) external pure returns (AuthRequest memory) {
     return
@@ -144,22 +141,41 @@ library AuthRequestBuilder {
   }
 
   // allow dev to choose for isOptional
+  // the user is ask to choose isSelectableByUser to avoid the function signature collision
+  // between build(AuthType authType, bool isOptional) and build(AuthType authType, bool isAnon)
 
-  function build(AuthType authType, bool isOptional) external pure returns (AuthRequest memory) {
+  function build(AuthType authType, bool isOptional, bool isSelectableByUser) external pure returns (AuthRequest memory) {
     return
       _build({
         authType: authType,
         isAnon: DEFAULT_AUTH_REQUEST_IS_ANON,
         userId: DEFAULT_AUTH_REQUEST_USER_ID,
         isOptional: isOptional,
+        isSelectableByUser: isSelectableByUser,
         extraData: DEFAULT_AUTH_REQUEST_EXTRA_DATA
       });
   }
 
+  function build(AuthType authType, bool isOptional, bool isSelectableByUser, uint256 userId) external pure returns (AuthRequest memory) {
+    return
+      _build({
+        authType: authType,
+        isAnon: DEFAULT_AUTH_REQUEST_IS_ANON,
+        userId: userId,
+        isOptional: isOptional,
+        isSelectableByUser: isSelectableByUser,
+        extraData: DEFAULT_AUTH_REQUEST_EXTRA_DATA
+      });
+  }
+
+  // the user is ask to choose isSelectableByUser to avoid the function signature collision
+  // between build(AuthType authType, bool isAnon, bool isOptional) and build(AuthType authType, bool isOptional, bool isSelectableByUser)
+
   function build(
     AuthType authType,
     bool isAnon,
-    bool isOptional
+    bool isOptional,
+    bool isSelectableByUser
   ) external pure returns (AuthRequest memory) {
     return
       _build({
@@ -167,6 +183,7 @@ library AuthRequestBuilder {
         isAnon: isAnon,
         userId: DEFAULT_AUTH_REQUEST_USER_ID,
         isOptional: isOptional,
+        isSelectableByUser: isSelectableByUser,
         extraData: DEFAULT_AUTH_REQUEST_EXTRA_DATA
       });
   }

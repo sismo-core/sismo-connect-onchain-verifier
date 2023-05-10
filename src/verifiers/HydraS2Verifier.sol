@@ -213,8 +213,8 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     HydraS2ProofInput memory input,
     bytes memory signedMessage
   ) private pure {
-    // don't check extraData if signedMessage is empty
-    if (signedMessage.length == 0) {
+    // don't check extraData if signedMessage from response is empty
+    if (keccak256(signedMessage) == keccak256(abi.encode(0x00))) {
       return;
     }
     if (input.extraData != uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD) {
