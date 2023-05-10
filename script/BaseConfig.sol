@@ -139,13 +139,13 @@ contract BaseDeploymentConfig is Script {
         availableRootsRegistry: address(0xF3dAc93c85e92cab8f811b3A3cCaCB93140D9304),
         commitmentMapperRegistry: address(0xa3104F52bF6C8317a49144d864CB04f2A487327B),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0),
+        sismoConnectVerifier: address(0x4f9FD8C9C1433d5B62BAA20b2A9e562C69E9a8E2),
+        hydraS2Verifier: address(0xc64aa7816b9b308C430a166DD92E20a42F190B33),
         // external libraries
-        authRequestBuilder: address(0),
-        claimRequestBuilder: address(0),
-        signatureBuilder: address(0),
-        requestBuilder: address(0)
+        authRequestBuilder: address(0x2B3D017E90A9f6b8752F66dC22cA41B92e9a18BA),
+        claimRequestBuilder: address(0x8aAE62053279F31F40CAcE79A3E7619ac52D0E31),
+        signatureBuilder: address(0x082797A93A25655838B241Ff9e0195Ea26756e72),
+        requestBuilder: address(0x5982C07bEAF5aAEAF9c2881f7A3e545Dfc2EDC88)
       });
     } else if (chain == DeployChain.TestnetMumbai) {
       config = DeploymentConfig({
