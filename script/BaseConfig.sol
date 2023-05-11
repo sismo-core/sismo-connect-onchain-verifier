@@ -30,6 +30,7 @@ contract BaseDeploymentConfig is Script {
   address immutable MAIN_OWNER = 0x00c92065F759c3d1c94d08C27a2Ab97a1c874Cbc;
   address immutable MAIN_GNOSIS_ROOTS_OWNER = 0xEf809a50de35c762FBaCf1ae1F6B861CE42911D1;
   address immutable MAIN_POLYGON_ROOTS_OWNER = 0xF0a0B692e1c764281c211948D03edEeF5Fb57111;
+  address immutable MAIN_MAINNET_ROOTS_OWNER = 0x2a265b954B96d4940B94eb69E8Fc8E7346369D05;
 
   // Testnet Env
   address immutable TESTNET_PROXY_ADMIN = 0x246E71bC2a257f4BE9C7fAD4664E6D7444844Adc;
@@ -58,6 +59,7 @@ contract BaseDeploymentConfig is Script {
   error ChainNameNotFound(string chainName);
 
   enum DeployChain {
+    Mainnet,
     Gnosis,
     Polygon,
     TestnetGoerli,
@@ -68,7 +70,9 @@ contract BaseDeploymentConfig is Script {
   }
 
   function getChainName(string memory chainName) internal pure returns (DeployChain) {
-    if (_compareString(chainName, "gnosis")) {
+    if (_compareString(chainName, "mainnet")) {
+      return DeployChain.Mainnet;
+    } else if (_compareString(chainName, "gnosis")) {
       return DeployChain.Gnosis;
     } else if (_compareString(chainName, "polygon")) {
       return DeployChain.Polygon;
@@ -87,7 +91,27 @@ contract BaseDeploymentConfig is Script {
   }
 
   function _setConfig(DeployChain chain) internal returns (DeploymentConfig memory) {
-    if (chain == DeployChain.Gnosis) {
+    if (chain == DeployChain.Mainnet) {
+      config = DeploymentConfig({
+        proxyAdmin: MAIN_PROXY_ADMIN,
+        owner: MAIN_OWNER,
+        rootsOwner: MAIN_MAINNET_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ],
+        availableRootsRegistry: address(0x2E7f4aC6AC90faeC2D870D012A3BCDBcF792B25C),
+        commitmentMapperRegistry: address(0xb4463Dbcd773F7Ca37E63f12dce9852e59dC86C9),
+        sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
+        sismoConnectVerifier: address(0x6a38Cb405f4e784F785066742EE4A56dA7191A01),
+        hydraS2Verifier: address(0x2d37f599AAC33eb4F30E106527D6121a56935e53),
+        // external libraries
+        authRequestBuilder: address(0xa1dC586f3713FbbB7200E4A06823dE1af4A62b5a),
+        claimRequestBuilder: address(0xf79e6D5f657b50D8aA1a7A788756add0DD82f7f3),
+        signatureBuilder: address(0x9598d30e2097E5cA7fEEBFbeB700A47cbfc0b620),
+        requestBuilder: address(0x6cCD9b2Fd62e943389902cBC41b1c23Ea1f25336)
+      });
+    } else if (chain == DeployChain.Gnosis) {
       config = DeploymentConfig({
         proxyAdmin: MAIN_PROXY_ADMIN,
         owner: MAIN_OWNER,
@@ -99,13 +123,13 @@ contract BaseDeploymentConfig is Script {
         availableRootsRegistry: address(0x9B0C9EF48DEc082904054cf9183878E1f4e04D79),
         commitmentMapperRegistry: address(0x653245dE30B901e507B1b09f619ce5B4b161e583),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0),
+        sismoConnectVerifier: address(0x271862214Ab70A6d930f9fEE05B1207BeB60AfFA),
+        hydraS2Verifier: address(0x6174F80943061EE1437de6820844858fe4A33AbC),
         // external libraries
-        authRequestBuilder: address(0),
-        claimRequestBuilder: address(0),
-        signatureBuilder: address(0),
-        requestBuilder: address(0)
+        authRequestBuilder: address(0xe21A97058ae498881C2b9DC817aB7fE8Aebd4091),
+        claimRequestBuilder: address(0x5BBfA1596BF54B7CAb13CEB02A380dE805270fdA),
+        signatureBuilder: address(0x8420E6d8D31E30877dE9538f74d870F0f14e1Fd4),
+        requestBuilder: address(0x0Fe7275e851154De63d7d634Ac1452E87233C1d5)
       });
     } else if (chain == DeployChain.Polygon) {
       config = DeploymentConfig({
@@ -119,13 +143,13 @@ contract BaseDeploymentConfig is Script {
         availableRootsRegistry: address(0x818c0f863C6B8E92c316924711bfEb2D903B4A77),
         commitmentMapperRegistry: address(0x2607c31e104bcF96F7Bc78e8e9BCA356C4D5ebBb),
         sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0),
+        sismoConnectVerifier: address(0xd74b10d8aC3bD2B5554Bf7747322d0152f6Ac2BC),
+        hydraS2Verifier: address(0x454597294c65b4616b9C5387B33Ccf3D7f2A4BF1),
         // external libraries
-        authRequestBuilder: address(0),
-        claimRequestBuilder: address(0),
-        signatureBuilder: address(0),
-        requestBuilder: address(0)
+        authRequestBuilder: address(0xEC3AC3cdCAc8Bf66Feb59DdbA209ACAAE78fdb90),
+        claimRequestBuilder: address(0xaaf233f93A12267C4F549E89554a409929D27917),
+        signatureBuilder: address(0x29de9addE52BdB6F12178DA639B75A9917C2C2aC),
+        requestBuilder: address(0x8b58F4A8F64C64f4BDd6072b1E71538653f5ea7A)
       });
     } else if (chain == DeployChain.TestnetGoerli) {
       config = DeploymentConfig({
