@@ -64,6 +64,7 @@ contract BaseDeploymentConfig is Script {
     Polygon,
     TestnetGoerli,
     TestnetMumbai,
+    ScrollTestnetGoerli,
     StagingGoerli,
     StagingMumbai,
     Test
@@ -80,6 +81,8 @@ contract BaseDeploymentConfig is Script {
       return DeployChain.TestnetGoerli;
     } else if (_compareString(chainName, "testnet-mumbai")) {
       return DeployChain.TestnetMumbai;
+    } else if (_compareString(chainName, "scroll-testnet-goerli")) {
+      return DeployChain.ScrollTestnetGoerli;
     } else if (_compareString(chainName, "staging-goerli")) {
       return DeployChain.StagingGoerli;
     } else if (_compareString(chainName, "staging-mumbai")) {
@@ -191,6 +194,23 @@ contract BaseDeploymentConfig is Script {
         signatureBuilder: address(0x5c7166025Eb98e4a479844e57148e2bd8DaC122f),
         requestBuilder: address(0xdE8e8317408b7e935B4931f624354cd8B45AE01E)
       });
+    } else if (chain == DeployChain.ScrollTestnetGoerli) {
+      config = DeploymentConfig({
+        proxyAdmin: address(0x061060a65146b3265C62fC8f3AE977c9B27260fF), 
+        owner: address(0x061060a65146b3265C62fC8f3AE977c9B27260fF),
+        rootsOwner: address(0x061060a65146b3265C62fC8f3AE977c9B27260fF),
+        commitmentMapperEdDSAPubKey: [uint256(10), uint256(11)],
+        availableRootsRegistry: address(0),
+        commitmentMapperRegistry: address(0),
+        sismoAddressesProvider: address(0),
+        sismoConnectVerifier: address(0),
+        hydraS2Verifier: address(0),
+        // external libraries
+        authRequestBuilder: address(0),
+        claimRequestBuilder: address(0),
+        signatureBuilder: address(0),
+        requestBuilder: address(0)
+      }); 
     } else if (chain == DeployChain.StagingGoerli) {
       config = DeploymentConfig({
         proxyAdmin: STAGING_PROXY_ADMIN,
