@@ -6,8 +6,13 @@
   "author": "Hadrien Charlanes <35774097+dhadrien@users.noreply.github.com>",
   "license": "MIT",
   "devDependencies": {
+    "@sismo-core/hydra-s2": "^1.0.0",
+    "@sismo-core/sismo-connect-client": "^0.0.11",
+    "@types/node": "^20.2.3",
     "prettier": "^2.3.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.13"
+    "prettier-plugin-solidity": "^1.0.0-beta.13",
+    "typescript": "^5.0.4",
+    "viem": "^0.3.36"
   },
   "scripts": {
     "lint": "prettier --write **.sol"
