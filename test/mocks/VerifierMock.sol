@@ -6,7 +6,6 @@ import {IBaseVerifier} from "src/interfaces/IBaseVerifier.sol";
 import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
 
 contract VerifierMock is IBaseVerifier {
-
   bytes32 public immutable VERSION = "mock-scheme";
 
   function verify(

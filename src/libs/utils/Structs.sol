@@ -5,7 +5,7 @@ struct SismoConnectRequest {
   bytes16 appId;
   bytes16 namespace;
   AuthRequest[] auths;
-	ClaimRequest[] claims;
+  ClaimRequest[] claims;
   SignatureRequest signature;
 }
 
@@ -16,7 +16,7 @@ struct AuthRequest {
   bool isAnon; // default: false -> true not supported yet, need to throw if true
   bool isOptional; // default: false
   bool isSelectableByUser; // default: true
-  // 
+  //
   bytes extraData; // default: ""
 }
 
@@ -26,9 +26,9 @@ struct ClaimRequest {
   bytes16 groupTimestamp; // default: bytes16("latest")
   uint256 value; // default: 1
   // flags
-  bool isOptional; // default: false 
+  bool isOptional; // default: false
   bool isSelectableByUser; // default: true
-  // 
+  //
   bytes extraData; // default: ""
 }
 
@@ -97,7 +97,7 @@ struct SismoConnectVerifiedResult {
   bytes32 version;
   VerifiedAuth[] auths;
   VerifiedClaim[] claims;
-  bytes signedMessage; 
+  bytes signedMessage;
 }
 
 struct VerifiedAuth {

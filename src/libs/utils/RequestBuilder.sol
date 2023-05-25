@@ -7,8 +7,13 @@ import {SignatureBuilder} from "./SignatureBuilder.sol";
 contract RequestBuilder {
   // default value for namespace
   bytes16 public constant DEFAULT_NAMESPACE = bytes16(keccak256("main"));
-  // default value for a signature request 
-  SignatureRequest DEFAULT_SIGNATURE_REQUEST = SignatureRequest({message: "MESSAGE_SELECTED_BY_USER", isSelectableByUser: false, extraData: ""});
+  // default value for a signature request
+  SignatureRequest DEFAULT_SIGNATURE_REQUEST =
+    SignatureRequest({
+      message: "MESSAGE_SELECTED_BY_USER",
+      isSelectableByUser: false,
+      extraData: ""
+    });
 
   function build(
     AuthRequest memory auth,
@@ -191,7 +196,7 @@ contract RequestBuilder {
     );
   }
 
-    function build(
+  function build(
     AuthRequest memory auth,
     bytes16 appId
   ) external view returns (SismoConnectRequest memory) {
@@ -208,7 +213,6 @@ contract RequestBuilder {
       })
     );
   }
-
 
   function build(
     ClaimRequest memory claim,
@@ -246,7 +250,6 @@ contract RequestBuilder {
       })
     );
   }
-
 
   // build with arrays for auths and claims
   function build(

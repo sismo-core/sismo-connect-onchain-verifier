@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "./Structs.sol";
 
 library ClaimBuilder {
-    // default value for Claim Request
+  // default value for Claim Request
   bytes16 public constant DEFAULT_CLAIM_GROUP_TIMESTAMP = bytes16("latest");
   uint256 public constant DEFAULT_CLAIM_VALUE = 1;
   ClaimType public constant DEFAULT_CLAIM_TYPE = ClaimType.GTE;

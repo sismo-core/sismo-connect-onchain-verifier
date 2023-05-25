@@ -13,10 +13,7 @@ contract VerifierMockBaseTest is BaseTest {
     verifierMock = new VerifierMock();
 
     vm.startPrank(owner);
-    sismoConnectVerifier.registerVerifier(
-      verifierMock.VERSION(),
-      address(verifierMock)
-    );
+    sismoConnectVerifier.registerVerifier(verifierMock.VERSION(), address(verifierMock));
     vm.stopPrank();
   }
 }
