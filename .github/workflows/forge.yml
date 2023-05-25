@@ -4,9 +4,14 @@ name: Forge Tests
 
 jobs:
   check:
+    name: Forge Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Install node dependencies
+        shell: bash
+        run: |
+          yarn install --frozen-lockfile
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
