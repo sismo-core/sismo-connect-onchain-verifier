@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "./Structs.sol";
 
 library AuthBuilder {
-   // default values for Auth Request
+  // default values for Auth Request
   AuthType public constant DEFAULT_AUTH_TYPE = AuthType.VAULT;
   bool public constant DEFAULT_AUTH_IS_ANON = false;
   uint256 public constant DEFAULT_AUTH_USER_ID = 0;
@@ -18,16 +18,22 @@ library AuthBuilder {
     bool isSelectableByUser,
     bytes memory extraData
   ) external pure returns (Auth memory) {
-    return Auth({
-      authType: authType, 
-      isAnon: isAnon, 
-      userId: userId, 
-      isSelectableByUser: isSelectableByUser,
-      extraData: extraData
-    });
+    return
+      Auth({
+        authType: authType,
+        isAnon: isAnon,
+        userId: userId,
+        isSelectableByUser: isSelectableByUser,
+        extraData: extraData
+      });
   }
 
-  function build(AuthType authType, bool isAnon, uint256 userId, bytes memory extraData) external pure returns (Auth memory) {
+  function build(
+    AuthType authType,
+    bool isAnon,
+    uint256 userId,
+    bytes memory extraData
+  ) external pure returns (Auth memory) {
     return
       Auth({
         authType: authType,

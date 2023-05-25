@@ -65,7 +65,10 @@ contract ClaimRequestBuilder {
       });
   }
 
-  function build(bytes16 groupId, bytes16 groupTimestamp) external pure returns (ClaimRequest memory) {
+  function build(
+    bytes16 groupId,
+    bytes16 groupTimestamp
+  ) external pure returns (ClaimRequest memory) {
     return
       ClaimRequest({
         groupId: groupId,
@@ -104,7 +107,10 @@ contract ClaimRequestBuilder {
       });
   }
 
-  function build(bytes16 groupId, bytes memory extraData) external pure returns (ClaimRequest memory) {
+  function build(
+    bytes16 groupId,
+    bytes memory extraData
+  ) external pure returns (ClaimRequest memory) {
     return
       ClaimRequest({
         groupId: groupId,
@@ -289,15 +295,19 @@ contract ClaimRequestBuilder {
         isSelectableByUser: DEFAULT_CLAIM_REQUEST_IS_SELECTABLE_BY_USER,
         extraData: extraData
       });
-  } 
+  }
 
   // allow dev to choose for isOptional
   // we force to also set isSelectableByUser
   // otherwise function signatures would be colliding
   // between build(bytes16 groupId, bool isOptional) and build(bytes16 groupId, bool isSelectableByUser)
-  // we keep this logic for all function signature combinations 
+  // we keep this logic for all function signature combinations
 
-  function build(bytes16 groupId, bool isOptional, bool isSelectableByUser) external pure returns (ClaimRequest memory) {
+  function build(
+    bytes16 groupId,
+    bool isOptional,
+    bool isSelectableByUser
+  ) external pure returns (ClaimRequest memory) {
     return
       ClaimRequest({
         groupId: groupId,

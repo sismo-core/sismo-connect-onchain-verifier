@@ -31,10 +31,13 @@ contract SismoConnectE2E is HydraS2BaseTest {
   bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1");
   bytes public DEFAULT_SIGNED_MESSAGE = abi.encode(user);
 
-  ResponseWithoutProofs public DEFAULT_RESPONSE = ResponseBuilder.emptyResponseWithoutProofs().withAppId(DEFAULT_APP_ID)
-                                                                                              .withVersion(DEFAULT_VERSION)
-                                                                                              .withNamespace(DEFAULT_NAMESPACE)
-                                                                                              .withSignedMessage(DEFAULT_SIGNED_MESSAGE);
+  ResponseWithoutProofs public DEFAULT_RESPONSE =
+    ResponseBuilder
+      .emptyResponseWithoutProofs()
+      .withAppId(DEFAULT_APP_ID)
+      .withVersion(DEFAULT_VERSION)
+      .withNamespace(DEFAULT_NAMESPACE)
+      .withSignedMessage(DEFAULT_SIGNED_MESSAGE);
 
   ClaimRequest claimRequest;
   AuthRequest authRequest;
@@ -222,7 +225,11 @@ contract SismoConnectE2E is HydraS2BaseTest {
 
     AuthRequest[] memory auths = new AuthRequest[](2);
     auths[0] = authRequestBuilder.build({authType: AuthType.VAULT});
-    auths[1] = authRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true, isSelectableByUser: true});
+    auths[1] = authRequestBuilder.build({
+      authType: AuthType.TWITTER,
+      isOptional: true,
+      isSelectableByUser: true
+    });
 
     SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
@@ -252,7 +259,11 @@ contract SismoConnectE2E is HydraS2BaseTest {
 
     AuthRequest[] memory auths = new AuthRequest[](2);
     auths[0] = authRequestBuilder.build({authType: AuthType.GITHUB});
-    auths[1] = authRequestBuilder.build({authType: AuthType.TWITTER, isOptional: true, isSelectableByUser: true});
+    auths[1] = authRequestBuilder.build({
+      authType: AuthType.TWITTER,
+      isOptional: true,
+      isSelectableByUser: true
+    });
 
     SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
@@ -297,7 +308,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
 
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
   }
-  
+
   // helpers
 
   function emptyResponse() private pure returns (SismoConnectResponse memory) {

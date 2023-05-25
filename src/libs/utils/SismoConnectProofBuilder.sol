@@ -17,13 +17,14 @@ library ProofBuilder {
     auths[0] = auth;
     Claim[] memory claims = new Claim[](1);
     claims[0] = claim;
-    return SismoConnectProof({
-      auths: auths, 
-      claims: claims, 
-      proofData: proofData,
-      provingScheme: DEFAULT_PROOF_PROVING_SCHEME,
-      extraData: DEFAULT_PROOF_EXTRA_DATA
-    });
+    return
+      SismoConnectProof({
+        auths: auths,
+        claims: claims,
+        proofData: proofData,
+        provingScheme: DEFAULT_PROOF_PROVING_SCHEME,
+        extraData: DEFAULT_PROOF_EXTRA_DATA
+      });
   }
 
   function build(
@@ -36,13 +37,14 @@ library ProofBuilder {
     auths[0] = auth;
     Claim[] memory claims = new Claim[](1);
     claims[0] = claim;
-    return SismoConnectProof({
-      auths: auths, 
-      claims: claims, 
-      proofData: proofData,
-      provingScheme: provingScheme,
-      extraData: DEFAULT_PROOF_EXTRA_DATA
-    });
+    return
+      SismoConnectProof({
+        auths: auths,
+        claims: claims,
+        proofData: proofData,
+        provingScheme: provingScheme,
+        extraData: DEFAULT_PROOF_EXTRA_DATA
+      });
   }
 
   function build(
@@ -52,13 +54,14 @@ library ProofBuilder {
     Auth[] memory auths = new Auth[](1);
     auths[0] = auth;
     Claim[] memory claims = new Claim[](0);
-    return SismoConnectProof({
-      auths: auths, 
-      claims: claims, 
-      proofData: proofData,
-      provingScheme: DEFAULT_PROOF_PROVING_SCHEME,
-      extraData: DEFAULT_PROOF_EXTRA_DATA
-    });
+    return
+      SismoConnectProof({
+        auths: auths,
+        claims: claims,
+        proofData: proofData,
+        provingScheme: DEFAULT_PROOF_PROVING_SCHEME,
+        extraData: DEFAULT_PROOF_EXTRA_DATA
+      });
   }
 
   function build(
@@ -69,16 +72,15 @@ library ProofBuilder {
     Auth[] memory auths = new Auth[](1);
     auths[0] = auth;
     Claim[] memory claims = new Claim[](0);
-    return SismoConnectProof({
-      auths: auths, 
-      claims: claims, 
-      proofData: proofData,
-      provingScheme: provingScheme,
-      extraData: DEFAULT_PROOF_EXTRA_DATA
-    });
+    return
+      SismoConnectProof({
+        auths: auths,
+        claims: claims,
+        proofData: proofData,
+        provingScheme: provingScheme,
+        extraData: DEFAULT_PROOF_EXTRA_DATA
+      });
   }
-
-
 
   function build(
     Claim memory claim,
@@ -87,13 +89,14 @@ library ProofBuilder {
     Auth[] memory auths = new Auth[](0);
     Claim[] memory claims = new Claim[](1);
     claims[0] = claim;
-    return SismoConnectProof({
-      auths: auths, 
-      claims: claims, 
-      proofData: proofData,
-      provingScheme: DEFAULT_PROOF_PROVING_SCHEME,
-      extraData: DEFAULT_PROOF_EXTRA_DATA
-    });
+    return
+      SismoConnectProof({
+        auths: auths,
+        claims: claims,
+        proofData: proofData,
+        provingScheme: DEFAULT_PROOF_PROVING_SCHEME,
+        extraData: DEFAULT_PROOF_EXTRA_DATA
+      });
   }
 
   function build(
@@ -104,13 +107,14 @@ library ProofBuilder {
     Auth[] memory auths = new Auth[](0);
     Claim[] memory claims = new Claim[](1);
     claims[0] = claim;
-    return SismoConnectProof({
-      auths: auths, 
-      claims: claims, 
-      proofData: proofData,
-      provingScheme: provingScheme,
-      extraData: DEFAULT_PROOF_EXTRA_DATA
-    });
+    return
+      SismoConnectProof({
+        auths: auths,
+        claims: claims,
+        proofData: proofData,
+        provingScheme: provingScheme,
+        extraData: DEFAULT_PROOF_EXTRA_DATA
+      });
   }
 
   function build(
@@ -118,13 +122,14 @@ library ProofBuilder {
     Claim[] memory claims,
     bytes memory proofData
   ) external pure returns (SismoConnectProof memory) {
-    return SismoConnectProof({
-      auths: auths, 
-      claims: claims, 
-      proofData: proofData,
-      provingScheme: DEFAULT_PROOF_PROVING_SCHEME,
-      extraData: DEFAULT_PROOF_EXTRA_DATA
-    });
+    return
+      SismoConnectProof({
+        auths: auths,
+        claims: claims,
+        proofData: proofData,
+        provingScheme: DEFAULT_PROOF_PROVING_SCHEME,
+        extraData: DEFAULT_PROOF_EXTRA_DATA
+      });
   }
 
   function build(
@@ -133,15 +138,13 @@ library ProofBuilder {
     bytes memory proofData,
     bytes32 provingScheme
   ) external pure returns (SismoConnectProof memory) {
-    return SismoConnectProof({
-      auths: auths, 
-      claims: claims, 
-      proofData: proofData,
-      provingScheme: provingScheme,
-      extraData: DEFAULT_PROOF_EXTRA_DATA
-    });
+    return
+      SismoConnectProof({
+        auths: auths,
+        claims: claims,
+        proofData: proofData,
+        provingScheme: provingScheme,
+        extraData: DEFAULT_PROOF_EXTRA_DATA
+      });
   }
-
-
-
 }

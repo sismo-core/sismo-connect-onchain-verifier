@@ -144,7 +144,11 @@ contract AuthRequestBuilder {
   // the user is ask to choose isSelectableByUser to avoid the function signature collision
   // between build(AuthType authType, bool isOptional) and build(AuthType authType, bool isAnon)
 
-  function build(AuthType authType, bool isOptional, bool isSelectableByUser) external pure returns (AuthRequest memory) {
+  function build(
+    AuthType authType,
+    bool isOptional,
+    bool isSelectableByUser
+  ) external pure returns (AuthRequest memory) {
     return
       _build({
         authType: authType,
@@ -156,7 +160,12 @@ contract AuthRequestBuilder {
       });
   }
 
-  function build(AuthType authType, bool isOptional, bool isSelectableByUser, uint256 userId) external pure returns (AuthRequest memory) {
+  function build(
+    AuthType authType,
+    bool isOptional,
+    bool isSelectableByUser,
+    uint256 userId
+  ) external pure returns (AuthRequest memory) {
     return
       _build({
         authType: authType,
