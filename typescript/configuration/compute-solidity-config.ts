@@ -10,9 +10,7 @@ import { getRegistryTreeRoot } from "./compute-tree";
 
 export type newSismoConnectClientConfig = {
   appId: string;
-  authRequests?: AuthRequest[];
-  claimRequests?: ClaimRequest[];
-  vaultEnv?: "prod" | "dev";
+  vault?: "mainVault" | "devVault";
   customGroups?: CustomGroup[];
   displayRawResponse?: boolean;
   sismoApiUrl?: string;
@@ -23,16 +21,17 @@ export type CustomGroup = DevGroup;
 
 export type SolidityConfig = {
   appId: `0x${string}`;
-  devMode: boolean;
+  vaultEnv: VaultEnv;
   registryTreeRoot: bigint;
   devGroups: {
     groupId: `0x${string}`;
-    // data: {
-    //   address: `0x${string}`;
-    //   value: bigint;
-    // }[];
   }[];
 };
+
+export enum VaultEnv {
+  MAIN,
+  DEV,
+}
 
 const computeSolityData = (data: DevAddresses): { address: `0x${string}`; value: bigint }[] => {
   if (Array.isArray(data)) {
@@ -51,7 +50,7 @@ const computeSolidityConfig = async (rawConfig: string): Promise<SolidityConfig>
 
   return {
     appId: config.appId as `0x${string}`,
-    devMode: (config.vaultEnv ?? false) === "dev",
+    vaultEnv: (config.vault ?? "mainVault") === "mainVault" ? VaultEnv.MAIN : VaultEnv.DEV,
     registryTreeRoot: BigInt(root),
     devGroups:
       config.customGroups === undefined
@@ -72,8 +71,8 @@ const main = async () => {
         components: [
           { name: "appId", type: "bytes16" },
           {
-            name: "devMode",
-            type: "bool",
+            name: "vaultEnv",
+            type: "uint8",
           },
           {
             name: "registryTreeRoot",

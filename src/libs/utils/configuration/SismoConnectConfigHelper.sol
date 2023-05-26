@@ -7,7 +7,7 @@ import "stringutils/strings.sol";
 
 struct SismoConnectConfig {
   bytes16 appId;
-  bool devMode;
+  VaultEnv vaultEnv;
   uint256 registryTreeRoot;
   DevGroup[] devGroups;
 }
@@ -26,34 +26,43 @@ contract SismoConnectConfigHelper is TestBase, ScriptBase {
 
   function getConfig(string memory configPath) internal returns (SismoConnectConfig memory) {
     string memory root = vm.projectRoot();
-
     _checkConfigFileExtension(configPath);
+    return
+      _getSolidityConfig(
+        root,
+        configPath,
+        "/lib/sismo-connect-onchain-verifier/typescript/configuration/compute-solidity-config.ts"
+      );
+  }
 
-    string[] memory configInputs = _getConfigInputs(root, configPath);
+  function getConfig(
+    string memory configPath,
+    string memory computeSolidityFilePath
+  ) internal returns (SismoConnectConfig memory) {
+    string memory root = vm.projectRoot();
+    _checkConfigFileExtension(configPath);
+    return _getSolidityConfig(root, configPath, computeSolidityFilePath);
+  }
 
-    string memory computeConfigPath = string.concat(
-      root,
-      "/typescript/configuration/compute-solidity-config.ts"
-    );
+  function _getSolidityConfig(
+    string memory root,
+    string memory configPath,
+    string memory computeSolidityFilePath
+  ) internal returns (SismoConnectConfig memory) {
+    string memory stringifiedConfiguration = string(vm.ffi(_getConfigInputs(root, configPath)));
+
+    string memory computeSolidityConfigPath = string.concat(root, computeSolidityFilePath);
+
     string[] memory inputs = new string[](4);
     inputs[0] = "npx";
     inputs[1] = "ts-node";
-    inputs[2] = computeConfigPath;
-    inputs[3] = string(vm.ffi(configInputs));
+    inputs[2] = computeSolidityConfigPath;
+    inputs[3] = stringifiedConfiguration;
 
-    bytes memory res = vm.ffi(inputs);
-    SismoConnectConfig memory config = abi.decode(res, (SismoConnectConfig));
+    bytes memory config = vm.ffi(inputs);
+    SismoConnectConfig memory sismoConnectConfig = abi.decode(config, (SismoConnectConfig));
 
-    // logs for debugging
-    console2.log("appId");
-    console2.logBytes16(config.appId);
-    console2.log("devMode");
-    console2.logBool(config.devMode);
-    console2.log("registryTreeRoot");
-    console2.logUint(config.registryTreeRoot);
-    console2.log("devGroups.length");
-    console2.logUint(config.devGroups.length);
-    return config;
+    return sismoConnectConfig;
   }
 
   function _getConfigInputs(

@@ -3,6 +3,7 @@ import { newSismoConnectClientConfig } from "./../../../typescript/configuration
 
 export const config: newSismoConnectClientConfig = {
   appId: "0xf4977993e52606cfd67b7a1cde717069",
+  vault: "devVault",
   customGroups: [
     {
       // Nouns DAO NFT Holders group : https://factory.sismo.io/groups-explorer?search=0x311ece950f9ec55757eb95f3182ae5e2
