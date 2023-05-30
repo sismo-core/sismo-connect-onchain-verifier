@@ -319,6 +319,59 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     });
   }
 
+  function testFuzz_RevertWith_RegistryTreeRootNotAvailable(
+    uint256 invalidRegistryTreeRoot
+  ) public {
+    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
+      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+
+    // we shift the return of the mocked AvailableRootsregistry contract to be always false
+    availableRootsRegistry.shiftIsRootAvailable();
+    // registryTreeRoot is at index 4 in snarkProof's inputs
+    invalidResponse = _changeProofDataInSismoConnectResponse(
+      invalidResponse,
+      4,
+      invalidRegistryTreeRoot
+    );
+    vm.expectRevert(
+      abi.encodeWithSignature("RegistryRootNotAvailable(uint256)", invalidRegistryTreeRoot)
+    );
+    sismoConnect.exposed_verify({
+      responseBytes: abi.encode(invalidResponse),
+      claim: claimRequest,
+      signature: signature
+    });
+  }
+
+  function testFuzz_RevertWith_RegistryTreeRootNotAvailableWithVaultDev(
+    uint256 invalidRegistryTreeRoot
+  ) public {
+    SismoConnectHarness sismoConnectWithDevVault = new SismoConnectHarness(appId, Vault.DEV); // we use the dev vault
+    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
+      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+
+    // change the registry tree root that should be returned by the vault to be different from the one in the proof
+    // registryTreeRoot is returned from the vault in the extraData field of the proof
+    invalidResponse.proofs[0].extraData = abi.encode(invalidRegistryTreeRoot);
+
+    uint256 correctRegistryTreeRoot = abi
+      .decode(invalidResponse.proofs[0].proofData, (HydraS2ProofData))
+      ._getRegistryRoot();
+
+    vm.expectRevert(
+      abi.encodeWithSignature(
+        "RegistryRootFromDevVaultMismatch(uint256,uint256)",
+        correctRegistryTreeRoot,
+        invalidRegistryTreeRoot
+      )
+    );
+    sismoConnectWithDevVault.exposed_verify({
+      responseBytes: abi.encode(invalidResponse),
+      claim: claimRequest,
+      signature: signature
+    });
+  }
+
   function testFuzz_RevertWith_AccountsTreeValueMismatch(
     uint256 incorrectAccountsTreeValue
   ) public {

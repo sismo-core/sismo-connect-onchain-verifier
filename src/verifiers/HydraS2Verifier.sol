@@ -170,7 +170,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     }
     if ((vault == Vault.DEV) || (vault == Vault.DEMO)) {
       if (input.registryTreeRoot != registryTreeRoot) {
-        revert RegistryRootNotAvailable(input.registryTreeRoot);
+        revert RegistryRootFromDevVaultMismatch(input.registryTreeRoot, registryTreeRoot);
       }
     }
 

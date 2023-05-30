@@ -7,6 +7,7 @@ contract IHydraS2Verifier {
 
   error InvalidVersion(bytes32 version);
   error RegistryRootNotAvailable(uint256 inputRoot);
+  error RegistryRootFromDevVaultMismatch(uint256 inputRoot, uint256 devVaultRoot);
   error DestinationMismatch(address destinationFromProof, address expectedDestination);
   error CommitmentMapperPubKeyMismatch(
     bytes32 expectedX,

@@ -5,13 +5,13 @@ import {BaseTest} from "test/BaseTest.t.sol";
 import "src/verifiers/HydraS2Verifier.sol";
 import "./HydraS2Proofs.sol";
 import {CommitmentMapperRegistryMock, ICommitmentMapperRegistry} from "test/mocks/CommitmentMapperRegistryMock.sol";
-import {AvailableRootsRegistryMock, IAvailableRootsRegistry} from "test/mocks/AvailableRootsRegistryMock.sol";
+import {AvailableRootsRegistryMock} from "test/mocks/AvailableRootsRegistryMock.sol";
 
 contract HydraS2BaseTest is BaseTest {
   HydraS2Proofs immutable hydraS2Proofs = new HydraS2Proofs();
   HydraS2Verifier hydraS2Verifier;
   ICommitmentMapperRegistry commitmentMapperRegistry;
-  IAvailableRootsRegistry availableRootsRegistry;
+  AvailableRootsRegistryMock availableRootsRegistry;
 
   function setUp() public virtual override {
     super.setUp();
@@ -32,6 +32,5 @@ contract HydraS2BaseTest is BaseTest {
     vm.stopPrank();
 
     commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(hydraS2Proofs.getEdDSAPubKey());
-    availableRootsRegistry.registerRoot(hydraS2Proofs.getRoot());
   }
 }
