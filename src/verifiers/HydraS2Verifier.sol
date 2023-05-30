@@ -9,12 +9,26 @@ import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapp
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "./HydraS2Lib.sol";
-import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
+import {Auth, ClaimType, AuthType, Claim, Vault, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
 
 contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifier, Initializable {
   using HydraS2Lib for HydraS2ProofData;
   using HydraS2Lib for Auth;
   using HydraS2Lib for Claim;
+
+  // Struct holding the decoded Hydra-S2 snark proof and decoded public inputs
+  // This struct is used to avoid stack too deep error
+  struct HydraS2Proof {
+    HydraS2ProofData data;
+    HydraS2ProofInput input;
+  }
+
+  // Struct holding the verified Auth and Claim from the Hydra-S2 snark proof
+  // This struct is used to avoid stack too deep error
+  struct VerifiedProof {
+    VerifiedAuth auth;
+    VerifiedClaim claim;
+  }
 
   uint8 public constant IMPLEMENTATION_VERSION = 1;
   bytes32 public immutable HYDRA_S2_VERSION = "hydra-s2.1";
@@ -33,6 +47,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
 
   function verify(
     bytes16 appId,
+    Vault vault,
     bytes16 namespace,
     bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
@@ -42,13 +57,12 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       revert InvalidVersion(sismoConnectProof.provingScheme);
     }
 
-    // Decode the snark proof from the sismoConnectProof
-    // This snark proof is specify to this proving scheme
-    HydraS2ProofData memory snarkProof = abi.decode(
-      sismoConnectProof.proofData,
-      (HydraS2ProofData)
-    );
-    HydraS2ProofInput memory snarkInput = snarkProof._input();
+    HydraS2Proof memory hydraS2Proof = HydraS2Proof({
+      // Decode the snark proof data from the sismoConnectProof
+      data: abi.decode(sismoConnectProof.proofData, (HydraS2ProofData)),
+      // Get the public inputs from the snark proof data
+      input: abi.decode(sismoConnectProof.proofData, (HydraS2ProofData))._input()
+    });
 
     // We only support one Auth and one Claim in the hydra-s2 proving scheme
     // We revert if there is more than one Auth or Claim in the sismoConnectProof
@@ -58,40 +72,56 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
 
     // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
-    VerifiedAuth memory verifiedAuth;
-    VerifiedClaim memory verifiedClaim;
+    VerifiedProof memory verifiedProof;
     if (sismoConnectProof.auths.length == 1) {
       // Get the Auth from the sismoConnectProof
       // We only support one Auth in the hydra-s2 proving scheme
       Auth memory auth = sismoConnectProof.auths[0];
-      verifiedAuth = _verifyAuthValidity(snarkInput, sismoConnectProof.proofData, auth, appId);
+      verifiedProof.auth = _verifyAuthValidity(
+        hydraS2Proof.input,
+        sismoConnectProof.proofData,
+        auth,
+        appId
+      );
     }
     if (sismoConnectProof.claims.length == 1) {
+      // Get the Registry Tree Root from the sismoConnectProof
+      // only if the extraData has been provided, otherwise set it to 0 to avoid decoding error
+      uint256 registryTreeRoot;
+      if (sismoConnectProof.extraData.length == 32) {
+        registryTreeRoot = abi.decode(sismoConnectProof.extraData, (uint256));
+      } else {
+        registryTreeRoot = 0;
+      }
+
       // Get the Claim from the sismoConnectProof
       // We only support one Claim in the hydra-s2 proving scheme
       Claim memory claim = sismoConnectProof.claims[0];
-      verifiedClaim = _verifyClaimValidity(
-        snarkInput,
+      verifiedProof.claim = _verifyClaimValidity(
+        hydraS2Proof.input,
         sismoConnectProof.proofData,
+        registryTreeRoot,
         claim,
         appId,
+        vault,
         namespace
       );
     }
 
-    _validateSignedMessageInput(snarkInput, signedMessage);
+    _validateSignedMessageInput(hydraS2Proof.input, signedMessage);
 
     // Check the snarkProof is valid
-    _checkSnarkProof(snarkProof);
-
-    return (verifiedAuth, verifiedClaim);
+    _checkSnarkProof(hydraS2Proof.data);
+    return (verifiedProof.auth, verifiedProof.claim);
   }
 
   function _verifyClaimValidity(
     HydraS2ProofInput memory input,
     bytes memory proofData,
+    uint256 registryTreeRoot,
     Claim memory claim,
     bytes16 appId,
+    Vault vault,
     bytes16 namespace
   ) private view returns (VerifiedClaim memory) {
     // Check claim value validity
@@ -128,10 +158,22 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     if (input.sourceVerificationEnabled == false) {
       revert SourceVerificationNotEnabled();
     }
+
     // isRootAvailable
-    if (!AVAILABLE_ROOTS_REGISTRY.isRootAvailable(input.registryTreeRoot)) {
-      revert RegistryRootNotAvailable(input.registryTreeRoot);
+    // we only check the root availability onchain for MAIN vault
+    // otherwise we compare the root used in the proof with the one returned by the vault in the SismoConnectProof extraData
+    // it allows for fake roots to be used in the proof for DEV and DEMO vaults
+    if (vault == Vault.MAIN) {
+      if (!AVAILABLE_ROOTS_REGISTRY.isRootAvailable(input.registryTreeRoot)) {
+        revert RegistryRootNotAvailable(input.registryTreeRoot);
+      }
     }
+    if ((vault == Vault.DEV) || (vault == Vault.DEMO)) {
+      if (input.registryTreeRoot != registryTreeRoot) {
+        revert RegistryRootNotAvailable(input.registryTreeRoot);
+      }
+    }
+
     // accountsTreeValue
     uint256 groupSnapshotId = _encodeAccountsTreeValue(claim.groupId, claim.groupTimestamp);
     if (input.accountsTreeValue != groupSnapshotId) {
@@ -225,9 +267,14 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     }
   }
 
-  function _checkSnarkProof(HydraS2ProofData memory snarkProof) internal view {
+  function _checkSnarkProof(HydraS2ProofData memory snarkProofData) internal view {
     if (
-      !verifyProof(snarkProof.proof.a, snarkProof.proof.b, snarkProof.proof.c, snarkProof.input)
+      !verifyProof(
+        snarkProofData.proof.a,
+        snarkProofData.proof.b,
+        snarkProofData.proof.c,
+        snarkProofData.input
+      )
     ) {
       revert InvalidProof();
     }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {RequestBuilder, SismoConnectRequest, SismoConnectResponse} from "../utils/RequestBuilder.sol";
+import {RequestBuilder, SismoConnectRequest, SismoConnectResponse, Vault} from "../utils/RequestBuilder.sol";
 import {AuthRequestBuilder, AuthRequest, Auth, VerifiedAuth, AuthType} from "../utils/AuthRequestBuilder.sol";
 import {ClaimRequestBuilder, ClaimRequest, Claim, VerifiedClaim, ClaimType} from "../utils/ClaimRequestBuilder.sol";
 import {SignatureBuilder, SignatureRequest, Signature} from "../utils/SignatureBuilder.sol";
@@ -9,8 +9,9 @@ import {ISismoConnectVerifier, SismoConnectVerifiedResult} from "../../interface
 import {IAddressesProvider} from "../../periphery/interfaces/IAddressesProvider.sol";
 import {SismoConnectHelper} from "../utils/SismoConnectHelper.sol";
 import {IHydraS2Verifier} from "../../verifiers/IHydraS2Verifier.sol";
+import {ISismoConnectLib} from "../../interfaces/ISismoConnectLib.sol";
 
-contract SismoConnect {
+contract SismoConnect is ISismoConnectLib {
   uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;
 
   IAddressesProvider public constant ADDRESSES_PROVIDER =
@@ -25,9 +26,11 @@ contract SismoConnect {
   RequestBuilder internal _requestBuilder;
 
   bytes16 public appId;
+  Vault public vault;
 
-  constructor(bytes16 appIdentifier) {
+  constructor(bytes16 appIdentifier, Vault _vault) {
     appId = appIdentifier;
+    vault = _vault;
     _sismoConnectVerifier = ISismoConnectVerifier(
       ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1"))
     );

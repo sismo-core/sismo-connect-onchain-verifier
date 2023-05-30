@@ -31,6 +31,9 @@ contract SismoConnectE2E is HydraS2BaseTest {
   bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1");
   bytes public DEFAULT_SIGNED_MESSAGE = abi.encode(user);
 
+  // need to be public to use RequestBuilder directly in the tests
+  Vault public vault = Vault.MAIN;
+
   ResponseWithoutProofs public DEFAULT_RESPONSE =
     ResponseBuilder
       .emptyResponseWithoutProofs()
@@ -49,7 +52,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    sismoConnect = new SismoConnectHarness(DEFAULT_APP_ID);
+    sismoConnect = new SismoConnectHarness(DEFAULT_APP_ID, vault);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});

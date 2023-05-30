@@ -7,6 +7,7 @@ struct SismoConnectRequest {
   AuthRequest[] auths;
   ClaimRequest[] claims;
   SignatureRequest signature;
+  Vault vault;
 }
 
 struct AuthRequest {
@@ -88,7 +89,7 @@ struct SismoConnectProof {
   Claim[] claims;
   bytes32 provingScheme;
   bytes proofData;
-  bytes extraData;
+  bytes extraData; // default: "", can be used to store registry tree root
 }
 
 struct SismoConnectVerifiedResult {
@@ -116,4 +117,10 @@ struct VerifiedClaim {
   bytes extraData;
   uint256 proofId;
   bytes proofData;
+}
+
+enum Vault {
+  MAIN,
+  DEV,
+  DEMO
 }

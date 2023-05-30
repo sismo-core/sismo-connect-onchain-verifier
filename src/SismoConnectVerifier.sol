@@ -66,6 +66,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
         response.proofs[i].provingScheme
       ].verify({
           appId: response.appId,
+          vault: request.vault,
           namespace: response.namespace,
           signedMessage: response.signedMessage,
           sismoConnectProof: response.proofs[i]

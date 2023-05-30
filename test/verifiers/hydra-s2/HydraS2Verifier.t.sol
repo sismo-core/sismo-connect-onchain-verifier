@@ -22,7 +22,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    sismoConnect = new SismoConnectHarness(appId);
+    sismoConnect = new SismoConnectHarness(appId, Vault.MAIN);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: groupId});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
