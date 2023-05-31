@@ -421,6 +421,98 @@ contract SismoConnect {
     return _claimRequestBuilder.build(groupId, value, claimType, extraData);
   }
 
+  function buildClaim(
+    bytes16 groupId,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (ClaimRequest memory) {
+    return _claimRequestBuilder.build(groupId, isOptional, isSelectableByUser);
+  }
+
+  function buildClaim(
+    bytes16 groupId,
+    bytes16 groupTimestamp,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (ClaimRequest memory) {
+    return _claimRequestBuilder.build(groupId, groupTimestamp, isOptional, isSelectableByUser);
+  }
+
+  function buildClaim(
+    bytes16 groupId,
+    uint256 value,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (ClaimRequest memory) {
+    return _claimRequestBuilder.build(groupId, value, isOptional, isSelectableByUser);
+  }
+
+  function buildClaim(
+    bytes16 groupId,
+    ClaimType claimType,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (ClaimRequest memory) {
+    return _claimRequestBuilder.build(groupId, claimType, isOptional, isSelectableByUser);
+  }
+
+  function buildClaim(
+    bytes16 groupId,
+    bytes16 groupTimestamp,
+    uint256 value,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (ClaimRequest memory) {
+    return
+      _claimRequestBuilder.build(groupId, groupTimestamp, value, isOptional, isSelectableByUser);
+  }
+
+  function buildClaim(
+    bytes16 groupId,
+    bytes16 groupTimestamp,
+    ClaimType claimType,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (ClaimRequest memory) {
+    return
+      _claimRequestBuilder.build(
+        groupId,
+        groupTimestamp,
+        claimType,
+        isOptional,
+        isSelectableByUser
+      );
+  }
+
+  function buildClaim(
+    bytes16 groupId,
+    uint256 value,
+    ClaimType claimType,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (ClaimRequest memory) {
+    return _claimRequestBuilder.build(groupId, value, claimType, isOptional, isSelectableByUser);
+  }
+
+  function buildClaim(
+    bytes16 groupId,
+    bytes16 groupTimestamp,
+    uint256 value,
+    ClaimType claimType,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (ClaimRequest memory) {
+    return
+      _claimRequestBuilder.build(
+        groupId,
+        groupTimestamp,
+        value,
+        claimType,
+        isOptional,
+        isSelectableByUser
+      );
+  }
+
   function buildAuth(
     AuthType authType,
     bool isAnon,
@@ -488,6 +580,32 @@ contract SismoConnect {
     uint256 userId
   ) internal view returns (AuthRequest memory) {
     return _authRequestBuilder.build(authType, isOptional, isSelectableByUser, userId);
+  }
+
+  function buildAuth(
+    AuthType authType,
+    bool isAnon,
+    bool isOptional,
+    bool isSelectableByUser
+  ) internal view returns (AuthRequest memory) {
+    return _authRequestBuilder.build(authType, isAnon, isOptional, isSelectableByUser);
+  }
+
+  function buildAuth(
+    AuthType authType,
+    uint256 userId,
+    bool isOptional
+  ) internal view returns (AuthRequest memory) {
+    return _authRequestBuilder.build(authType, userId, isOptional);
+  }
+
+  function buildAuth(
+    AuthType authType,
+    bool isAnon,
+    uint256 userId,
+    bool isOptional
+  ) internal view returns (AuthRequest memory) {
+    return _authRequestBuilder.build(authType, isAnon, userId, isOptional);
   }
 
   function buildSignature(bytes memory message) internal view returns (SignatureRequest memory) {
