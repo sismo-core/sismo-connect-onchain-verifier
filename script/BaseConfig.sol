@@ -37,6 +37,7 @@ contract BaseDeploymentConfig is Script {
   address immutable TESTNET_OWNER = 0xBB8FcA8f2381CFeEDe5D7541d7bF76343EF6c67B;
   address immutable TESTNET_GOERLI_ROOTS_OWNER = 0xa687922C4bf2eB22297FdF89156B49eD3727618b;
   address immutable TESTNET_MUMBAI_ROOTS_OWNER = 0xCA0583A6682607282963d3E2545Cd2e75697C2bb;
+  address immutable TESTNET_SCROLL_GOERLI_ROOTS_OWNER = 0x8f9c04d7bA132Fd0CbA124eFCE3936328d217458;
 
   // Sismo Staging env (Sismo internal use only)
   address immutable STAGING_PROXY_ADMIN = 0x246E71bC2a257f4BE9C7fAD4664E6D7444844Adc;
@@ -196,13 +197,16 @@ contract BaseDeploymentConfig is Script {
       });
     } else if (chain == DeployChain.ScrollTestnetGoerli) {
       config = DeploymentConfig({
-        proxyAdmin: address(0x061060a65146b3265C62fC8f3AE977c9B27260fF), 
-        owner: address(0x061060a65146b3265C62fC8f3AE977c9B27260fF),
-        rootsOwner: address(0x061060a65146b3265C62fC8f3AE977c9B27260fF),
-        commitmentMapperEdDSAPubKey: [uint256(10), uint256(11)],
+        proxyAdmin: TESTNET_PROXY_ADMIN,
+        owner: TESTNET_OWNER,
+        rootsOwner: TESTNET_SCROLL_GOERLI_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ],
         availableRootsRegistry: address(0),
         commitmentMapperRegistry: address(0),
-        sismoAddressesProvider: address(0),
+        sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
         sismoConnectVerifier: address(0),
         hydraS2Verifier: address(0),
         // external libraries
@@ -210,7 +214,7 @@ contract BaseDeploymentConfig is Script {
         claimRequestBuilder: address(0),
         signatureBuilder: address(0),
         requestBuilder: address(0)
-      }); 
+      });
     } else if (chain == DeployChain.StagingGoerli) {
       config = DeploymentConfig({
         proxyAdmin: STAGING_PROXY_ADMIN,
