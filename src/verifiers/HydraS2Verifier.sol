@@ -16,6 +16,20 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   using HydraS2Lib for Auth;
   using HydraS2Lib for Claim;
 
+  // Struct holding the decoded Hydra-S2 snark proof and decoded public inputs
+  // This struct is used to avoid stack too deep error
+  struct HydraS2Proof {
+    HydraS2ProofData data;
+    HydraS2ProofInput input;
+  }
+
+  // Struct holding the verified Auth and Claim from the Hydra-S2 snark proof
+  // This struct is used to avoid stack too deep error
+  struct VerifiedProof {
+    VerifiedAuth auth;
+    VerifiedClaim claim;
+  }
+
   uint8 public constant IMPLEMENTATION_VERSION = 1;
   bytes32 public immutable HYDRA_S2_VERSION = "hydra-s2.1";
   // Registry storing the Commitment Mapper EdDSA Public key
@@ -34,6 +48,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   function verify(
     bytes16 appId,
     bytes16 namespace,
+    bool isImpersonationMode,
     bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
   ) external view override returns (VerifiedAuth memory, VerifiedClaim memory) {
@@ -42,13 +57,12 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       revert InvalidVersion(sismoConnectProof.provingScheme);
     }
 
-    // Decode the snark proof from the sismoConnectProof
-    // This snark proof is specify to this proving scheme
-    HydraS2ProofData memory snarkProof = abi.decode(
-      sismoConnectProof.proofData,
-      (HydraS2ProofData)
-    );
-    HydraS2ProofInput memory snarkInput = snarkProof._input();
+    HydraS2Proof memory hydraS2Proof = HydraS2Proof({
+      // Decode the snark proof data from the sismoConnectProof
+      data: abi.decode(sismoConnectProof.proofData, (HydraS2ProofData)),
+      // Get the public inputs from the snark proof data
+      input: abi.decode(sismoConnectProof.proofData, (HydraS2ProofData))._input()
+    });
 
     // We only support one Auth and one Claim in the hydra-s2 proving scheme
     // We revert if there is more than one Auth or Claim in the sismoConnectProof
@@ -58,33 +72,37 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
 
     // Verify Claim, Auth and SignedMessage validity by checking corresponding
     // snarkProof public input
-    VerifiedAuth memory verifiedAuth;
-    VerifiedClaim memory verifiedClaim;
+    VerifiedProof memory verifiedProof;
     if (sismoConnectProof.auths.length == 1) {
       // Get the Auth from the sismoConnectProof
       // We only support one Auth in the hydra-s2 proving scheme
       Auth memory auth = sismoConnectProof.auths[0];
-      verifiedAuth = _verifyAuthValidity(snarkInput, sismoConnectProof.proofData, auth, appId);
+      verifiedProof.auth = _verifyAuthValidity(
+        hydraS2Proof.input,
+        sismoConnectProof.proofData,
+        auth,
+        appId
+      );
     }
     if (sismoConnectProof.claims.length == 1) {
       // Get the Claim from the sismoConnectProof
       // We only support one Claim in the hydra-s2 proving scheme
       Claim memory claim = sismoConnectProof.claims[0];
-      verifiedClaim = _verifyClaimValidity(
-        snarkInput,
+      verifiedProof.claim = _verifyClaimValidity(
+        hydraS2Proof.input,
         sismoConnectProof.proofData,
         claim,
         appId,
-        namespace
+        namespace,
+        isImpersonationMode
       );
     }
 
-    _validateSignedMessageInput(snarkInput, signedMessage);
+    _validateSignedMessageInput(hydraS2Proof.input, signedMessage);
 
     // Check the snarkProof is valid
-    _checkSnarkProof(snarkProof);
-
-    return (verifiedAuth, verifiedClaim);
+    _checkSnarkProof(hydraS2Proof.data);
+    return (verifiedProof.auth, verifiedProof.claim);
   }
 
   function _verifyClaimValidity(
@@ -92,7 +110,8 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     bytes memory proofData,
     Claim memory claim,
     bytes16 appId,
-    bytes16 namespace
+    bytes16 namespace,
+    bool isImpersonationMode
   ) private view returns (VerifiedClaim memory) {
     // Check claim value validity
     if (input.claimValue != claim.value) {
@@ -111,7 +130,15 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     }
 
     // commitmentMapperPubKey
-    uint256[2] memory commitmentMapperPubKey = COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
+    // In impersonation mode, we use the EdDSA public key of the Impersonation Commitment Mapper
+    // otherwise we use the EdDSA public key of the Commitment Mapper Registry
+    uint256[2] memory commitmentMapperPubKey = isImpersonationMode
+      ? [
+        0x2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f0256,
+        0x30423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74
+      ]
+      : COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
+
     if (
       input.commitmentMapperPubKey[0] != commitmentMapperPubKey[0] ||
       input.commitmentMapperPubKey[1] != commitmentMapperPubKey[1]
@@ -225,9 +252,14 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     }
   }
 
-  function _checkSnarkProof(HydraS2ProofData memory snarkProof) internal view {
+  function _checkSnarkProof(HydraS2ProofData memory snarkProofData) internal view {
     if (
-      !verifyProof(snarkProof.proof.a, snarkProof.proof.b, snarkProof.proof.c, snarkProof.input)
+      !verifyProof(
+        snarkProofData.proof.a,
+        snarkProofData.proof.b,
+        snarkProofData.proof.c,
+        snarkProofData.input
+      )
     ) {
       revert InvalidProof();
     }

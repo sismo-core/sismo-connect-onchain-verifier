@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import "./Structs.sol";
 import {SignatureBuilder} from "./SignatureBuilder.sol";
+import {ISismoConnectLib} from "../../interfaces/ISismoConnectLib.sol";
 
 contract RequestBuilder {
   // default value for namespace
@@ -21,7 +22,7 @@ contract RequestBuilder {
     SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
-  ) external pure returns (SismoConnectRequest memory) {
+  ) external view returns (SismoConnectRequest memory) {
     AuthRequest[] memory auths = new AuthRequest[](1);
     auths[0] = auth;
     ClaimRequest[] memory claims = new ClaimRequest[](1);
@@ -30,6 +31,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: signature
@@ -51,6 +53,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -61,25 +64,6 @@ contract RequestBuilder {
   function build(
     ClaimRequest memory claim,
     SignatureRequest memory signature,
-    bytes16 appId,
-    bytes16 namespace
-  ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory auths = new AuthRequest[](0);
-    ClaimRequest[] memory claims = new ClaimRequest[](1);
-    claims[0] = claim;
-    return (
-      SismoConnectRequest({
-        appId: appId,
-        namespace: namespace,
-        auths: auths,
-        claims: claims,
-        signature: signature
-      })
-    );
-  }
-
-  function build(
-    ClaimRequest memory claim,
     bytes16 appId,
     bytes16 namespace
   ) external view returns (SismoConnectRequest memory) {
@@ -90,6 +74,27 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function build(
+    ClaimRequest memory claim,
+    bytes16 appId,
+    bytes16 namespace
+  ) external view returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -102,7 +107,7 @@ contract RequestBuilder {
     SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
-  ) external pure returns (SismoConnectRequest memory) {
+  ) external view returns (SismoConnectRequest memory) {
     AuthRequest[] memory auths = new AuthRequest[](1);
     auths[0] = auth;
     ClaimRequest[] memory claims = new ClaimRequest[](0);
@@ -110,6 +115,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: signature
@@ -129,6 +135,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -141,7 +148,7 @@ contract RequestBuilder {
     ClaimRequest memory claim,
     SignatureRequest memory signature,
     bytes16 appId
-  ) external pure returns (SismoConnectRequest memory) {
+  ) external view returns (SismoConnectRequest memory) {
     AuthRequest[] memory auths = new AuthRequest[](1);
     auths[0] = auth;
     ClaimRequest[] memory claims = new ClaimRequest[](1);
@@ -150,6 +157,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: signature
@@ -170,6 +178,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -180,24 +189,6 @@ contract RequestBuilder {
   function build(
     AuthRequest memory auth,
     SignatureRequest memory signature,
-    bytes16 appId
-  ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory auths = new AuthRequest[](1);
-    auths[0] = auth;
-    ClaimRequest[] memory claims = new ClaimRequest[](0);
-    return (
-      SismoConnectRequest({
-        appId: appId,
-        namespace: DEFAULT_NAMESPACE,
-        auths: auths,
-        claims: claims,
-        signature: signature
-      })
-    );
-  }
-
-  function build(
-    AuthRequest memory auth,
     bytes16 appId
   ) external view returns (SismoConnectRequest memory) {
     AuthRequest[] memory auths = new AuthRequest[](1);
@@ -207,6 +198,26 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function build(
+    AuthRequest memory auth,
+    bytes16 appId
+  ) external view returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -218,7 +229,7 @@ contract RequestBuilder {
     ClaimRequest memory claim,
     SignatureRequest memory signature,
     bytes16 appId
-  ) external pure returns (SismoConnectRequest memory) {
+  ) external view returns (SismoConnectRequest memory) {
     AuthRequest[] memory auths = new AuthRequest[](0);
     ClaimRequest[] memory claims = new ClaimRequest[](1);
     claims[0] = claim;
@@ -226,6 +237,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: signature
@@ -244,6 +256,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -258,11 +271,12 @@ contract RequestBuilder {
     SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
-  ) external pure returns (SismoConnectRequest memory) {
+  ) external view returns (SismoConnectRequest memory) {
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: signature
@@ -280,6 +294,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -290,23 +305,6 @@ contract RequestBuilder {
   function build(
     ClaimRequest[] memory claims,
     SignatureRequest memory signature,
-    bytes16 appId,
-    bytes16 namespace
-  ) external pure returns (SismoConnectRequest memory) {
-    AuthRequest[] memory auths = new AuthRequest[](0);
-    return (
-      SismoConnectRequest({
-        appId: appId,
-        namespace: namespace,
-        auths: auths,
-        claims: claims,
-        signature: signature
-      })
-    );
-  }
-
-  function build(
-    ClaimRequest[] memory claims,
     bytes16 appId,
     bytes16 namespace
   ) external view returns (SismoConnectRequest memory) {
@@ -315,6 +313,25 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function build(
+    ClaimRequest[] memory claims,
+    bytes16 appId,
+    bytes16 namespace
+  ) external view returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -327,12 +344,13 @@ contract RequestBuilder {
     SignatureRequest memory signature,
     bytes16 appId,
     bytes16 namespace
-  ) external pure returns (SismoConnectRequest memory) {
+  ) external view returns (SismoConnectRequest memory) {
     ClaimRequest[] memory claims = new ClaimRequest[](0);
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: signature
@@ -350,6 +368,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -362,11 +381,12 @@ contract RequestBuilder {
     ClaimRequest[] memory claims,
     SignatureRequest memory signature,
     bytes16 appId
-  ) external pure returns (SismoConnectRequest memory) {
+  ) external view returns (SismoConnectRequest memory) {
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: signature
@@ -383,6 +403,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -393,22 +414,6 @@ contract RequestBuilder {
   function build(
     AuthRequest[] memory auths,
     SignatureRequest memory signature,
-    bytes16 appId
-  ) external pure returns (SismoConnectRequest memory) {
-    ClaimRequest[] memory claims = new ClaimRequest[](0);
-    return (
-      SismoConnectRequest({
-        appId: appId,
-        namespace: DEFAULT_NAMESPACE,
-        auths: auths,
-        claims: claims,
-        signature: signature
-      })
-    );
-  }
-
-  function build(
-    AuthRequest[] memory auths,
     bytes16 appId
   ) external view returns (SismoConnectRequest memory) {
     ClaimRequest[] memory claims = new ClaimRequest[](0);
@@ -416,6 +421,24 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        auths: auths,
+        claims: claims,
+        signature: signature
+      })
+    );
+  }
+
+  function build(
+    AuthRequest[] memory auths,
+    bytes16 appId
+  ) external view returns (SismoConnectRequest memory) {
+    ClaimRequest[] memory claims = new ClaimRequest[](0);
+    return (
+      SismoConnectRequest({
+        appId: appId,
+        namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -427,12 +450,13 @@ contract RequestBuilder {
     ClaimRequest[] memory claims,
     SignatureRequest memory signature,
     bytes16 appId
-  ) external pure returns (SismoConnectRequest memory) {
+  ) external view returns (SismoConnectRequest memory) {
     AuthRequest[] memory auths = new AuthRequest[](0);
     return (
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: signature
@@ -449,6 +473,7 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
+        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST

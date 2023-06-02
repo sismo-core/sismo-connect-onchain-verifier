@@ -22,7 +22,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    sismoConnect = new SismoConnectHarness(appId);
+    sismoConnect = new SismoConnectHarness(appId, false);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: groupId});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
@@ -312,6 +312,30 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
     // sourceVerificationEnabled is at index 12 in snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(invalidResponse, 12, uint256(0));
     vm.expectRevert(abi.encodeWithSignature("SourceVerificationNotEnabled()"));
+    sismoConnect.exposed_verify({
+      responseBytes: abi.encode(invalidResponse),
+      claim: claimRequest,
+      signature: signature
+    });
+  }
+
+  function testFuzz_RevertWith_RegistryTreeRootNotAvailable(
+    uint256 invalidRegistryTreeRoot
+  ) public {
+    (SismoConnectResponse memory invalidResponse, ) = hydraS2Proofs
+      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+
+    // we shift the return of the mocked AvailableRootsregistry contract to be always false
+    availableRootsRegistry.switchIsRootAvailable();
+    // registryTreeRoot is at index 4 in snarkProof's inputs
+    invalidResponse = _changeProofDataInSismoConnectResponse(
+      invalidResponse,
+      4,
+      invalidRegistryTreeRoot
+    );
+    vm.expectRevert(
+      abi.encodeWithSignature("RegistryRootNotAvailable(uint256)", invalidRegistryTreeRoot)
+    );
     sismoConnect.exposed_verify({
       responseBytes: abi.encode(invalidResponse),
       claim: claimRequest,

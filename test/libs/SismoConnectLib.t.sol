@@ -47,7 +47,7 @@ contract SismoConnectLibTest is VerifierMockBaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    sismoConnect = new SismoConnectHarness(DEFAULT_APP_ID);
+    sismoConnect = new SismoConnectHarness(DEFAULT_APP_ID, false);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});

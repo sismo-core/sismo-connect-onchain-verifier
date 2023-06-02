@@ -8,6 +8,7 @@ interface IBaseVerifier {
   function verify(
     bytes16 appId,
     bytes16 namespace,
+    bool isImpersonationMode,
     bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
   ) external view returns (VerifiedAuth memory, VerifiedClaim memory);

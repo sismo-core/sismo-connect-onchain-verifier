@@ -11,6 +11,7 @@ contract VerifierMock is IBaseVerifier {
   function verify(
     bytes16,
     bytes16,
+    bool,
     bytes memory,
     SismoConnectProof memory sismoConnectProof
   ) external pure override returns (VerifiedAuth memory, VerifiedClaim memory) {

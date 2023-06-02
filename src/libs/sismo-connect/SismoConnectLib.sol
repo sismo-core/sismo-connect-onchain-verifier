@@ -9,8 +9,9 @@ import {ISismoConnectVerifier, SismoConnectVerifiedResult} from "../../interface
 import {IAddressesProvider} from "../../periphery/interfaces/IAddressesProvider.sol";
 import {SismoConnectHelper} from "../utils/SismoConnectHelper.sol";
 import {IHydraS2Verifier} from "../../verifiers/IHydraS2Verifier.sol";
+import {ISismoConnectLib} from "../../interfaces/ISismoConnectLib.sol";
 
-contract SismoConnect {
+contract SismoConnect is ISismoConnectLib {
   uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;
 
   IAddressesProvider public constant ADDRESSES_PROVIDER =
@@ -25,9 +26,11 @@ contract SismoConnect {
   RequestBuilder internal _requestBuilder;
 
   bytes16 public appId;
+  bool public isImpersonationMode;
 
-  constructor(bytes16 appIdentifier) {
+  constructor(bytes16 appIdentifier, bool _isImpersonationMode) {
     appId = appIdentifier;
+    isImpersonationMode = _isImpersonationMode;
     _sismoConnectVerifier = ISismoConnectVerifier(
       ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1"))
     );
