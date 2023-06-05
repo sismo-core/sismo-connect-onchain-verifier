@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {RequestBuilder, SismoConnectRequest, SismoConnectResponse} from "../utils/RequestBuilder.sol";
+import {RequestBuilder, SismoConnectRequest, SismoConnectResponse, VaultConfig} from "../utils/RequestBuilder.sol";
 import {AuthRequestBuilder, AuthRequest, Auth, VerifiedAuth, AuthType} from "../utils/AuthRequestBuilder.sol";
 import {ClaimRequestBuilder, ClaimRequest, Claim, VerifiedClaim, ClaimType} from "../utils/ClaimRequestBuilder.sol";
 import {SignatureBuilder, SignatureRequest, Signature} from "../utils/SignatureBuilder.sol";
@@ -26,11 +26,11 @@ contract SismoConnect is ISismoConnectLib {
   RequestBuilder internal _requestBuilder;
 
   bytes16 public appId;
-  bool public isImpersonationMode;
+  VaultConfig public vaultConfig;
 
   constructor(bytes16 appIdentifier, bool _isImpersonationMode) {
     appId = appIdentifier;
-    isImpersonationMode = _isImpersonationMode;
+    vaultConfig = VaultConfig({isImpersonationMode: _isImpersonationMode});
     _sismoConnectVerifier = ISismoConnectVerifier(
       ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1"))
     );
@@ -43,6 +43,10 @@ contract SismoConnect is ISismoConnectLib {
     );
     _signatureBuilder = SignatureBuilder(ADDRESSES_PROVIDER.get(string("signatureBuilder-v1")));
     _requestBuilder = RequestBuilder(ADDRESSES_PROVIDER.get(string("requestBuilder-v1")));
+  }
+
+  function isImpersonationMode() public view returns (bool) {
+    return vaultConfig.isImpersonationMode;
   }
 
   function verify(

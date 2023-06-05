@@ -67,7 +67,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       ].verify({
           appId: response.appId,
           namespace: response.namespace,
-          isImpersonationMode: request.isImpersonationMode,
+          isImpersonationMode: request.vaultConfig.isImpersonationMode,
           signedMessage: response.signedMessage,
           sismoConnectProof: response.proofs[i]
         });

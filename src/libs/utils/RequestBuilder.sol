@@ -31,7 +31,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -53,7 +55,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -74,7 +78,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -94,7 +100,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -115,7 +123,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -135,7 +145,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -157,7 +169,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -178,7 +192,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -198,7 +214,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -217,7 +235,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -237,7 +257,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -256,7 +278,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -276,7 +300,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -294,7 +320,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -313,7 +341,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -331,7 +361,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -350,7 +382,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -368,7 +402,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: namespace,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -386,7 +422,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -403,7 +441,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -421,7 +461,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -438,7 +480,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
@@ -456,7 +500,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: signature
@@ -473,7 +519,9 @@ contract RequestBuilder {
       SismoConnectRequest({
         appId: appId,
         namespace: DEFAULT_NAMESPACE,
-        isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode(),
+        vaultConfig: VaultConfig({
+          isImpersonationMode: ISismoConnectLib(msg.sender).isImpersonationMode()
+        }),
         auths: auths,
         claims: claims,
         signature: DEFAULT_SIGNATURE_REQUEST
