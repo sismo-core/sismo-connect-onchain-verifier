@@ -21,8 +21,17 @@ struct DeploymentConfig {
   address sismoConnectVerifier;
 }
 
+// Minimal config is used to create empty config files
+struct MinimalConfig {
+  address owner;
+  address proxyAdmin;
+  address rootsOwner;
+  uint256[2] commitmentMapperEdDSAPubKey;
+}
+
 contract BaseDeploymentConfig is Script {
-  DeploymentConfig public config;
+  MinimalConfig minimalConfig;
+  DeploymentConfig config;
 
   address immutable SISMO_ADDRESSES_PROVIDER = 0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05;
 
@@ -73,190 +82,144 @@ contract BaseDeploymentConfig is Script {
   }
 
   function getChainName(string memory chainName) internal pure returns (DeployChain) {
-    if (_compareString(chainName, "mainnet")) {
+    if (_compareStrings(chainName, "mainnet")) {
       return DeployChain.Mainnet;
-    } else if (_compareString(chainName, "gnosis")) {
+    } else if (_compareStrings(chainName, "gnosis")) {
       return DeployChain.Gnosis;
-    } else if (_compareString(chainName, "polygon")) {
+    } else if (_compareStrings(chainName, "polygon")) {
       return DeployChain.Polygon;
-    } else if (_compareString(chainName, "testnet-goerli")) {
+    } else if (_compareStrings(chainName, "testnet-goerli")) {
       return DeployChain.TestnetGoerli;
-    } else if (_compareString(chainName, "testnet-mumbai")) {
+    } else if (_compareStrings(chainName, "testnet-mumbai")) {
       return DeployChain.TestnetMumbai;
-    } else if (_compareString(chainName, "scroll-testnet-goerli")) {
+    } else if (_compareStrings(chainName, "scroll-testnet-goerli")) {
       return DeployChain.ScrollTestnetGoerli;
-    } else if (_compareString(chainName, "staging-goerli")) {
+    } else if (_compareStrings(chainName, "staging-goerli")) {
       return DeployChain.StagingGoerli;
-    } else if (_compareString(chainName, "staging-mumbai")) {
+    } else if (_compareStrings(chainName, "staging-mumbai")) {
       return DeployChain.StagingMumbai;
-    } else if (_compareString(chainName, "test")) {
+    } else if (_compareStrings(chainName, "test")) {
       return DeployChain.Test;
     }
     revert ChainNameNotFound(chainName);
   }
 
-  function _setConfig(DeployChain chain) internal returns (DeploymentConfig memory) {
+  function _getEmptyDeploymentConfig(DeployChain chain) internal returns (DeploymentConfig memory) {
     if (chain == DeployChain.Mainnet) {
-      config = DeploymentConfig({
+      minimalConfig = MinimalConfig({
         proxyAdmin: MAIN_PROXY_ADMIN,
         owner: MAIN_OWNER,
         rootsOwner: MAIN_MAINNET_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
-        ],
-        availableRootsRegistry: address(0x2E7f4aC6AC90faeC2D870D012A3BCDBcF792B25C),
-        commitmentMapperRegistry: address(0xb4463Dbcd773F7Ca37E63f12dce9852e59dC86C9),
-        sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0x6a38Cb405f4e784F785066742EE4A56dA7191A01),
-        hydraS2Verifier: address(0x2d37f599AAC33eb4F30E106527D6121a56935e53),
-        // external libraries
-        authRequestBuilder: address(0xa1dC586f3713FbbB7200E4A06823dE1af4A62b5a),
-        claimRequestBuilder: address(0xf79e6D5f657b50D8aA1a7A788756add0DD82f7f3),
-        signatureBuilder: address(0x9598d30e2097E5cA7fEEBFbeB700A47cbfc0b620),
-        requestBuilder: address(0x6cCD9b2Fd62e943389902cBC41b1c23Ea1f25336)
+        ]
       });
     } else if (chain == DeployChain.Gnosis) {
-      config = DeploymentConfig({
+      minimalConfig = MinimalConfig({
         proxyAdmin: MAIN_PROXY_ADMIN,
         owner: MAIN_OWNER,
         rootsOwner: MAIN_GNOSIS_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
-        ],
-        availableRootsRegistry: address(0x9B0C9EF48DEc082904054cf9183878E1f4e04D79),
-        commitmentMapperRegistry: address(0x653245dE30B901e507B1b09f619ce5B4b161e583),
-        sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0x271862214Ab70A6d930f9fEE05B1207BeB60AfFA),
-        hydraS2Verifier: address(0x6174F80943061EE1437de6820844858fe4A33AbC),
-        // external libraries
-        authRequestBuilder: address(0xe21A97058ae498881C2b9DC817aB7fE8Aebd4091),
-        claimRequestBuilder: address(0x5BBfA1596BF54B7CAb13CEB02A380dE805270fdA),
-        signatureBuilder: address(0x8420E6d8D31E30877dE9538f74d870F0f14e1Fd4),
-        requestBuilder: address(0x0Fe7275e851154De63d7d634Ac1452E87233C1d5)
+        ]
       });
     } else if (chain == DeployChain.Polygon) {
-      config = DeploymentConfig({
+      minimalConfig = MinimalConfig({
         proxyAdmin: MAIN_PROXY_ADMIN,
         owner: MAIN_OWNER,
         rootsOwner: MAIN_POLYGON_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
-        ],
-        availableRootsRegistry: address(0x818c0f863C6B8E92c316924711bfEb2D903B4A77),
-        commitmentMapperRegistry: address(0x2607c31e104bcF96F7Bc78e8e9BCA356C4D5ebBb),
-        sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0xd74b10d8aC3bD2B5554Bf7747322d0152f6Ac2BC),
-        hydraS2Verifier: address(0x454597294c65b4616b9C5387B33Ccf3D7f2A4BF1),
-        // external libraries
-        authRequestBuilder: address(0xEC3AC3cdCAc8Bf66Feb59DdbA209ACAAE78fdb90),
-        claimRequestBuilder: address(0xaaf233f93A12267C4F549E89554a409929D27917),
-        signatureBuilder: address(0x29de9addE52BdB6F12178DA639B75A9917C2C2aC),
-        requestBuilder: address(0x8b58F4A8F64C64f4BDd6072b1E71538653f5ea7A)
+        ]
       });
     } else if (chain == DeployChain.TestnetGoerli) {
-      config = DeploymentConfig({
+      minimalConfig = MinimalConfig({
         proxyAdmin: TESTNET_PROXY_ADMIN,
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
-        ],
-        availableRootsRegistry: address(0xF3dAc93c85e92cab8f811b3A3cCaCB93140D9304),
-        commitmentMapperRegistry: address(0xa3104F52bF6C8317a49144d864CB04f2A487327B),
-        sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0x4f9FD8C9C1433d5B62BAA20b2A9e562C69E9a8E2),
-        hydraS2Verifier: address(0xc64aa7816b9b308C430a166DD92E20a42F190B33),
-        // external libraries
-        authRequestBuilder: address(0x2B3D017E90A9f6b8752F66dC22cA41B92e9a18BA),
-        claimRequestBuilder: address(0x8aAE62053279F31F40CAcE79A3E7619ac52D0E31),
-        signatureBuilder: address(0x082797A93A25655838B241Ff9e0195Ea26756e72),
-        requestBuilder: address(0x5982C07bEAF5aAEAF9c2881f7A3e545Dfc2EDC88)
+        ]
       });
     } else if (chain == DeployChain.TestnetMumbai) {
-      config = DeploymentConfig({
+      minimalConfig = MinimalConfig({
         proxyAdmin: TESTNET_PROXY_ADMIN,
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_MUMBAI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
-        ],
-        availableRootsRegistry: address(0x5449Cc7A7E4024a7192d70c9Ce60Bb823993fd81),
-        commitmentMapperRegistry: address(0x041B342b3F114F58983A9179D2c90Da01b822BE0),
-        sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0x0e2428989CD77D851b3Cc04ecbcAdAb834657290),
-        hydraS2Verifier: address(0x817ba96B4bB47733b1F827239B5C549267340398),
-        // external libraries
-        authRequestBuilder: address(0x72D73a403D25BA22E020729e1CB5153A15c2Ab86),
-        claimRequestBuilder: address(0x7484fE8b8A9cF5485D6499d909fFf706d923a4aA),
-        signatureBuilder: address(0x5c7166025Eb98e4a479844e57148e2bd8DaC122f),
-        requestBuilder: address(0xdE8e8317408b7e935B4931f624354cd8B45AE01E)
+        ]
       });
     } else if (chain == DeployChain.ScrollTestnetGoerli) {
-      config = DeploymentConfig({
+      minimalConfig = MinimalConfig({
         proxyAdmin: TESTNET_PROXY_ADMIN,
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_SCROLL_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
-        ],
-        availableRootsRegistry: address(0),
-        commitmentMapperRegistry: address(0),
-        sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-        sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0),
-        // external libraries
-        authRequestBuilder: address(0),
-        claimRequestBuilder: address(0),
-        signatureBuilder: address(0),
-        requestBuilder: address(0)
+        ]
       });
     } else if (chain == DeployChain.StagingGoerli) {
-      config = DeploymentConfig({
+      minimalConfig = MinimalConfig({
         proxyAdmin: STAGING_PROXY_ADMIN,
         owner: STAGING_OWNER,
         rootsOwner: STAGING_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
-        ],
-        availableRootsRegistry: address(0xEF170C37DFE6022A9Ed10b8C81d199704ED38a11),
-        commitmentMapperRegistry: address(0x5840b39264b9fc7B294Ef4D8De1c8d25b136201B),
-        sismoAddressesProvider: address(0),
-        sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0),
-        // external libraries
-        authRequestBuilder: address(0),
-        claimRequestBuilder: address(0),
-        signatureBuilder: address(0),
-        requestBuilder: address(0)
+        ]
       });
     } else if (chain == DeployChain.StagingMumbai) {
-      config = DeploymentConfig({
+      minimalConfig = MinimalConfig({
         proxyAdmin: STAGING_PROXY_ADMIN,
         owner: STAGING_OWNER,
         rootsOwner: STAGING_MUMBAI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
-        ],
-        availableRootsRegistry: address(0x787A74BE3AfD2bE012bD7E7c4CF2c6bDa2e70c83),
-        commitmentMapperRegistry: address(0x09Dca2AC5BB0b9E23beF5723D0203Bc9B1033D1f),
-        sismoAddressesProvider: address(0),
-        sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0),
-        // external libraries
-        authRequestBuilder: address(0),
-        claimRequestBuilder: address(0),
-        signatureBuilder: address(0),
-        requestBuilder: address(0)
+        ]
       });
     } else if (chain == DeployChain.Test) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: address(1),
+        owner: address(2),
+        rootsOwner: address(3),
+        commitmentMapperEdDSAPubKey: [uint256(10), uint256(11)]
+      });
+    } else {
+      revert ChainNotConfigured(chain);
+    }
+
+    config = DeploymentConfig({
+      proxyAdmin: minimalConfig.proxyAdmin,
+      owner: minimalConfig.owner,
+      rootsOwner: minimalConfig.rootsOwner,
+      commitmentMapperEdDSAPubKey: minimalConfig.commitmentMapperEdDSAPubKey,
+      availableRootsRegistry: address(0),
+      commitmentMapperRegistry: address(0),
+      sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
+      sismoConnectVerifier: address(0),
+      hydraS2Verifier: address(0),
+      // external libraries
+      authRequestBuilder: address(0),
+      claimRequestBuilder: address(0),
+      signatureBuilder: address(0),
+      requestBuilder: address(0)
+    });
+
+    return config;
+  }
+
+  function _readDeploymentConfig(
+    string memory chainName
+  ) internal returns (DeploymentConfig memory) {
+    if (_compareStrings(chainName, "test")) {
       config = DeploymentConfig({
         proxyAdmin: address(1),
         owner: address(2),
@@ -273,29 +236,99 @@ contract BaseDeploymentConfig is Script {
         signatureBuilder: address(0),
         requestBuilder: address(0)
       });
-    } else {
-      revert ChainNotConfigured(chain);
+      return config;
     }
-    return config;
-  }
 
-  function _readDeploymentConfig(
-    string memory chainName
-  ) internal view returns (DeploymentConfig memory) {
+    // read deployment config from file if the chain is different from `test`
     string memory filePath = string.concat(
       vm.projectRoot(),
       "/script/deployments/",
       chainName,
       ".json"
     );
-    string memory json = vm.readFile(filePath);
-    // make sure that the DeploymentConfig struct has its field in alphabetical order to avoid errors
-    DeploymentConfig memory deploymentConfig = abi.decode(vm.parseJson(json), (DeploymentConfig));
 
-    return deploymentConfig;
+    string memory json = vm.readFile(filePath);
+
+    // if the config is not created, create a new empty one
+    if (_compareStrings(json, "")) {
+      _saveDeploymentConfig(chainName, _getEmptyDeploymentConfig(getChainName(chainName)));
+      json = vm.readFile(filePath);
+    }
+
+    // make sure that the DeploymentConfig struct has its field in alphabetical order to avoid errors
+    config = abi.decode(vm.parseJson(json), (DeploymentConfig));
+
+    return config;
   }
 
-  function _compareString(string memory a, string memory b) internal pure returns (bool) {
+  function _saveDeploymentConfig(
+    string memory chainName,
+    DeploymentConfig memory deploymentConfig
+  ) internal {
+    string memory filePath = string.concat(
+      vm.projectRoot(),
+      "/script/deployments/",
+      chainName,
+      ".json"
+    );
+
+    // serialize deployment config by creating an object with key `chainName`
+    vm.serializeAddress(
+      chainName,
+      "availableRootsRegistry",
+      address(deploymentConfig.availableRootsRegistry)
+    );
+    vm.serializeAddress(
+      chainName,
+      "commitmentMapperRegistry",
+      address(deploymentConfig.commitmentMapperRegistry)
+    );
+    vm.serializeAddress(chainName, "hydraS2Verifier", address(deploymentConfig.hydraS2Verifier));
+    vm.serializeAddress(
+      chainName,
+      "sismoConnectVerifier",
+      address(deploymentConfig.sismoConnectVerifier)
+    );
+    vm.serializeAddress(
+      chainName,
+      "authRequestBuilder",
+      address(deploymentConfig.authRequestBuilder)
+    );
+    vm.serializeAddress(
+      chainName,
+      "claimRequestBuilder",
+      address(deploymentConfig.claimRequestBuilder)
+    );
+    vm.serializeAddress(chainName, "signatureBuilder", address(deploymentConfig.signatureBuilder));
+    vm.serializeAddress(chainName, "requestBuilder", address(deploymentConfig.requestBuilder));
+    vm.serializeAddress(chainName, "proxyAdmin", address(deploymentConfig.proxyAdmin));
+    vm.serializeAddress(chainName, "owner", address(deploymentConfig.owner));
+    vm.serializeAddress(chainName, "rootsOwner", address(deploymentConfig.rootsOwner));
+
+    // serialize commitment mapper pub key by creating a new json object with key "commitmentMapperEdDSAPubKey
+    vm.serializeUint(
+      "commitmentMapperEdDSAPubKey",
+      "pubKeyX",
+      deploymentConfig.commitmentMapperEdDSAPubKey[0]
+    );
+    string memory commitmentMapperPubKeyConfig = vm.serializeUint(
+      "commitmentMapperEdDSAPubKey",
+      "pubKeyY",
+      deploymentConfig.commitmentMapperEdDSAPubKey[1]
+    );
+
+    // serialize this json object as a string to be able to save it in the main json object with key `chainName`
+    vm.serializeString(chainName, "commitmentMapperEdDSAPubKey", commitmentMapperPubKeyConfig);
+    string memory finalJson = vm.serializeAddress(
+      chainName,
+      "sismoAddressesProvider",
+      SISMO_ADDRESSES_PROVIDER
+    );
+
+    vm.writeJson(finalJson, filePath);
+  }
+
+  function _compareStrings(string memory a, string memory b) internal pure returns (bool) {
     return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
   }
 

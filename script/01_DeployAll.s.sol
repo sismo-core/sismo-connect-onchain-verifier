@@ -30,6 +30,8 @@ contract DeployAll is Script, BaseDeploymentConfig {
   SignatureBuilder signatureBuilder;
   RequestBuilder requestBuilder;
 
+  string private _chainName;
+
   function runFor(
     string memory chainName
   ) public returns (ScriptTypes.DeployAllContracts memory contracts) {
@@ -38,12 +40,13 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
     vm.startBroadcast();
 
-    _setConfig(getChainName(chainName));
+    _chainName = chainName;
+    DeploymentConfig memory deploymentConfig = _readDeploymentConfig(chainName);
 
-    availableRootsRegistry = _deployAvailableRootsRegistry(config.rootsOwner);
+    availableRootsRegistry = _deployAvailableRootsRegistry(deploymentConfig.rootsOwner);
     commitmentMapperRegistry = _deployCommitmentMapperRegistry(
-      config.owner,
-      config.commitmentMapperEdDSAPubKey
+      deploymentConfig.owner,
+      deploymentConfig.commitmentMapperEdDSAPubKey
     );
     hydraS2Verifier = _deployHydraS2Verifier(commitmentMapperRegistry, availableRootsRegistry);
     sismoConnectVerifier = _deploySismoConnectVerifier(msg.sender);
@@ -52,7 +55,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
       hydraS2Verifier.HYDRA_S2_VERSION(),
       address(hydraS2Verifier)
     );
-    sismoConnectVerifier.transferOwnership(config.owner);
+    sismoConnectVerifier.transferOwnership(deploymentConfig.owner);
 
     contracts.availableRootsRegistry = availableRootsRegistry;
     contracts.commitmentMapperRegistry = commitmentMapperRegistry;
@@ -71,13 +74,29 @@ contract DeployAll is Script, BaseDeploymentConfig {
     contracts.signatureBuilder = signatureBuilder;
     contracts.requestBuilder = requestBuilder;
 
-    _saveDeploymentConfig(chainName);
+    DeploymentConfig memory newDeploymentConfig = DeploymentConfig({
+      proxyAdmin: deploymentConfig.proxyAdmin,
+      owner: deploymentConfig.owner,
+      rootsOwner: deploymentConfig.rootsOwner,
+      commitmentMapperEdDSAPubKey: deploymentConfig.commitmentMapperEdDSAPubKey,
+      sismoAddressesProvider: address(deploymentConfig.sismoAddressesProvider),
+      availableRootsRegistry: address(availableRootsRegistry),
+      commitmentMapperRegistry: address(commitmentMapperRegistry),
+      hydraS2Verifier: address(hydraS2Verifier),
+      sismoConnectVerifier: address(sismoConnectVerifier),
+      authRequestBuilder: address(authRequestBuilder),
+      claimRequestBuilder: address(claimRequestBuilder),
+      signatureBuilder: address(signatureBuilder),
+      requestBuilder: address(requestBuilder)
+    });
+
+    _saveDeploymentConfig(chainName, newDeploymentConfig);
 
     vm.stopBroadcast();
   }
 
   function _deployAvailableRootsRegistry(address owner) private returns (AvailableRootsRegistry) {
-    if (config.availableRootsRegistry != address(0)) {
+    if (_readDeploymentConfig(_chainName).availableRootsRegistry != address(0)) {
       console.log("Using existing availableRootsRegistry:", config.availableRootsRegistry);
       return AvailableRootsRegistry(config.availableRootsRegistry);
     }
@@ -97,7 +116,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
     address owner,
     uint256[2] memory commitmentMapperEdDSAPubKey
   ) private returns (CommitmentMapperRegistry) {
-    if (config.commitmentMapperRegistry != address(0)) {
+    if (_readDeploymentConfig(_chainName).commitmentMapperRegistry != address(0)) {
       console.log("Using existing commitmentMapperRegistry:", config.commitmentMapperRegistry);
       return CommitmentMapperRegistry(config.commitmentMapperRegistry);
     }
@@ -124,7 +143,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
     CommitmentMapperRegistry _commitmentMapperRegistry,
     AvailableRootsRegistry _availableRootsRegistry
   ) private returns (HydraS2Verifier) {
-    if (config.hydraS2Verifier != address(0)) {
+    if (_readDeploymentConfig(_chainName).hydraS2Verifier != address(0)) {
       console.log("Using existing hydraS2Verifier:", config.hydraS2Verifier);
       return HydraS2Verifier(config.hydraS2Verifier);
     }
@@ -146,7 +165,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deploySismoConnectVerifier(address owner) private returns (SismoConnectVerifier) {
-    if (config.sismoConnectVerifier != address(0)) {
+    if (_readDeploymentConfig(_chainName).sismoConnectVerifier != address(0)) {
       console.log("Using existing sismoConnectVerifier:", config.sismoConnectVerifier);
       return SismoConnectVerifier(config.sismoConnectVerifier);
     }
@@ -165,7 +184,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
   // External libraries
 
   function _deployAuthRequestBuilder() private returns (AuthRequestBuilder) {
-    if (config.authRequestBuilder != address(0)) {
+    if (_readDeploymentConfig(_chainName).authRequestBuilder != address(0)) {
       console.log("Using existing authrequestBuilder:", config.authRequestBuilder);
       return AuthRequestBuilder(config.authRequestBuilder);
     }
@@ -175,7 +194,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deployClaimRequestBuilder() private returns (ClaimRequestBuilder) {
-    if (config.claimRequestBuilder != address(0)) {
+    if (_readDeploymentConfig(_chainName).claimRequestBuilder != address(0)) {
       console.log("Using existing claimRequestBuilder:", config.claimRequestBuilder);
       return ClaimRequestBuilder(config.claimRequestBuilder);
     }
@@ -185,7 +204,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deploySignatureBuilder() private returns (SignatureBuilder) {
-    if (config.signatureBuilder != address(0)) {
+    if (_readDeploymentConfig(_chainName).signatureBuilder != address(0)) {
       console.log("Using existing signatureBuilder:", config.signatureBuilder);
       return SignatureBuilder(config.signatureBuilder);
     }
@@ -195,57 +214,13 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deployRequestBuilder() private returns (RequestBuilder) {
-    if (config.requestBuilder != address(0)) {
+    if (_readDeploymentConfig(_chainName).requestBuilder != address(0)) {
       console.log("Using existing requestBuilder:", config.requestBuilder);
       return RequestBuilder(config.requestBuilder);
     }
     requestBuilder = new RequestBuilder();
     console.log("requestBuilder Deployed:", address(requestBuilder));
     return requestBuilder;
-  }
-
-  function _saveDeploymentConfig(string memory chainName) internal {
-    string memory filePath = string.concat(
-      vm.projectRoot(),
-      "/script/deployments/",
-      chainName,
-      ".json"
-    );
-
-    // serialize deployment config by creating an object with key `chainName`
-    vm.serializeAddress(chainName, "availableRootsRegistry", address(availableRootsRegistry));
-    vm.serializeAddress(chainName, "commitmentMapperRegistry", address(commitmentMapperRegistry));
-    vm.serializeAddress(chainName, "hydraS2Verifier", address(hydraS2Verifier));
-    vm.serializeAddress(chainName, "sismoConnectVerifier", address(sismoConnectVerifier));
-    vm.serializeAddress(chainName, "authRequestBuilder", address(authRequestBuilder));
-    vm.serializeAddress(chainName, "claimRequestBuilder", address(claimRequestBuilder));
-    vm.serializeAddress(chainName, "signatureBuilder", address(signatureBuilder));
-    vm.serializeAddress(chainName, "requestBuilder", address(requestBuilder));
-    vm.serializeAddress(chainName, "proxyAdmin", address(config.proxyAdmin));
-    vm.serializeAddress(chainName, "owner", address(config.owner));
-    vm.serializeAddress(chainName, "rootsOwner", address(config.rootsOwner));
-
-    // serialize commitment mapper pub key by creating a new json object with key "commitmentMapperEdDSAPubKey
-    vm.serializeUint(
-      "commitmentMapperEdDSAPubKey",
-      "pubKeyX",
-      config.commitmentMapperEdDSAPubKey[0]
-    );
-    string memory commitmentMapperPubKeyConfig = vm.serializeUint(
-      "commitmentMapperEdDSAPubKey",
-      "pubKeyY",
-      config.commitmentMapperEdDSAPubKey[1]
-    );
-
-    // serialize this json object as a string to be able to save it in the main json object with key `chainName`
-    vm.serializeString(chainName, "commitmentMapperEdDSAPubKey", commitmentMapperPubKeyConfig);
-    string memory finalJson = vm.serializeAddress(
-      chainName,
-      "sismoAddressesProvider",
-      SISMO_ADDRESSES_PROVIDER
-    );
-
-    vm.writeJson(finalJson, filePath);
   }
 
   function run() public returns (ScriptTypes.DeployAllContracts memory contracts) {
