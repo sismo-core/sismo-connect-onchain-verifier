@@ -34,6 +34,7 @@ contract BaseDeploymentConfig is Script {
   DeploymentConfig config;
 
   address immutable SISMO_ADDRESSES_PROVIDER = 0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05;
+  address immutable ZERO_ADDRESS = 0x0000000000000000000000000000000000000000;
 
   // Main Env
   address immutable MAIN_PROXY_ADMIN = 0x2110475dfbB8d331b300178A867372991ff35fA3;
@@ -201,16 +202,16 @@ contract BaseDeploymentConfig is Script {
       owner: minimalConfig.owner,
       rootsOwner: minimalConfig.rootsOwner,
       commitmentMapperEdDSAPubKey: minimalConfig.commitmentMapperEdDSAPubKey,
-      availableRootsRegistry: address(0),
-      commitmentMapperRegistry: address(0),
+      availableRootsRegistry: ZERO_ADDRESS,
+      commitmentMapperRegistry: ZERO_ADDRESS,
       sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
-      sismoConnectVerifier: address(0),
-      hydraS2Verifier: address(0),
+      sismoConnectVerifier: ZERO_ADDRESS,
+      hydraS2Verifier: ZERO_ADDRESS,
       // external libraries
-      authRequestBuilder: address(0),
-      claimRequestBuilder: address(0),
-      signatureBuilder: address(0),
-      requestBuilder: address(0)
+      authRequestBuilder: ZERO_ADDRESS,
+      claimRequestBuilder: ZERO_ADDRESS,
+      signatureBuilder: ZERO_ADDRESS,
+      requestBuilder: ZERO_ADDRESS
     });
 
     return config;
@@ -225,16 +226,16 @@ contract BaseDeploymentConfig is Script {
         owner: address(2),
         rootsOwner: address(3),
         commitmentMapperEdDSAPubKey: [uint256(10), uint256(11)],
-        availableRootsRegistry: address(0),
-        commitmentMapperRegistry: address(0),
-        sismoAddressesProvider: address(0),
-        sismoConnectVerifier: address(0),
-        hydraS2Verifier: address(0),
+        availableRootsRegistry: ZERO_ADDRESS,
+        commitmentMapperRegistry: ZERO_ADDRESS,
+        sismoAddressesProvider: ZERO_ADDRESS,
+        sismoConnectVerifier: ZERO_ADDRESS,
+        hydraS2Verifier: ZERO_ADDRESS,
         // external libraries
-        authRequestBuilder: address(0),
-        claimRequestBuilder: address(0),
-        signatureBuilder: address(0),
-        requestBuilder: address(0)
+        authRequestBuilder: ZERO_ADDRESS,
+        claimRequestBuilder: ZERO_ADDRESS,
+        signatureBuilder: ZERO_ADDRESS,
+        requestBuilder: ZERO_ADDRESS
       });
       return config;
     }
