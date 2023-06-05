@@ -33,6 +33,8 @@ contract BaseDeploymentConfig is Script {
   MinimalConfig minimalConfig;
   DeploymentConfig config;
 
+  string public _chainName;
+
   address immutable SISMO_ADDRESSES_PROVIDER = 0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05;
   address immutable ZERO_ADDRESS = 0x0000000000000000000000000000000000000000;
 
@@ -217,62 +219,62 @@ contract BaseDeploymentConfig is Script {
     return config;
   }
 
-  function _readDeploymentConfig(
-    string memory chainName
-  ) internal returns (DeploymentConfig memory) {
-    if (_compareStrings(chainName, "test")) {
-      config = DeploymentConfig({
-        proxyAdmin: address(1),
-        owner: address(2),
-        rootsOwner: address(3),
-        commitmentMapperEdDSAPubKey: [uint256(10), uint256(11)],
-        availableRootsRegistry: ZERO_ADDRESS,
-        commitmentMapperRegistry: ZERO_ADDRESS,
-        sismoAddressesProvider: ZERO_ADDRESS,
-        sismoConnectVerifier: ZERO_ADDRESS,
-        hydraS2Verifier: ZERO_ADDRESS,
-        // external libraries
-        authRequestBuilder: ZERO_ADDRESS,
-        claimRequestBuilder: ZERO_ADDRESS,
-        signatureBuilder: ZERO_ADDRESS,
-        requestBuilder: ZERO_ADDRESS
-      });
-      return config;
-    }
-
+  function _setDeploymentConfig(string memory chainName) internal {
+    _chainName = chainName;
     // read deployment config from file if the chain is different from `test`
-    string memory filePath = string.concat(
-      vm.projectRoot(),
-      "/script/deployments/",
-      chainName,
-      ".json"
-    );
+    string memory filePath = string.concat(_deploymentConfigFilePath());
 
-    string memory json = vm.readFile(filePath);
+    string memory json;
+    try vm.readFile(filePath) returns (string memory _json) {
+      json = _json;
+    } catch {
+      console.log(
+        string.concat("Deployment config file not found, creating a new one at ", filePath, ".")
+      );
+      // create a new empty file
+      vm.writeFile(filePath, "");
+      json = "";
+    }
 
     // if the config is not created, create a new empty one
-    if (_compareStrings(json, "")) {
+    if (_compareStrings(json, "") || _compareStrings(chainName, "test")) {
       _saveDeploymentConfig(chainName, _getEmptyDeploymentConfig(getChainName(chainName)));
-      json = vm.readFile(filePath);
     }
+  }
 
-    // make sure that the DeploymentConfig struct has its field in alphabetical order to avoid errors
-    config = abi.decode(vm.parseJson(json), (DeploymentConfig));
+  function _readAddressFromDeploymentConfigAtKey(
+    string memory key
+  ) internal view returns (address) {
+    bytes memory encodedAddress = vm.parseJson(vm.readFile(_deploymentConfigFilePath()), key);
+    return
+      abi.decode(encodedAddress, (address)) == address(0x20)
+        ? address(0)
+        : abi.decode(encodedAddress, (address));
+  }
 
-    return config;
+  function _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig()
+    internal
+    view
+    returns (uint256[2] memory pubKey)
+  {
+    try
+      vm.parseJson(vm.readFile(_deploymentConfigFilePath()), ".commitmentMapperEdDSAPubKey")
+    returns (bytes memory value) {
+      return abi.decode(value, (uint256[2]));
+    } catch {
+      require(
+        false,
+        string.concat(
+          "Error reading commitmentMapperEdDSAPubKey from deployment config, you need to specify a public key."
+        )
+      );
+    }
   }
 
   function _saveDeploymentConfig(
     string memory chainName,
     DeploymentConfig memory deploymentConfig
   ) internal {
-    string memory filePath = string.concat(
-      vm.projectRoot(),
-      "/script/deployments/",
-      chainName,
-      ".json"
-    );
-
     // serialize deployment config by creating an object with key `chainName`
     vm.serializeAddress(
       chainName,
@@ -326,7 +328,11 @@ contract BaseDeploymentConfig is Script {
       SISMO_ADDRESSES_PROVIDER
     );
 
-    vm.writeJson(finalJson, filePath);
+    vm.writeJson(finalJson, _deploymentConfigFilePath());
+  }
+
+  function _deploymentConfigFilePath() internal view returns (string memory) {
+    return string.concat(vm.projectRoot(), "/script/deployments/", _chainName, ".json");
   }
 
   function _compareStrings(string memory a, string memory b) internal pure returns (bool) {

@@ -10,30 +10,48 @@ import {BaseDeploymentConfig, DeploymentConfig} from "script/BaseConfig.sol";
 contract SetAddressesProvider is Script, BaseDeploymentConfig {
   function run() external {
     string memory chainName = vm.envString("CHAIN_NAME");
-    DeploymentConfig memory deploymentConfig = _readDeploymentConfig(chainName);
+    _setDeploymentConfig(chainName);
 
     console.log("Run for CHAIN_NAME:", chainName);
     console.log("Sender:", msg.sender);
 
     vm.startBroadcast();
 
-    _setAddress(deploymentConfig.sismoConnectVerifier, string("sismoConnectVerifier-v1"));
-    _setAddress(deploymentConfig.hydraS2Verifier, string("hydraS2Verifier"));
     _setAddress(
-      deploymentConfig.availableRootsRegistry,
+      _readAddressFromDeploymentConfigAtKey(".sismoConnectVerifier"),
+      string("sismoConnectVerifier-v1")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".hydraS2Verifier"),
+      string("hydraS2Verifier")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".availableRootsRegistry"),
       string("sismoConnectAvailableRootsRegistry")
     );
     _setAddress(
-      deploymentConfig.commitmentMapperRegistry,
+      _readAddressFromDeploymentConfigAtKey(".commitmentMapperRegistry"),
       string("sismoConnectCommitmentMapperRegistry")
     );
 
     // external libraries
 
-    _setAddress(deploymentConfig.authRequestBuilder, string("authRequestBuilder-v1"));
-    _setAddress(deploymentConfig.claimRequestBuilder, string("claimRequestBuilder-v1"));
-    _setAddress(deploymentConfig.signatureBuilder, string("signatureBuilder-v1"));
-    _setAddress(deploymentConfig.requestBuilder, string("requestBuilder-v1"));
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".authRequestBuilder"),
+      string("authRequestBuilder-v1")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".claimRequestBuilder"),
+      string("claimRequestBuilder-v1")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".signatureBuilder"),
+      string("signatureBuilder-v1")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".requestBuilder"),
+      string("requestBuilder-v1")
+    );
 
     vm.stopBroadcast();
   }
