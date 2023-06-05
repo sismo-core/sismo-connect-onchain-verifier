@@ -71,6 +71,8 @@ contract DeployAll is Script, BaseDeploymentConfig {
     contracts.signatureBuilder = signatureBuilder;
     contracts.requestBuilder = requestBuilder;
 
+    _saveDeploymentConfig(chainName);
+
     vm.stopBroadcast();
   }
 
@@ -200,6 +202,50 @@ contract DeployAll is Script, BaseDeploymentConfig {
     requestBuilder = new RequestBuilder();
     console.log("requestBuilder Deployed:", address(requestBuilder));
     return requestBuilder;
+  }
+
+  function _saveDeploymentConfig(string memory chainName) internal {
+    string memory filePath = string.concat(
+      vm.projectRoot(),
+      "/script/deployments/",
+      chainName,
+      ".json"
+    );
+
+    // serialize deployment config by creating an object with key `chainName`
+    vm.serializeAddress(chainName, "availableRootsRegistry", address(availableRootsRegistry));
+    vm.serializeAddress(chainName, "commitmentMapperRegistry", address(commitmentMapperRegistry));
+    vm.serializeAddress(chainName, "hydraS2Verifier", address(hydraS2Verifier));
+    vm.serializeAddress(chainName, "sismoConnectVerifier", address(sismoConnectVerifier));
+    vm.serializeAddress(chainName, "authRequestBuilder", address(authRequestBuilder));
+    vm.serializeAddress(chainName, "claimRequestBuilder", address(claimRequestBuilder));
+    vm.serializeAddress(chainName, "signatureBuilder", address(signatureBuilder));
+    vm.serializeAddress(chainName, "requestBuilder", address(requestBuilder));
+    vm.serializeAddress(chainName, "proxyAdmin", address(config.proxyAdmin));
+    vm.serializeAddress(chainName, "owner", address(config.owner));
+    vm.serializeAddress(chainName, "rootsOwner", address(config.rootsOwner));
+
+    // serialize commitment mapper pub key by creating a new json object with key "commitmentMapperEdDSAPubKey
+    vm.serializeUint(
+      "commitmentMapperEdDSAPubKey",
+      "pubKeyX",
+      config.commitmentMapperEdDSAPubKey[0]
+    );
+    string memory commitmentMapperPubKeyConfig = vm.serializeUint(
+      "commitmentMapperEdDSAPubKey",
+      "pubKeyY",
+      config.commitmentMapperEdDSAPubKey[1]
+    );
+
+    // serialize this json object as a string to be able to save it in the main json object with key `chainName`
+    vm.serializeString(chainName, "commitmentMapperEdDSAPubKey", commitmentMapperPubKeyConfig);
+    string memory finalJson = vm.serializeAddress(
+      chainName,
+      "sismoAddressesProvider",
+      SISMO_ADDRESSES_PROVIDER
+    );
+
+    vm.writeJson(finalJson, filePath);
   }
 
   function run() public returns (ScriptTypes.DeployAllContracts memory contracts) {

@@ -2,22 +2,23 @@
 pragma solidity ^0.8.17;
 
 import {Script} from "forge-std/Script.sol";
+import "forge-std/console.sol";
 
+// struct fields are sorted by alphabetical order to be able to parse the config from the deployment files
 struct DeploymentConfig {
-  address proxyAdmin;
-  address owner;
-  address rootsOwner;
-  uint256[2] commitmentMapperEdDSAPubKey;
+  address authRequestBuilder;
   address availableRootsRegistry;
+  address claimRequestBuilder;
+  uint256[2] commitmentMapperEdDSAPubKey;
   address commitmentMapperRegistry;
+  address hydraS2Verifier;
+  address owner;
+  address proxyAdmin;
+  address requestBuilder;
+  address rootsOwner;
+  address signatureBuilder;
   address sismoAddressesProvider;
   address sismoConnectVerifier;
-  address hydraS2Verifier;
-  // external libraries
-  address authRequestBuilder;
-  address claimRequestBuilder;
-  address signatureBuilder;
-  address requestBuilder;
 }
 
 contract BaseDeploymentConfig is Script {
@@ -276,6 +277,22 @@ contract BaseDeploymentConfig is Script {
       revert ChainNotConfigured(chain);
     }
     return config;
+  }
+
+  function _readDeploymentConfig(
+    string memory chainName
+  ) internal view returns (DeploymentConfig memory) {
+    string memory filePath = string.concat(
+      vm.projectRoot(),
+      "/script/deployments/",
+      chainName,
+      ".json"
+    );
+    string memory json = vm.readFile(filePath);
+    // make sure that the DeploymentConfig struct has its field in alphabetical order to avoid errors
+    DeploymentConfig memory deploymentConfig = abi.decode(vm.parseJson(json), (DeploymentConfig));
+
+    return deploymentConfig;
   }
 
   function _compareString(string memory a, string memory b) internal pure returns (bool) {
