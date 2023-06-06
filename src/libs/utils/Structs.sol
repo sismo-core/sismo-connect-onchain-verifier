@@ -9,6 +9,15 @@ struct SismoConnectRequest {
   SignatureRequest signature;
 }
 
+struct SismoConnectConfig {
+  bytes16 appId;
+  VaultConfig vault;
+}
+
+struct VaultConfig {
+  bool isImpersonationMode;
+}
+
 struct AuthRequest {
   AuthType authType;
   uint256 userId; // default: 0
@@ -118,8 +127,4 @@ struct VerifiedClaim {
   bytes extraData;
   uint256 proofId;
   bytes proofData;
-}
-
-struct VaultConfig {
-  bool isImpersonationMode;
 }

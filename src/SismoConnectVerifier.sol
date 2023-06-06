@@ -48,7 +48,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   function verify(
     SismoConnectResponse memory response,
     SismoConnectRequest memory request,
-    VaultConfig memory vaultConfig
+    SismoConnectConfig memory config
   ) external view override returns (SismoConnectVerifiedResult memory) {
     _checkResponseMatchesWithRequest(response, request);
 
@@ -77,7 +77,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       ].verify({
           appId: response.appId,
           namespace: response.namespace,
-          isImpersonationMode: vaultConfig.isImpersonationMode,
+          isImpersonationMode: config.vault.isImpersonationMode,
           signedMessage: response.signedMessage,
           sismoConnectProof: response.proofs[i]
         });

@@ -57,7 +57,10 @@ contract SismoConnectE2E is HydraS2BaseTest {
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
 
     zkdrop = new ZKDropERC721({
-      appId: APP_ID_ZK_DROP,
+      config: SismoConnectConfig({
+        appId: APP_ID_ZK_DROP,
+        vault: VaultConfig({isImpersonationMode: false})
+      }),
       groupId: ZK,
       name: "ZKDrop test",
       symbol: "test",

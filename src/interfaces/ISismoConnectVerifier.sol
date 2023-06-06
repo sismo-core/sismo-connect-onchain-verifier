@@ -14,7 +14,7 @@ interface ISismoConnectVerifier {
   function verify(
     SismoConnectResponse memory response,
     SismoConnectRequest memory request,
-    VaultConfig memory vaultConfig
+    SismoConnectConfig memory config
   ) external returns (SismoConnectVerifiedResult memory);
 
   function SISMO_CONNECT_VERSION() external view returns (bytes32);

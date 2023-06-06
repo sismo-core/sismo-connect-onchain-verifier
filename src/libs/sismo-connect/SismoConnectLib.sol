@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {RequestBuilder, SismoConnectRequest, SismoConnectResponse, VaultConfig} from "../utils/RequestBuilder.sol";
+import {SismoConnectConfigBuilder} from "../utils/SismoConnectConfigBuilder.sol";
+import {RequestBuilder, SismoConnectRequest, SismoConnectResponse, SismoConnectConfig} from "../utils/RequestBuilder.sol";
 import {AuthRequestBuilder, AuthRequest, Auth, VerifiedAuth, AuthType} from "../utils/AuthRequestBuilder.sol";
 import {ClaimRequestBuilder, ClaimRequest, Claim, VerifiedClaim, ClaimType} from "../utils/ClaimRequestBuilder.sol";
 import {SignatureBuilder, SignatureRequest, Signature} from "../utils/SignatureBuilder.sol";
@@ -24,12 +25,10 @@ contract SismoConnect {
   SignatureBuilder internal _signatureBuilder;
   RequestBuilder internal _requestBuilder;
 
-  bytes16 public appId;
-  VaultConfig public vaultConfig;
+  SismoConnectConfig public config;
 
-  constructor(bytes16 appIdentifier, bool _isImpersonationMode) {
-    appId = appIdentifier;
-    vaultConfig = VaultConfig({isImpersonationMode: _isImpersonationMode});
+  constructor(SismoConnectConfig memory _config) {
+    config = _config;
     _sismoConnectVerifier = ISismoConnectVerifier(
       ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1"))
     );
@@ -44,10 +43,6 @@ contract SismoConnect {
     _requestBuilder = RequestBuilder(ADDRESSES_PROVIDER.get(string("requestBuilder-v1")));
   }
 
-  function isImpersonationMode() public view returns (bool) {
-    return vaultConfig.isImpersonationMode;
-  }
-
   function verify(
     bytes memory responseBytes,
     AuthRequest memory auth,
@@ -57,7 +52,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auth, claim, signature, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -68,7 +63,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auth, claim, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -79,7 +74,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auth, signature, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -90,7 +85,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claim, signature, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -100,7 +95,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auth, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -110,7 +105,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claim, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -121,7 +116,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auth, claim, signature);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -131,7 +126,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auth, claim);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -141,7 +136,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auth, signature);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -151,7 +146,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claim, signature);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -160,7 +155,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auth);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -169,7 +164,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claim);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -177,7 +172,7 @@ contract SismoConnect {
     SismoConnectRequest memory request
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -189,7 +184,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auths, claims, signature, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -200,7 +195,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auths, claims, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -211,7 +206,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auths, signature, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -222,7 +217,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claims, signature, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -232,7 +227,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auths, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -242,7 +237,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claims, namespace);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -253,7 +248,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auths, claims, signature);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -263,7 +258,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auths, claims);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -273,7 +268,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auths, signature);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -283,7 +278,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claims, signature);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -292,7 +287,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(auths);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function verify(
@@ -301,7 +296,7 @@ contract SismoConnect {
   ) internal returns (SismoConnectVerifiedResult memory) {
     SismoConnectResponse memory response = abi.decode(responseBytes, (SismoConnectResponse));
     SismoConnectRequest memory request = buildRequest(claims);
-    return _sismoConnectVerifier.verify(response, request, vaultConfig);
+    return _sismoConnectVerifier.verify(response, request, config);
   }
 
   function buildClaim(
@@ -656,40 +651,40 @@ contract SismoConnect {
     ClaimRequest memory claim,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, claim, signature, appId);
+    return _requestBuilder.build(auth, claim, signature, config.appId);
   }
 
   function buildRequest(
     AuthRequest memory auth,
     ClaimRequest memory claim
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, claim, _GET_EMPTY_SIGNATURE_REQUEST(), appId);
+    return _requestBuilder.build(auth, claim, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
   }
 
   function buildRequest(
     ClaimRequest memory claim,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claim, signature, appId);
+    return _requestBuilder.build(claim, signature, config.appId);
   }
 
   function buildRequest(
     AuthRequest memory auth,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, signature, appId);
+    return _requestBuilder.build(auth, signature, config.appId);
   }
 
   function buildRequest(
     ClaimRequest memory claim
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claim, _GET_EMPTY_SIGNATURE_REQUEST(), appId);
+    return _requestBuilder.build(claim, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
   }
 
   function buildRequest(
     AuthRequest memory auth
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, _GET_EMPTY_SIGNATURE_REQUEST(), appId);
+    return _requestBuilder.build(auth, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
   }
 
   function buildRequest(
@@ -698,7 +693,7 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, claim, signature, appId, namespace);
+    return _requestBuilder.build(auth, claim, signature, config.appId, namespace);
   }
 
   function buildRequest(
@@ -706,7 +701,8 @@ contract SismoConnect {
     ClaimRequest memory claim,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, claim, _GET_EMPTY_SIGNATURE_REQUEST(), appId, namespace);
+    return
+      _requestBuilder.build(auth, claim, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
   }
 
   function buildRequest(
@@ -714,7 +710,7 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claim, signature, appId, namespace);
+    return _requestBuilder.build(claim, signature, config.appId, namespace);
   }
 
   function buildRequest(
@@ -722,21 +718,21 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, signature, appId, namespace);
+    return _requestBuilder.build(auth, signature, config.appId, namespace);
   }
 
   function buildRequest(
     ClaimRequest memory claim,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claim, _GET_EMPTY_SIGNATURE_REQUEST(), appId, namespace);
+    return _requestBuilder.build(claim, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
   }
 
   function buildRequest(
     AuthRequest memory auth,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, _GET_EMPTY_SIGNATURE_REQUEST(), appId, namespace);
+    return _requestBuilder.build(auth, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
   }
 
   function buildRequest(
@@ -744,40 +740,40 @@ contract SismoConnect {
     ClaimRequest[] memory claims,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, claims, signature, appId);
+    return _requestBuilder.build(auths, claims, signature, config.appId);
   }
 
   function buildRequest(
     AuthRequest[] memory auths,
     ClaimRequest[] memory claims
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, claims, _GET_EMPTY_SIGNATURE_REQUEST(), appId);
+    return _requestBuilder.build(auths, claims, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
   }
 
   function buildRequest(
     ClaimRequest[] memory claims,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claims, signature, appId);
+    return _requestBuilder.build(claims, signature, config.appId);
   }
 
   function buildRequest(
     AuthRequest[] memory auths,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, signature, appId);
+    return _requestBuilder.build(auths, signature, config.appId);
   }
 
   function buildRequest(
     ClaimRequest[] memory claims
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claims, _GET_EMPTY_SIGNATURE_REQUEST(), appId);
+    return _requestBuilder.build(claims, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
   }
 
   function buildRequest(
     AuthRequest[] memory auths
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, _GET_EMPTY_SIGNATURE_REQUEST(), appId);
+    return _requestBuilder.build(auths, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
   }
 
   function buildRequest(
@@ -786,7 +782,7 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, claims, signature, appId, namespace);
+    return _requestBuilder.build(auths, claims, signature, config.appId, namespace);
   }
 
   function buildRequest(
@@ -794,7 +790,8 @@ contract SismoConnect {
     ClaimRequest[] memory claims,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, claims, _GET_EMPTY_SIGNATURE_REQUEST(), appId, namespace);
+    return
+      _requestBuilder.build(auths, claims, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
   }
 
   function buildRequest(
@@ -802,7 +799,7 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claims, signature, appId, namespace);
+    return _requestBuilder.build(claims, signature, config.appId, namespace);
   }
 
   function buildRequest(
@@ -810,21 +807,21 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, signature, appId, namespace);
+    return _requestBuilder.build(auths, signature, config.appId, namespace);
   }
 
   function buildRequest(
     ClaimRequest[] memory claims,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claims, _GET_EMPTY_SIGNATURE_REQUEST(), appId, namespace);
+    return _requestBuilder.build(claims, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
   }
 
   function buildRequest(
     AuthRequest[] memory auths,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, _GET_EMPTY_SIGNATURE_REQUEST(), appId, namespace);
+    return _requestBuilder.build(auths, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
   }
 
   function _GET_EMPTY_SIGNATURE_REQUEST() internal view returns (SignatureRequest memory) {
