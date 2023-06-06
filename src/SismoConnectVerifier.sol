@@ -50,6 +50,10 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     SismoConnectRequest memory request,
     SismoConnectConfig memory config
   ) external view override returns (SismoConnectVerifiedResult memory) {
+    if (response.appId != config.appId) {
+      revert AppIdMismatch(response.appId, config.appId);
+    }
+
     _checkResponseMatchesWithRequest(response, request);
 
     uint256 responseProofsArrayLength = response.proofs.length;
@@ -115,10 +119,6 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
 
     if (response.namespace != request.namespace) {
       revert NamespaceMismatch(response.namespace, request.namespace);
-    }
-
-    if (response.appId != request.appId) {
-      revert AppIdMismatch(response.appId, request.appId);
     }
 
     // Check if the message of the signature matches between the request and the response

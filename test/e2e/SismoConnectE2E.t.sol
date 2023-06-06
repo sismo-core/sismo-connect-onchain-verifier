@@ -78,8 +78,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
       responseBytes: responseEncoded,
       request: requestBuilder.build({
         claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
-        signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)}),
-        appId: DEFAULT_APP_ID
+        signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)})
       })
     });
   }
@@ -97,8 +96,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
       responseBytes: responseEncoded,
       request: requestBuilder.build({
         claims: claims,
-        signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)}),
-        appId: DEFAULT_APP_ID
+        signature: sismoConnect.exposed_buildSignature({message: abi.encode(user)})
       })
     });
   }
@@ -110,8 +108,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
 
     SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
-      signature: signature,
-      appId: DEFAULT_APP_ID
+      signature: signature
     });
 
     SismoConnectVerifiedResult memory verifiedResult = sismoConnect.exposed_verify(
@@ -128,8 +125,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
     SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.VAULT}),
       claim: sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e}),
-      signature: signature,
-      appId: DEFAULT_APP_ID
+      signature: signature
     });
 
     SismoConnectVerifiedResult memory verifiedResult = sismoConnect.exposed_verify(
@@ -170,8 +166,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
     SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
-      signature: signature,
-      appId: DEFAULT_APP_ID
+      signature: signature
     });
 
     (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
@@ -201,8 +196,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
     SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
-      signature: signature,
-      appId: DEFAULT_APP_ID
+      signature: signature
     });
 
     (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
@@ -239,8 +233,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
     SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
-      signature: signature,
-      appId: DEFAULT_APP_ID
+      signature: signature
     });
 
     (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
@@ -273,8 +266,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
     SismoConnectRequest memory request = requestBuilder.build({
       claims: claims,
       auths: auths,
-      signature: signature,
-      appId: DEFAULT_APP_ID
+      signature: signature
     });
 
     bytes
@@ -294,8 +286,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
 
     SismoConnectRequest memory request = requestBuilder.build({
       auth: sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB}),
-      signature: signature,
-      appId: DEFAULT_APP_ID
+      signature: signature
     });
 
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
@@ -307,8 +298,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
     );
 
     SismoConnectRequest memory request = requestBuilder.build({
-      auth: sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB}),
-      appId: DEFAULT_APP_ID
+      auth: sismoConnect.exposed_buildAuth({authType: AuthType.GITHUB})
     });
 
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});

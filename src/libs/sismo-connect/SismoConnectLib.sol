@@ -651,40 +651,40 @@ contract SismoConnect {
     ClaimRequest memory claim,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, claim, signature, config.appId);
+    return _requestBuilder.build(auth, claim, signature);
   }
 
   function buildRequest(
     AuthRequest memory auth,
     ClaimRequest memory claim
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, claim, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
+    return _requestBuilder.build(auth, claim, _GET_EMPTY_SIGNATURE_REQUEST());
   }
 
   function buildRequest(
     ClaimRequest memory claim,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claim, signature, config.appId);
+    return _requestBuilder.build(claim, signature);
   }
 
   function buildRequest(
     AuthRequest memory auth,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, signature, config.appId);
+    return _requestBuilder.build(auth, signature);
   }
 
   function buildRequest(
     ClaimRequest memory claim
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claim, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
+    return _requestBuilder.build(claim, _GET_EMPTY_SIGNATURE_REQUEST());
   }
 
   function buildRequest(
     AuthRequest memory auth
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
+    return _requestBuilder.build(auth, _GET_EMPTY_SIGNATURE_REQUEST());
   }
 
   function buildRequest(
@@ -693,7 +693,7 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, claim, signature, config.appId, namespace);
+    return _requestBuilder.build(auth, claim, signature, namespace);
   }
 
   function buildRequest(
@@ -701,8 +701,7 @@ contract SismoConnect {
     ClaimRequest memory claim,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return
-      _requestBuilder.build(auth, claim, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
+    return _requestBuilder.build(auth, claim, _GET_EMPTY_SIGNATURE_REQUEST(), namespace);
   }
 
   function buildRequest(
@@ -710,7 +709,7 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claim, signature, config.appId, namespace);
+    return _requestBuilder.build(claim, signature, namespace);
   }
 
   function buildRequest(
@@ -718,21 +717,21 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, signature, config.appId, namespace);
+    return _requestBuilder.build(auth, signature, namespace);
   }
 
   function buildRequest(
     ClaimRequest memory claim,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claim, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
+    return _requestBuilder.build(claim, _GET_EMPTY_SIGNATURE_REQUEST(), namespace);
   }
 
   function buildRequest(
     AuthRequest memory auth,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auth, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
+    return _requestBuilder.build(auth, _GET_EMPTY_SIGNATURE_REQUEST(), namespace);
   }
 
   function buildRequest(
@@ -740,40 +739,40 @@ contract SismoConnect {
     ClaimRequest[] memory claims,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, claims, signature, config.appId);
+    return _requestBuilder.build(auths, claims, signature);
   }
 
   function buildRequest(
     AuthRequest[] memory auths,
     ClaimRequest[] memory claims
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, claims, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
+    return _requestBuilder.build(auths, claims, _GET_EMPTY_SIGNATURE_REQUEST());
   }
 
   function buildRequest(
     ClaimRequest[] memory claims,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claims, signature, config.appId);
+    return _requestBuilder.build(claims, signature);
   }
 
   function buildRequest(
     AuthRequest[] memory auths,
     SignatureRequest memory signature
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, signature, config.appId);
+    return _requestBuilder.build(auths, signature);
   }
 
   function buildRequest(
     ClaimRequest[] memory claims
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claims, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
+    return _requestBuilder.build(claims, _GET_EMPTY_SIGNATURE_REQUEST());
   }
 
   function buildRequest(
     AuthRequest[] memory auths
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId);
+    return _requestBuilder.build(auths, _GET_EMPTY_SIGNATURE_REQUEST());
   }
 
   function buildRequest(
@@ -782,7 +781,7 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, claims, signature, config.appId, namespace);
+    return _requestBuilder.build(auths, claims, signature, namespace);
   }
 
   function buildRequest(
@@ -790,8 +789,7 @@ contract SismoConnect {
     ClaimRequest[] memory claims,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return
-      _requestBuilder.build(auths, claims, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
+    return _requestBuilder.build(auths, claims, _GET_EMPTY_SIGNATURE_REQUEST(), namespace);
   }
 
   function buildRequest(
@@ -799,7 +797,7 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claims, signature, config.appId, namespace);
+    return _requestBuilder.build(claims, signature, namespace);
   }
 
   function buildRequest(
@@ -807,21 +805,21 @@ contract SismoConnect {
     SignatureRequest memory signature,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, signature, config.appId, namespace);
+    return _requestBuilder.build(auths, signature, namespace);
   }
 
   function buildRequest(
     ClaimRequest[] memory claims,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(claims, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
+    return _requestBuilder.build(claims, _GET_EMPTY_SIGNATURE_REQUEST(), namespace);
   }
 
   function buildRequest(
     AuthRequest[] memory auths,
     bytes16 namespace
   ) internal view returns (SismoConnectRequest memory) {
-    return _requestBuilder.build(auths, _GET_EMPTY_SIGNATURE_REQUEST(), config.appId, namespace);
+    return _requestBuilder.build(auths, _GET_EMPTY_SIGNATURE_REQUEST(), namespace);
   }
 
   function _GET_EMPTY_SIGNATURE_REQUEST() internal view returns (SignatureRequest memory) {
