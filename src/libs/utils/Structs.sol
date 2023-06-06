@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 struct SismoConnectRequest {
   bytes16 appId;
   bytes16 namespace;
-  VaultConfig vaultConfig;
   AuthRequest[] auths;
   ClaimRequest[] claims;
   SignatureRequest signature;

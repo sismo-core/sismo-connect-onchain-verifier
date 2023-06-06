@@ -31,8 +31,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
   bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1");
   bytes public DEFAULT_SIGNED_MESSAGE = abi.encode(user);
 
-  // need this storage variable to be set to use RequestBuilder in tests
-  bool public isImpersonationMode = false;
+  bool public DEFAULT_IS_IMPERSONATION_MODE = false;
 
   ResponseWithoutProofs public DEFAULT_RESPONSE =
     ResponseBuilder
@@ -52,7 +51,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    sismoConnect = new SismoConnectHarness(DEFAULT_APP_ID, false);
+    sismoConnect = new SismoConnectHarness(DEFAULT_APP_ID, DEFAULT_IS_IMPERSONATION_MODE);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});

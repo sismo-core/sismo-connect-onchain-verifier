@@ -27,6 +27,13 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     uint256 claimsIndex; // index of the first available slot in the array of verified claims
   }
 
+  // Struct holding the verified Auths and Claims from the snark proofs
+  // This struct is used to avoid stack too deep error
+  struct VerifiedProofs {
+    VerifiedAuth[] auths;
+    VerifiedClaim[] claims;
+  }
+
   constructor(address owner) {
     initialize(owner);
   }
@@ -40,7 +47,8 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
 
   function verify(
     SismoConnectResponse memory response,
-    SismoConnectRequest memory request
+    SismoConnectRequest memory request,
+    VaultConfig memory vaultConfig
   ) external view override returns (SismoConnectVerifiedResult memory) {
     _checkResponseMatchesWithRequest(response, request);
 
@@ -58,8 +66,10 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       infos.nbOfClaims += response.proofs[i].claims.length;
     }
 
-    VerifiedAuth[] memory verifiedAuths = new VerifiedAuth[](infos.nbOfAuths);
-    VerifiedClaim[] memory verifiedClaims = new VerifiedClaim[](infos.nbOfClaims);
+    VerifiedProofs memory verifiedProofs = VerifiedProofs({
+      auths: new VerifiedAuth[](infos.nbOfAuths),
+      claims: new VerifiedClaim[](infos.nbOfClaims)
+    });
 
     for (uint256 i = 0; i < responseProofsArrayLength; i++) {
       (VerifiedAuth memory verifiedAuth, VerifiedClaim memory verifiedClaim) = _verifiers[
@@ -67,7 +77,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       ].verify({
           appId: response.appId,
           namespace: response.namespace,
-          isImpersonationMode: request.vaultConfig.isImpersonationMode,
+          isImpersonationMode: vaultConfig.isImpersonationMode,
           signedMessage: response.signedMessage,
           sismoConnectProof: response.proofs[i]
         });
@@ -75,11 +85,11 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
       // we only want to add the verified auths and claims to the result
       // if they are not empty, for that we check the length of the proofData that should always be different from 0
       if (verifiedAuth.proofData.length != 0) {
-        verifiedAuths[infos.authsIndex] = verifiedAuth;
+        verifiedProofs.auths[infos.authsIndex] = verifiedAuth;
         infos.authsIndex++;
       }
       if (verifiedClaim.proofData.length != 0) {
-        verifiedClaims[infos.claimsIndex] = verifiedClaim;
+        verifiedProofs.claims[infos.claimsIndex] = verifiedClaim;
         infos.claimsIndex++;
       }
     }
@@ -89,8 +99,8 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
         appId: response.appId,
         namespace: response.namespace,
         version: response.version,
-        auths: verifiedAuths,
-        claims: verifiedClaims,
+        auths: verifiedProofs.auths,
+        claims: verifiedProofs.claims,
         signedMessage: response.signedMessage
       });
   }

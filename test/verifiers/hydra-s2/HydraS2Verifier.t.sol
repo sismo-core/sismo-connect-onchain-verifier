@@ -14,6 +14,9 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
   address user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
   bytes16 constant appId = 0x11b1de449c6c4adb0b5775b3868b28b3;
   bytes16 constant groupId = 0xe9ed316946d3d98dfcd829a53ec9822e;
+
+  bool public DEFAULT_IS_IMPERSONATION_MODE = false;
+
   ClaimRequest claimRequest;
   AuthRequest authRequest;
   SignatureRequest signature;
@@ -22,7 +25,7 @@ contract HydraS2VerifierTest is HydraS2BaseTest {
 
   function setUp() public virtual override {
     super.setUp();
-    sismoConnect = new SismoConnectHarness(appId, false);
+    sismoConnect = new SismoConnectHarness(appId, DEFAULT_IS_IMPERSONATION_MODE);
     claimRequest = sismoConnect.exposed_buildClaim({groupId: groupId});
     authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
