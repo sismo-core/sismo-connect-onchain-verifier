@@ -134,8 +134,8 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     // otherwise we use the EdDSA public key of the Commitment Mapper Registry
     uint256[2] memory commitmentMapperPubKey = isImpersonationMode
       ? [
-        0x2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f0256,
-        0x30423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74
+        0x1801b584700a740f9576cc7e83745895452edc518a9ce60b430e1272fc4eb93b,
+        0x057cf80de4f8dd3e4c56f948f40c28c3acbeca71ef9f825597bf8cc059f1238b
       ]
       : COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
 
