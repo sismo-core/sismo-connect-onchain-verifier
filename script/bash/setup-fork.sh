@@ -23,22 +23,33 @@ elif [[ ! -f "$config_file" ]]; then
 fi
 
 # Define the contract names
-declare -a contract_names=("authRequestBuilder"
-                            "availableRootsRegistry"
-                            "claimRequestBuilder"
-                            "commitmentMapperRegistry"
+declare -a contract_keys=("authRequestBuilder"
+                          "availableRootsRegistry"
+                          "claimRequestBuilder"
+                          "commitmentMapperRegistry"
+                          "hydraS2Verifier"
+                          "requestBuilder"
+                          "signatureBuilder"
+                          "sismoConnectVerifier")
+
+declare -a contract_values=("authRequestBuilder-v1"
+                            "sismoConnectAvailableRootsRegistry"
+                            "claimRequestBuilder-v1"
+                            "sismoConnectCommitmentMapperRegistry"
                             "hydraS2Verifier"
-                            "requestBuilder"
-                            "signatureBuilder"
-                            "sismoConnectVerifier")
+                            "requestBuilder-v1"
+                            "signatureBuilder-v1"
+                            "sismoConnectVerifier-v1")
 
 # Loop over contract names
-for name in "${contract_names[@]}"
+for index in "${!contract_keys[@]}"
 do
-    echo "Set address of ${name} in the AddressesProvider"
+    name=${contract_keys[$index]}
+    value=${contract_values[$index]}
+    echo "Set address of contract ${name} to ${value} in the AddressesProvider"
     # Use jq to parse the JSON file and get the contract address
     contract_address=$(jq -r .${name} ${config_file})
 
     # Set the contract address in the AddressesProvider by impersonating the owner thanks to --unlocked
-    cast send 0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05 "set(address,string)" ${contract_address} ${name}-v1 --unlocked --from $ADDRESSES_PROVIDER_OWNER
+    cast send 0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05 "set(address,string)" ${contract_address} ${value} --unlocked --from $ADDRESSES_PROVIDER_OWNER
 done
