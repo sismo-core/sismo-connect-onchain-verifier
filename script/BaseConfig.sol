@@ -219,7 +219,7 @@ contract BaseDeploymentConfig is Script {
     return config;
   }
 
-  function _setDeploymentConfig(string memory chainName) internal {
+  function _setDeploymentConfig(string memory chainName, bool checkIfEmpty) internal {
     _chainName = chainName;
     // read deployment config from file if the chain is different from `test`
     string memory filePath = string.concat(_deploymentConfigFilePath());
@@ -237,8 +237,10 @@ contract BaseDeploymentConfig is Script {
     }
 
     // if the config is not created, create a new empty one
-    if (_compareStrings(json, "") || _compareStrings(chainName, "test")) {
-      _saveDeploymentConfig(chainName, _getEmptyDeploymentConfig(getChainName(chainName)));
+    if (checkIfEmpty) {
+      if (_compareStrings(json, "") || _compareStrings(chainName, "test") || _isLocalFork()) {
+        _saveDeploymentConfig(chainName, _getEmptyDeploymentConfig(getChainName(chainName)));
+      }
     }
   }
 
@@ -328,11 +330,52 @@ contract BaseDeploymentConfig is Script {
       SISMO_ADDRESSES_PROVIDER
     );
 
-    vm.writeJson(finalJson, _deploymentConfigFilePath());
+    vm.writeFile(_deploymentConfigFilePath(), finalJson);
   }
 
   function _deploymentConfigFilePath() internal view returns (string memory) {
-    return string.concat(vm.projectRoot(), "/script/deployments/", _chainName, ".json");
+    // we return the real config if USE_DEPLOYMENT_CONFIG is true
+    // and the RPC_URL is different from localhost
+    // otherwise we return the temporary config
+    try vm.envBool("USE_DEPLOYMENT_CONFIG") returns (bool useDeploymentConfig) {
+      return _checkLocalhostFork(useDeploymentConfig == true);
+    } catch {
+      return _checkLocalhostFork(false);
+    }
+  }
+
+  function _checkLocalhostFork(bool useDeploymentConfig) internal view returns (string memory) {
+    // check if we are using a fork
+    bool isLocalFork = _isLocalFork();
+
+    // if the chainId is different from 31337 (localhost) we need to check if the user wants to use the real development config
+    // otherwise it can be dangerous to deploy to a real chain with a config that is temporary
+    if (!_compareStrings(vm.toString(block.chainid), "31337")) {
+      require(
+        useDeploymentConfig == true || isLocalFork == true,
+        "If you want to deploy to a chain different from localhost, you either need to use the deployment config by specifying `USE_DEPLOYMENT_CONFIG=true` in your command. Or set `FORK=true` and `--rpc-url http://localhost:8545` in your command to deploy to a fork."
+      );
+      require(
+        !_compareStrings(_chainName, "test"),
+        "If you want to deploy to a chain different from localhost, you need to specify a chain name different from `test`."
+      );
+      // return the real config if we are NOT using a fork
+      isLocalFork == true
+        ? string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json")
+        : string.concat(vm.projectRoot(), "/script/deployments/", _chainName, ".json");
+    }
+    // return the temporary config
+    return string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json");
+  }
+
+  function _isLocalFork() internal view returns (bool) {
+    bool isLocalFork;
+    try vm.envBool("FORK") returns (bool fork) {
+      isLocalFork = fork;
+    } catch {
+      isLocalFork = false;
+    }
+    return isLocalFork;
   }
 
   function _compareStrings(string memory a, string memory b) internal pure returns (bool) {

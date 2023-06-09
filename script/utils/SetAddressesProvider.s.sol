@@ -10,7 +10,7 @@ import {BaseDeploymentConfig, DeploymentConfig} from "script/BaseConfig.sol";
 contract SetAddressesProvider is Script, BaseDeploymentConfig {
   function run() external {
     string memory chainName = vm.envString("CHAIN_NAME");
-    _setDeploymentConfig(chainName);
+    _setDeploymentConfig({chainName: chainName, checkIfEmpty: false});
 
     console.log("Run for CHAIN_NAME:", chainName);
     console.log("Sender:", msg.sender);

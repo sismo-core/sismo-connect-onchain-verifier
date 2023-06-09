@@ -38,7 +38,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
     vm.startBroadcast();
 
-    _setDeploymentConfig(chainName);
+    _setDeploymentConfig({chainName: chainName, checkIfEmpty: true});
 
     availableRootsRegistry = _deployAvailableRootsRegistry(
       _readAddressFromDeploymentConfigAtKey(".rootsOwner")
