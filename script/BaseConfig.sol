@@ -330,7 +330,7 @@ contract BaseDeploymentConfig is Script {
       SISMO_ADDRESSES_PROVIDER
     );
 
-    vm.writeFile(_deploymentConfigFilePath(), finalJson);
+    vm.writeJson(finalJson, _deploymentConfigFilePath());
   }
 
   function _deploymentConfigFilePath() internal view returns (string memory) {
