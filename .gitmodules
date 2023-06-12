@@ -10,3 +10,6 @@
 	path = lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 	branch = v4.8.0
+[submodule "lib/hydra-s3-zkps"]
+	path = lib/hydra-s3-zkps
+	url = https://github.com/sismo-core/hydra-s3-zkps
