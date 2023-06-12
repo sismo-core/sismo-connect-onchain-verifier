@@ -38,12 +38,14 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
     vm.startBroadcast();
 
-    _setConfig(getChainName(chainName));
+    _setDeploymentConfig({chainName: chainName, checkIfEmpty: true});
 
-    availableRootsRegistry = _deployAvailableRootsRegistry(config.rootsOwner);
+    availableRootsRegistry = _deployAvailableRootsRegistry(
+      _readAddressFromDeploymentConfigAtKey(".rootsOwner")
+    );
     commitmentMapperRegistry = _deployCommitmentMapperRegistry(
-      config.owner,
-      config.commitmentMapperEdDSAPubKey
+      _readAddressFromDeploymentConfigAtKey(".owner"),
+      _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig()
     );
     hydraS2Verifier = _deployHydraS2Verifier(commitmentMapperRegistry, availableRootsRegistry);
     sismoConnectVerifier = _deploySismoConnectVerifier(msg.sender);
@@ -52,7 +54,8 @@ contract DeployAll is Script, BaseDeploymentConfig {
       hydraS2Verifier.HYDRA_S2_VERSION(),
       address(hydraS2Verifier)
     );
-    sismoConnectVerifier.transferOwnership(config.owner);
+
+    sismoConnectVerifier.transferOwnership(_readAddressFromDeploymentConfigAtKey(".owner"));
 
     contracts.availableRootsRegistry = availableRootsRegistry;
     contracts.commitmentMapperRegistry = commitmentMapperRegistry;
@@ -71,20 +74,41 @@ contract DeployAll is Script, BaseDeploymentConfig {
     contracts.signatureBuilder = signatureBuilder;
     contracts.requestBuilder = requestBuilder;
 
+    DeploymentConfig memory newDeploymentConfig = DeploymentConfig({
+      proxyAdmin: _readAddressFromDeploymentConfigAtKey(".proxyAdmin"),
+      owner: _readAddressFromDeploymentConfigAtKey(".owner"),
+      rootsOwner: _readAddressFromDeploymentConfigAtKey(".rootsOwner"),
+      commitmentMapperEdDSAPubKey: _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig(),
+      sismoAddressesProvider: _readAddressFromDeploymentConfigAtKey(".sismoAddressesProvider"),
+      availableRootsRegistry: address(availableRootsRegistry),
+      commitmentMapperRegistry: address(commitmentMapperRegistry),
+      hydraS2Verifier: address(hydraS2Verifier),
+      sismoConnectVerifier: address(sismoConnectVerifier),
+      authRequestBuilder: address(authRequestBuilder),
+      claimRequestBuilder: address(claimRequestBuilder),
+      signatureBuilder: address(signatureBuilder),
+      requestBuilder: address(requestBuilder)
+    });
+
+    _saveDeploymentConfig(chainName, newDeploymentConfig);
+
     vm.stopBroadcast();
   }
 
   function _deployAvailableRootsRegistry(address owner) private returns (AvailableRootsRegistry) {
-    if (config.availableRootsRegistry != address(0)) {
-      console.log("Using existing availableRootsRegistry:", config.availableRootsRegistry);
-      return AvailableRootsRegistry(config.availableRootsRegistry);
+    address availableRootsRegistryAddress = _readAddressFromDeploymentConfigAtKey(
+      ".availableRootsRegistry"
+    );
+    if (availableRootsRegistryAddress != address(0)) {
+      console.log("Using existing availableRootsRegistry:", availableRootsRegistryAddress);
+      return AvailableRootsRegistry(availableRootsRegistryAddress);
     }
     AvailableRootsRegistry rootsRegistryImplem = new AvailableRootsRegistry(owner);
     console.log("rootsRegistry Implem Deployed:", address(rootsRegistryImplem));
 
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
       address(rootsRegistryImplem),
-      config.proxyAdmin,
+      _readAddressFromDeploymentConfigAtKey(".proxyAdmin"),
       abi.encodeWithSelector(rootsRegistryImplem.initialize.selector, owner)
     );
     console.log("rootsRegistry Proxy Deployed:", address(proxy));
@@ -95,19 +119,23 @@ contract DeployAll is Script, BaseDeploymentConfig {
     address owner,
     uint256[2] memory commitmentMapperEdDSAPubKey
   ) private returns (CommitmentMapperRegistry) {
-    if (config.commitmentMapperRegistry != address(0)) {
-      console.log("Using existing commitmentMapperRegistry:", config.commitmentMapperRegistry);
-      return CommitmentMapperRegistry(config.commitmentMapperRegistry);
+    address commitmentMapperRegistryAddress = _readAddressFromDeploymentConfigAtKey(
+      ".commitmentMapperRegistry"
+    );
+    if (commitmentMapperRegistryAddress != address(0)) {
+      console.log("Using existing commitmentMapperRegistry:", commitmentMapperRegistryAddress);
+      return CommitmentMapperRegistry(commitmentMapperRegistryAddress);
     }
     CommitmentMapperRegistry commitmentMapperImplem = new CommitmentMapperRegistry(
       owner,
       commitmentMapperEdDSAPubKey
     );
     console.log("commitmentMapper Implem Deployed:", address(commitmentMapperImplem));
+    console.log("owner:", owner);
 
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
       address(commitmentMapperImplem),
-      config.proxyAdmin,
+      _readAddressFromDeploymentConfigAtKey(".proxyAdmin"),
       abi.encodeWithSelector(
         commitmentMapperImplem.initialize.selector,
         owner,
@@ -122,9 +150,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
     CommitmentMapperRegistry _commitmentMapperRegistry,
     AvailableRootsRegistry _availableRootsRegistry
   ) private returns (HydraS2Verifier) {
-    if (config.hydraS2Verifier != address(0)) {
-      console.log("Using existing hydraS2Verifier:", config.hydraS2Verifier);
-      return HydraS2Verifier(config.hydraS2Verifier);
+    address hydraS2VerifierAddress = _readAddressFromDeploymentConfigAtKey(".hydraS2Verifier");
+    if (hydraS2VerifierAddress != address(0)) {
+      console.log("Using existing hydraS2Verifier:", hydraS2VerifierAddress);
+      return HydraS2Verifier(hydraS2VerifierAddress);
     }
     address commitmentMapperRegistryAddr = address(_commitmentMapperRegistry);
     address availableRootsRegistryAddr = address(_availableRootsRegistry);
@@ -136,7 +165,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
       address(hydraS2VerifierImplem),
-      config.proxyAdmin,
+      _readAddressFromDeploymentConfigAtKey(".proxyAdmin"),
       abi.encodeWithSelector(hydraS2VerifierImplem.initialize.selector)
     );
     console.log("hydraS2Verifier Proxy Deployed:", address(proxy));
@@ -144,16 +173,19 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deploySismoConnectVerifier(address owner) private returns (SismoConnectVerifier) {
-    if (config.sismoConnectVerifier != address(0)) {
-      console.log("Using existing sismoConnectVerifier:", config.sismoConnectVerifier);
-      return SismoConnectVerifier(config.sismoConnectVerifier);
+    address sismoConnectVerifierAddress = _readAddressFromDeploymentConfigAtKey(
+      ".sismoConnectVerifier"
+    );
+    if (sismoConnectVerifierAddress != address(0)) {
+      console.log("Using existing sismoConnectVerifier:", sismoConnectVerifierAddress);
+      return SismoConnectVerifier(sismoConnectVerifierAddress);
     }
     SismoConnectVerifier sismoConnectVerifierImplem = new SismoConnectVerifier(owner);
     console.log("sismoConnectVerifier Implem Deployed:", address(sismoConnectVerifierImplem));
 
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
       address(sismoConnectVerifierImplem),
-      config.proxyAdmin,
+      _readAddressFromDeploymentConfigAtKey(".proxyAdmin"),
       abi.encodeWithSelector(sismoConnectVerifierImplem.initialize.selector, owner)
     );
     console.log("sismoConnectVerifier Proxy Deployed:", address(proxy));
@@ -163,9 +195,12 @@ contract DeployAll is Script, BaseDeploymentConfig {
   // External libraries
 
   function _deployAuthRequestBuilder() private returns (AuthRequestBuilder) {
-    if (config.authRequestBuilder != address(0)) {
-      console.log("Using existing authrequestBuilder:", config.authRequestBuilder);
-      return AuthRequestBuilder(config.authRequestBuilder);
+    address authRequestBuilderAddress = _readAddressFromDeploymentConfigAtKey(
+      ".authRequestBuilder"
+    );
+    if (authRequestBuilderAddress != address(0)) {
+      console.log("Using existing authrequestBuilder:", authRequestBuilderAddress);
+      return AuthRequestBuilder(authRequestBuilderAddress);
     }
     authRequestBuilder = new AuthRequestBuilder();
     console.log("authRequestBuilder Deployed:", address(authRequestBuilder));
@@ -173,9 +208,12 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deployClaimRequestBuilder() private returns (ClaimRequestBuilder) {
-    if (config.claimRequestBuilder != address(0)) {
-      console.log("Using existing claimRequestBuilder:", config.claimRequestBuilder);
-      return ClaimRequestBuilder(config.claimRequestBuilder);
+    address claimRequestBuilderAddress = _readAddressFromDeploymentConfigAtKey(
+      ".claimRequestBuilder"
+    );
+    if (claimRequestBuilderAddress != address(0)) {
+      console.log("Using existing claimRequestBuilder:", claimRequestBuilderAddress);
+      return ClaimRequestBuilder(claimRequestBuilderAddress);
     }
     claimRequestBuilder = new ClaimRequestBuilder();
     console.log("claimRequestBuilder Deployed:", address(claimRequestBuilder));
@@ -183,9 +221,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deploySignatureBuilder() private returns (SignatureBuilder) {
-    if (config.signatureBuilder != address(0)) {
-      console.log("Using existing signatureBuilder:", config.signatureBuilder);
-      return SignatureBuilder(config.signatureBuilder);
+    address signatureBuilderAddress = _readAddressFromDeploymentConfigAtKey(".signatureBuilder");
+    if (signatureBuilderAddress != address(0)) {
+      console.log("Using existing signatureBuilder:", signatureBuilderAddress);
+      return SignatureBuilder(signatureBuilderAddress);
     }
     signatureBuilder = new SignatureBuilder();
     console.log("signatureBuilder Deployed:", address(signatureBuilder));
@@ -193,9 +232,10 @@ contract DeployAll is Script, BaseDeploymentConfig {
   }
 
   function _deployRequestBuilder() private returns (RequestBuilder) {
-    if (config.requestBuilder != address(0)) {
-      console.log("Using existing requestBuilder:", config.requestBuilder);
-      return RequestBuilder(config.requestBuilder);
+    address requestBuilderAddress = _readAddressFromDeploymentConfigAtKey(".requestBuilder");
+    if (requestBuilderAddress != address(0)) {
+      console.log("Using existing requestBuilder:", requestBuilderAddress);
+      return RequestBuilder(requestBuilderAddress);
     }
     requestBuilder = new RequestBuilder();
     console.log("requestBuilder Deployed:", address(requestBuilder));

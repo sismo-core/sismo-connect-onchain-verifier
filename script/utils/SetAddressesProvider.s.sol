@@ -5,35 +5,59 @@ import "forge-std/Script.sol";
 import "forge-std/console.sol";
 
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
-import {BaseDeploymentConfig} from "script/BaseConfig.sol";
+import {BaseDeploymentConfig, DeploymentConfig} from "script/BaseConfig.sol";
 
 contract SetAddressesProvider is Script, BaseDeploymentConfig {
   function run() external {
     string memory chainName = vm.envString("CHAIN_NAME");
-    _setConfig(getChainName(chainName));
+    _setDeploymentConfig({chainName: chainName, checkIfEmpty: false});
 
     console.log("Run for CHAIN_NAME:", chainName);
     console.log("Sender:", msg.sender);
 
     vm.startBroadcast();
 
-    _setAddress(config.sismoConnectVerifier, string("sismoConnectVerifier-v1"));
-    _setAddress(config.hydraS2Verifier, string("hydraS2Verifier"));
-    _setAddress(config.availableRootsRegistry, string("sismoConnectAvailableRootsRegistry"));
-    _setAddress(config.commitmentMapperRegistry, string("sismoConnectCommitmentMapperRegistry"));
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".sismoConnectVerifier"),
+      string("sismoConnectVerifier-v1")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".hydraS2Verifier"),
+      string("hydraS2Verifier")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".availableRootsRegistry"),
+      string("sismoConnectAvailableRootsRegistry")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".commitmentMapperRegistry"),
+      string("sismoConnectCommitmentMapperRegistry")
+    );
 
     // external libraries
 
-    _setAddress(config.authRequestBuilder, string("authRequestBuilder-v1"));
-    _setAddress(config.claimRequestBuilder, string("claimRequestBuilder-v1"));
-    _setAddress(config.signatureBuilder, string("signatureBuilder-v1"));
-    _setAddress(config.requestBuilder, string("requestBuilder-v1"));
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".authRequestBuilder"),
+      string("authRequestBuilder-v1")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".claimRequestBuilder"),
+      string("claimRequestBuilder-v1")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".signatureBuilder"),
+      string("signatureBuilder-v1")
+    );
+    _setAddress(
+      _readAddressFromDeploymentConfigAtKey(".requestBuilder"),
+      string("requestBuilder-v1")
+    );
 
     vm.stopBroadcast();
   }
 
   function _setAddress(address contractAddress, string memory contractName) internal {
-    IAddressesProvider sismoAddressProvider = IAddressesProvider(config.sismoAddressesProvider);
+    IAddressesProvider sismoAddressProvider = IAddressesProvider(SISMO_ADDRESSES_PROVIDER);
     address currentContractAddress = sismoAddressProvider.get(contractName);
 
     if (currentContractAddress != contractAddress) {

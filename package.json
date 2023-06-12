@@ -10,6 +10,7 @@
     "prettier-plugin-solidity": "^1.0.0-beta.13"
   },
   "scripts": {
-    "lint": "prettier --write **.sol"
+    "lint": "prettier --write **.sol",
+    "setup-fork": "./script/bash/setup-fork.sh"
   }
 }

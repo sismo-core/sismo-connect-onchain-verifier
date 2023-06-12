@@ -12,3 +12,8 @@ broadcast/
 lib
 
 .hardhat/contracts
+
+# Deployment files
+**deployments/test.json
+**/tmp/*
+!**/tmp/test.json

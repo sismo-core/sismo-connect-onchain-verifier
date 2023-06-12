@@ -2,6 +2,7 @@
 optimizer_runs = 1000000
 verbosity = 1
 libs = ["lib"]
+fs_permissions = [{ access = "read-write", path = "./"}]
 
 [fmt]
 ignore = ["test/libs/SimoConnectLib.t.sol"]
@@ -12,10 +13,3 @@ gnosis = "${RPC_URL}"
 goerli = "${RPC_URL}"
 mumbai = "${RPC_URL}"
 mainnet = "${RPC_URL}"
-
-[etherscan]
-polygon = { key = "${ETHERSCAN_API_KEY}" }
-gnosis = { key = "${ETHERSCAN_API_KEY}" }
-goerli = { key = "${ETHERSCAN_API_KEY}" }
-mumbai = { key = "${ETHERSCAN_API_KEY}" }
-mainnet = { key = "${ETHERSCAN_API_KEY}" }
