@@ -42,7 +42,9 @@ enum AuthType {
   VAULT,
   GITHUB,
   TWITTER,
-  EVM_ACCOUNT
+  EVM_ACCOUNT,
+  TELEGRAM,
+  DISCORD
 }
 
 enum ClaimType {
