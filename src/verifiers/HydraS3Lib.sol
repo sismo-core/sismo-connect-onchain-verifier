@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-struct HydraS2CircomSnarkProof {
+struct HydraS3CircomSnarkProof {
   uint256[2] a;
   uint256[2][2] b;
   uint256[2] c;
 }
 
-struct HydraS2ProofData {
-  HydraS2CircomSnarkProof proof;
+struct HydraS3ProofData {
+  HydraS3CircomSnarkProof proof;
   uint256[14] input;
   // destinationIdentifier;
   // extraData;
@@ -26,7 +26,7 @@ struct HydraS2ProofData {
   // destinationVerificationEnabled;
 }
 
-struct HydraS2ProofInput {
+struct HydraS3ProofInput {
   address destinationIdentifier;
   uint256 extraData;
   uint256[2] commitmentMapperPubKey;
@@ -42,13 +42,13 @@ struct HydraS2ProofInput {
   bool destinationVerificationEnabled;
 }
 
-library HydraS2Lib {
+library HydraS3Lib {
   uint256 public constant SNARK_FIELD =
     21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
-  function _input(HydraS2ProofData memory self) internal pure returns (HydraS2ProofInput memory) {
+  function _input(HydraS3ProofData memory self) internal pure returns (HydraS3ProofInput memory) {
     return
-      HydraS2ProofInput(
+      HydraS3ProofInput(
         _getDestinationIdentifier(self),
         _getExtraData(self),
         _getCommitmentMapperPubKey(self),
@@ -66,7 +66,7 @@ library HydraS2Lib {
   }
 
   function _toCircomFormat(
-    HydraS2ProofData memory self
+    HydraS3ProofData memory self
   )
     internal
     pure
@@ -75,60 +75,60 @@ library HydraS2Lib {
     return (self.proof.a, self.proof.b, self.proof.c, self.input);
   }
 
-  function _getDestinationIdentifier(HydraS2ProofData memory self) internal pure returns (address) {
+  function _getDestinationIdentifier(HydraS3ProofData memory self) internal pure returns (address) {
     return address(uint160(self.input[0]));
   }
 
-  function _getExtraData(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getExtraData(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[1];
   }
 
   function _getCommitmentMapperPubKey(
-    HydraS2ProofData memory self
+    HydraS3ProofData memory self
   ) internal pure returns (uint256[2] memory) {
     return [self.input[2], self.input[3]];
   }
 
-  function _getRegistryRoot(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getRegistryRoot(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[4];
   }
 
-  function _getRequestIdentifier(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getRequestIdentifier(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[5];
   }
 
-  function _getProofIdentifier(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getProofIdentifier(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[6];
   }
 
-  function _getClaimValue(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getClaimValue(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[7];
   }
 
-  function _getAccountsTreeValue(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getAccountsTreeValue(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[8];
   }
 
-  function _getClaimComparator(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getClaimComparator(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[9];
   }
 
-  function _getVaultIdentifier(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getVaultIdentifier(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[10];
   }
 
-  function _getVaultNamespace(HydraS2ProofData memory self) internal pure returns (uint256) {
+  function _getVaultNamespace(HydraS3ProofData memory self) internal pure returns (uint256) {
     return self.input[11];
   }
 
   function _getSourceVerificationEnabled(
-    HydraS2ProofData memory self
+    HydraS3ProofData memory self
   ) internal pure returns (bool) {
     return self.input[12] == 1;
   }
 
   function _getDestinationVerificationEnabled(
-    HydraS2ProofData memory self
+    HydraS3ProofData memory self
   ) internal pure returns (bool) {
     return self.input[13] == 1;
   }

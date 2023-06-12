@@ -19,11 +19,11 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
 
     _setAddress(
       _readAddressFromDeploymentConfigAtKey(".sismoConnectVerifier"),
-      string("sismoConnectVerifier-v1")
+      string("sismoConnectVerifier-v1.1")
     );
     _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".hydraS2Verifier"),
-      string("hydraS2Verifier")
+      _readAddressFromDeploymentConfigAtKey(".hydraS3Verifier"),
+      string("hydraS3Verifier")
     );
     _setAddress(
       _readAddressFromDeploymentConfigAtKey(".availableRootsRegistry"),
@@ -38,19 +38,19 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
 
     _setAddress(
       _readAddressFromDeploymentConfigAtKey(".authRequestBuilder"),
-      string("authRequestBuilder-v1")
+      string("authRequestBuilder-v1.1")
     );
     _setAddress(
       _readAddressFromDeploymentConfigAtKey(".claimRequestBuilder"),
-      string("claimRequestBuilder-v1")
+      string("claimRequestBuilder-v1.1")
     );
     _setAddress(
       _readAddressFromDeploymentConfigAtKey(".signatureBuilder"),
-      string("signatureBuilder-v1")
+      string("signatureBuilder-v1.1")
     );
     _setAddress(
       _readAddressFromDeploymentConfigAtKey(".requestBuilder"),
-      string("requestBuilder-v1")
+      string("requestBuilder-v1.1")
     );
 
     vm.stopBroadcast();

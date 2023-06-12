@@ -9,7 +9,7 @@ import {ProofBuilder} from "src/libs/utils/SismoConnectProofBuilder.sol";
 import {ResponseBuilder} from "test/utils/ResponseBuilderLib.sol";
 import {ICommitmentMapperRegistry} from "test/mocks/CommitmentMapperRegistryMock.sol";
 
-contract HydraS2Proofs {
+contract HydraS3Proofs {
   using ResponseBuilder for SismoConnectResponse;
 
   // default value for Claim
@@ -33,10 +33,10 @@ contract HydraS2Proofs {
   bytes16 public constant DEFAULT_NAMESPACE = bytes16(keccak256("main"));
 
   // default value for version
-  bytes32 public constant DEFAULT_VERSION = bytes32("sismo-connect-v1");
+  bytes32 public constant DEFAULT_VERSION = bytes32("sismo-connect-v1.1");
 
   // default proving scheme
-  bytes32 public constant DEFAULT_PROVING_SCHEME = bytes32("hydra-s2.1");
+  bytes32 public constant DEFAULT_PROVING_SCHEME = bytes32("hydra-s3.1");
 
   function getEdDSAPubKey() public pure returns (uint256[2] memory) {
     return [
@@ -109,7 +109,7 @@ contract HydraS2Proofs {
       SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
-        version: bytes32("sismo-connect-v1"),
+        version: bytes32("sismo-connect-v1.1"),
         signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
         proofs: proofs
       }),
@@ -137,7 +137,7 @@ contract HydraS2Proofs {
       SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
-        version: bytes32("sismo-connect-v1"),
+        version: bytes32("sismo-connect-v1.1"),
         signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
         proofs: proofs
       }),
@@ -171,7 +171,7 @@ contract HydraS2Proofs {
       SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
-        version: bytes32("sismo-connect-v1"),
+        version: bytes32("sismo-connect-v1.1"),
         signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
         proofs: proofs
       }),
@@ -212,7 +212,7 @@ contract HydraS2Proofs {
       SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
-        version: bytes32("sismo-connect-v1"),
+        version: bytes32("sismo-connect-v1.1"),
         signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
         proofs: response.proofs
       }),
@@ -239,7 +239,7 @@ contract HydraS2Proofs {
       SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
-        version: bytes32("sismo-connect-v1"),
+        version: bytes32("sismo-connect-v1.1"),
         signedMessage: abi.encode(0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE),
         proofs: response.proofs
       }),
@@ -266,7 +266,7 @@ contract HydraS2Proofs {
       SismoConnectResponse({
         appId: 0x11b1de449c6c4adb0b5775b3868b28b3,
         namespace: bytes16(keccak256("main")),
-        version: bytes32("sismo-connect-v1"),
+        version: bytes32("sismo-connect-v1.1"),
         signedMessage: "",
         proofs: response.proofs
       }),

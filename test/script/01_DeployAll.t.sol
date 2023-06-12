@@ -38,14 +38,14 @@ contract DeployAllTest is Test {
     assertEq(contracts.commitmentMapperRegistry.owner(), OWNER);
   }
 
-  function testHydraS2Verifier() public {
-    _expectDeployedWithProxy(address(contracts.hydraS2Verifier), PROXY_ADMIN);
+  function testHydraS3Verifier() public {
+    _expectDeployedWithProxy(address(contracts.hydraS3Verifier), PROXY_ADMIN);
     assertEq(
-      address(contracts.hydraS2Verifier.COMMITMENT_MAPPER_REGISTRY()),
+      address(contracts.hydraS3Verifier.COMMITMENT_MAPPER_REGISTRY()),
       address(contracts.commitmentMapperRegistry)
     );
     assertEq(
-      address(contracts.hydraS2Verifier.AVAILABLE_ROOTS_REGISTRY()),
+      address(contracts.hydraS3Verifier.AVAILABLE_ROOTS_REGISTRY()),
       address(contracts.availableRootsRegistry)
     );
   }
@@ -53,8 +53,8 @@ contract DeployAllTest is Test {
   function testSismoConnectVerifier() public {
     _expectDeployedWithProxy(address(contracts.sismoConnectVerifier), PROXY_ADMIN);
     assertEq(
-      contracts.sismoConnectVerifier.getVerifier("hydra-s2.1"),
-      address(contracts.hydraS2Verifier)
+      contracts.sismoConnectVerifier.getVerifier("hydra-s3.1"),
+      address(contracts.hydraS3Verifier)
     );
     assertEq(contracts.sismoConnectVerifier.owner(), OWNER);
   }

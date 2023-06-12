@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-contract IHydraS2Verifier {
+contract IHydraS3Verifier {
   error InvalidProof();
   error OnlyOneAuthAndOneClaimIsSupported();
 

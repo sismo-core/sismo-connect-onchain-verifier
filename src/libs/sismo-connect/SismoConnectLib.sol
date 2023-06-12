@@ -9,7 +9,7 @@ import {SignatureBuilder, SignatureRequest, Signature} from "../utils/SignatureB
 import {ISismoConnectVerifier, SismoConnectVerifiedResult} from "../../interfaces/ISismoConnectVerifier.sol";
 import {IAddressesProvider} from "../../periphery/interfaces/IAddressesProvider.sol";
 import {SismoConnectHelper} from "../utils/SismoConnectHelper.sol";
-import {IHydraS2Verifier} from "../../verifiers/IHydraS2Verifier.sol";
+import {IHydraS3Verifier} from "../../verifiers/IHydraS3Verifier.sol";
 
 contract SismoConnect {
   uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;
@@ -30,17 +30,17 @@ contract SismoConnect {
   constructor(SismoConnectConfig memory _config) {
     config = _config;
     _sismoConnectVerifier = ISismoConnectVerifier(
-      ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1"))
+      ADDRESSES_PROVIDER.get(string("sismoConnectVerifier-v1.1"))
     );
     // external libraries
     _authRequestBuilder = AuthRequestBuilder(
-      ADDRESSES_PROVIDER.get(string("authRequestBuilder-v1"))
+      ADDRESSES_PROVIDER.get(string("authRequestBuilder-v1.1"))
     );
     _claimRequestBuilder = ClaimRequestBuilder(
-      ADDRESSES_PROVIDER.get(string("claimRequestBuilder-v1"))
+      ADDRESSES_PROVIDER.get(string("claimRequestBuilder-v1.1"))
     );
-    _signatureBuilder = SignatureBuilder(ADDRESSES_PROVIDER.get(string("signatureBuilder-v1")));
-    _requestBuilder = RequestBuilder(ADDRESSES_PROVIDER.get(string("requestBuilder-v1")));
+    _signatureBuilder = SignatureBuilder(ADDRESSES_PROVIDER.get(string("signatureBuilder-v1.1")));
+    _requestBuilder = RequestBuilder(ADDRESSES_PROVIDER.get(string("requestBuilder-v1.1")));
   }
 
   function verify(

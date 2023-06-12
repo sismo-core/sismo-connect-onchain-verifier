@@ -3,27 +3,27 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {IBaseVerifier} from "../interfaces/IBaseVerifier.sol";
-import {IHydraS2Verifier} from "./IHydraS2Verifier.sol";
-import {HydraS2Verifier as HydraS2SnarkVerifier} from "@sismo-core/hydra-s2/HydraS2Verifier.sol";
+import {IHydraS3Verifier} from "./IHydraS3Verifier.sol";
+import {HydraS3Verifier as HydraS3SnarkVerifier} from "@sismo-core/hydra-s3/HydraS3Verifier.sol";
 import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapperRegistry.sol";
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {HydraS2ProofData, HydraS2Lib, HydraS2ProofInput} from "./HydraS2Lib.sol";
+import {HydraS3ProofData, HydraS3Lib, HydraS3ProofInput} from "./HydraS3Lib.sol";
 import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
 
-contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifier, Initializable {
-  using HydraS2Lib for HydraS2ProofData;
-  using HydraS2Lib for Auth;
-  using HydraS2Lib for Claim;
+contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifier, Initializable {
+  using HydraS3Lib for HydraS3ProofData;
+  using HydraS3Lib for Auth;
+  using HydraS3Lib for Claim;
 
-  // Struct holding the decoded Hydra-S2 snark proof and decoded public inputs
+  // Struct holding the decoded Hydra-S3 snark proof and decoded public inputs
   // This struct is used to avoid stack too deep error
-  struct HydraS2Proof {
-    HydraS2ProofData data;
-    HydraS2ProofInput input;
+  struct HydraS3Proof {
+    HydraS3ProofData data;
+    HydraS3ProofInput input;
   }
 
-  // Struct holding the verified Auth and Claim from the Hydra-S2 snark proof
+  // Struct holding the verified Auth and Claim from the Hydra-S3 snark proof
   // This struct is used to avoid stack too deep error
   struct VerifiedProof {
     VerifiedAuth auth;
@@ -31,7 +31,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   }
 
   uint8 public constant IMPLEMENTATION_VERSION = 1;
-  bytes32 public immutable HYDRA_S2_VERSION = "hydra-s2.1";
+  bytes32 public immutable HYDRA_S3_VERSION = "hydra-s3.1";
   // Registry storing the Commitment Mapper EdDSA Public key
   ICommitmentMapperRegistry public immutable COMMITMENT_MAPPER_REGISTRY;
   // Registry storing the Registry Tree Roots of the Attester's available ClaimData
@@ -53,18 +53,18 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     SismoConnectProof memory sismoConnectProof
   ) external view override returns (VerifiedAuth memory, VerifiedClaim memory) {
     // Verify the sismoConnectProof version corresponds to the current verifier.
-    if (sismoConnectProof.provingScheme != HYDRA_S2_VERSION) {
+    if (sismoConnectProof.provingScheme != HYDRA_S3_VERSION) {
       revert InvalidVersion(sismoConnectProof.provingScheme);
     }
 
-    HydraS2Proof memory hydraS2Proof = HydraS2Proof({
+    HydraS3Proof memory hydraS3Proof = HydraS3Proof({
       // Decode the snark proof data from the sismoConnectProof
-      data: abi.decode(sismoConnectProof.proofData, (HydraS2ProofData)),
+      data: abi.decode(sismoConnectProof.proofData, (HydraS3ProofData)),
       // Get the public inputs from the snark proof data
-      input: abi.decode(sismoConnectProof.proofData, (HydraS2ProofData))._input()
+      input: abi.decode(sismoConnectProof.proofData, (HydraS3ProofData))._input()
     });
 
-    // We only support one Auth and one Claim in the hydra-s2 proving scheme
+    // We only support one Auth and one Claim in the hydra-s3 proving scheme
     // We revert if there is more than one Auth or Claim in the sismoConnectProof
     if (sismoConnectProof.auths.length > 1 || sismoConnectProof.claims.length > 1) {
       revert OnlyOneAuthAndOneClaimIsSupported();
@@ -75,10 +75,10 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     VerifiedProof memory verifiedProof;
     if (sismoConnectProof.auths.length == 1) {
       // Get the Auth from the sismoConnectProof
-      // We only support one Auth in the hydra-s2 proving scheme
+      // We only support one Auth in the hydra-s3 proving scheme
       Auth memory auth = sismoConnectProof.auths[0];
       verifiedProof.auth = _verifyAuthValidity(
-        hydraS2Proof.input,
+        hydraS3Proof.input,
         sismoConnectProof.proofData,
         auth,
         appId
@@ -86,10 +86,10 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     }
     if (sismoConnectProof.claims.length == 1) {
       // Get the Claim from the sismoConnectProof
-      // We only support one Claim in the hydra-s2 proving scheme
+      // We only support one Claim in the hydra-s3 proving scheme
       Claim memory claim = sismoConnectProof.claims[0];
       verifiedProof.claim = _verifyClaimValidity(
-        hydraS2Proof.input,
+        hydraS3Proof.input,
         sismoConnectProof.proofData,
         claim,
         appId,
@@ -98,15 +98,15 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
       );
     }
 
-    _validateSignedMessageInput(hydraS2Proof.input, signedMessage);
+    _validateSignedMessageInput(hydraS3Proof.input, signedMessage);
 
     // Check the snarkProof is valid
-    _checkSnarkProof(hydraS2Proof.data);
+    _checkSnarkProof(hydraS3Proof.data);
     return (verifiedProof.auth, verifiedProof.claim);
   }
 
   function _verifyClaimValidity(
-    HydraS2ProofInput memory input,
+    HydraS3ProofInput memory input,
     bytes memory proofData,
     Claim memory claim,
     bytes16 appId,
@@ -184,7 +184,7 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   }
 
   function _verifyAuthValidity(
-    HydraS2ProofInput memory input,
+    HydraS3ProofInput memory input,
     bytes memory proofData,
     Auth memory auth,
     bytes16 appId
@@ -237,22 +237,22 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   }
 
   function _validateSignedMessageInput(
-    HydraS2ProofInput memory input,
+    HydraS3ProofInput memory input,
     bytes memory signedMessage
   ) private pure {
     // don't check extraData if signedMessage from response is empty
     if (keccak256(signedMessage) == keccak256(abi.encode(0x00))) {
       return;
     }
-    if (input.extraData != uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD) {
+    if (input.extraData != uint256(keccak256(signedMessage)) % HydraS3Lib.SNARK_FIELD) {
       revert InvalidExtraData(
         input.extraData,
-        uint256(keccak256(signedMessage)) % HydraS2Lib.SNARK_FIELD
+        uint256(keccak256(signedMessage)) % HydraS3Lib.SNARK_FIELD
       );
     }
   }
 
-  function _checkSnarkProof(HydraS2ProofData memory snarkProofData) internal view {
+  function _checkSnarkProof(HydraS3ProofData memory snarkProofData) internal view {
     if (
       !verifyProof(
         snarkProofData.proof.a,
@@ -274,14 +274,14 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
     bytes32 groupSnapshotId = _encodeGroupSnapshotId(groupId, groupTimestamp);
     bytes32 serviceId = _encodeServiceId(appId, namespace);
     return
-      uint256(keccak256(abi.encodePacked(serviceId, groupSnapshotId))) % HydraS2Lib.SNARK_FIELD;
+      uint256(keccak256(abi.encodePacked(serviceId, groupSnapshotId))) % HydraS3Lib.SNARK_FIELD;
   }
 
   function _encodeAccountsTreeValue(
     bytes16 groupId,
     bytes16 groupTimestamp
   ) internal pure returns (uint256) {
-    return uint256(_encodeGroupSnapshotId(groupId, groupTimestamp)) % HydraS2Lib.SNARK_FIELD;
+    return uint256(_encodeGroupSnapshotId(groupId, groupTimestamp)) % HydraS3Lib.SNARK_FIELD;
   }
 
   function _encodeGroupSnapshotId(
@@ -296,6 +296,6 @@ contract HydraS2Verifier is IHydraS2Verifier, IBaseVerifier, HydraS2SnarkVerifie
   }
 
   function _encodeVaultNamespace(bytes16 appId) internal pure returns (uint256) {
-    return uint256(keccak256(abi.encodePacked(appId, bytes16(0)))) % HydraS2Lib.SNARK_FIELD;
+    return uint256(keccak256(abi.encodePacked(appId, bytes16(0)))) % HydraS3Lib.SNARK_FIELD;
   }
 }

@@ -2,14 +2,14 @@
 pragma solidity ^0.8.17;
 
 import {BaseTest} from "test/BaseTest.t.sol";
-import "src/verifiers/HydraS2Verifier.sol";
-import "./HydraS2Proofs.sol";
+import "src/verifiers/HydraS3Verifier.sol";
+import "./HydraS3Proofs.sol";
 import {CommitmentMapperRegistryMock, ICommitmentMapperRegistry} from "test/mocks/CommitmentMapperRegistryMock.sol";
 import {AvailableRootsRegistryMock} from "test/mocks/AvailableRootsRegistryMock.sol";
 
-contract HydraS2BaseTest is BaseTest {
-  HydraS2Proofs immutable hydraS2Proofs = new HydraS2Proofs();
-  HydraS2Verifier hydraS2Verifier;
+contract HydraS3BaseTest is BaseTest {
+  HydraS3Proofs immutable hydraS3Proofs = new HydraS3Proofs();
+  HydraS3Verifier hydraS3Verifier;
   ICommitmentMapperRegistry commitmentMapperRegistry;
   AvailableRootsRegistryMock availableRootsRegistry;
 
@@ -19,19 +19,19 @@ contract HydraS2BaseTest is BaseTest {
     commitmentMapperRegistry = new CommitmentMapperRegistryMock();
     availableRootsRegistry = new AvailableRootsRegistryMock();
 
-    hydraS2Verifier = new HydraS2Verifier(
+    hydraS3Verifier = new HydraS3Verifier(
       address(commitmentMapperRegistry),
       address(availableRootsRegistry)
     );
 
     vm.startPrank(owner);
     sismoConnectVerifier.registerVerifier(
-      hydraS2Verifier.HYDRA_S2_VERSION(),
-      address(hydraS2Verifier)
+      hydraS3Verifier.HYDRA_S3_VERSION(),
+      address(hydraS3Verifier)
     );
     vm.stopPrank();
 
-    commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(hydraS2Proofs.getEdDSAPubKey());
-    availableRootsRegistry.registerRoot(hydraS2Proofs.getRoot());
+    commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(hydraS3Proofs.getEdDSAPubKey());
+    availableRootsRegistry.registerRoot(hydraS3Proofs.getRoot());
   }
 }

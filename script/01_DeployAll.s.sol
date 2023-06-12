@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 import "src/periphery/AvailableRootsRegistry.sol";
 import "src/periphery/CommitmentMapperRegistry.sol";
-import {HydraS2Verifier} from "src/verifiers/HydraS2Verifier.sol";
+import {HydraS3Verifier} from "src/verifiers/HydraS3Verifier.sol";
 
 import {SismoConnectVerifier} from "src/SismoConnectVerifier.sol";
 import {AuthRequestBuilder} from "src/libs/utils/AuthRequestBuilder.sol";
@@ -21,7 +21,7 @@ import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.so
 contract DeployAll is Script, BaseDeploymentConfig {
   AvailableRootsRegistry availableRootsRegistry;
   CommitmentMapperRegistry commitmentMapperRegistry;
-  HydraS2Verifier hydraS2Verifier;
+  HydraS3Verifier hydraS3Verifier;
   SismoConnectVerifier sismoConnectVerifier;
 
   // external libraries
@@ -47,19 +47,19 @@ contract DeployAll is Script, BaseDeploymentConfig {
       _readAddressFromDeploymentConfigAtKey(".owner"),
       _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig()
     );
-    hydraS2Verifier = _deployHydraS2Verifier(commitmentMapperRegistry, availableRootsRegistry);
+    hydraS3Verifier = _deployHydraS3Verifier(commitmentMapperRegistry, availableRootsRegistry);
     sismoConnectVerifier = _deploySismoConnectVerifier(msg.sender);
 
     sismoConnectVerifier.registerVerifier(
-      hydraS2Verifier.HYDRA_S2_VERSION(),
-      address(hydraS2Verifier)
+      hydraS3Verifier.HYDRA_S3_VERSION(),
+      address(hydraS3Verifier)
     );
 
     sismoConnectVerifier.transferOwnership(_readAddressFromDeploymentConfigAtKey(".owner"));
 
     contracts.availableRootsRegistry = availableRootsRegistry;
     contracts.commitmentMapperRegistry = commitmentMapperRegistry;
-    contracts.hydraS2Verifier = hydraS2Verifier;
+    contracts.hydraS3Verifier = hydraS3Verifier;
     contracts.sismoConnectVerifier = sismoConnectVerifier;
 
     // external libraries
@@ -82,7 +82,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
       sismoAddressesProvider: _readAddressFromDeploymentConfigAtKey(".sismoAddressesProvider"),
       availableRootsRegistry: address(availableRootsRegistry),
       commitmentMapperRegistry: address(commitmentMapperRegistry),
-      hydraS2Verifier: address(hydraS2Verifier),
+      hydraS3Verifier: address(hydraS3Verifier),
       sismoConnectVerifier: address(sismoConnectVerifier),
       authRequestBuilder: address(authRequestBuilder),
       claimRequestBuilder: address(claimRequestBuilder),
@@ -146,30 +146,30 @@ contract DeployAll is Script, BaseDeploymentConfig {
     return CommitmentMapperRegistry(address(proxy));
   }
 
-  function _deployHydraS2Verifier(
+  function _deployHydraS3Verifier(
     CommitmentMapperRegistry _commitmentMapperRegistry,
     AvailableRootsRegistry _availableRootsRegistry
-  ) private returns (HydraS2Verifier) {
-    address hydraS2VerifierAddress = _readAddressFromDeploymentConfigAtKey(".hydraS2Verifier");
-    if (hydraS2VerifierAddress != address(0)) {
-      console.log("Using existing hydraS2Verifier:", hydraS2VerifierAddress);
-      return HydraS2Verifier(hydraS2VerifierAddress);
+  ) private returns (HydraS3Verifier) {
+    address hydraS3VerifierAddress = _readAddressFromDeploymentConfigAtKey(".hydraS3Verifier");
+    if (hydraS3VerifierAddress != address(0)) {
+      console.log("Using existing hydraS3Verifier:", hydraS3VerifierAddress);
+      return HydraS3Verifier(hydraS3VerifierAddress);
     }
     address commitmentMapperRegistryAddr = address(_commitmentMapperRegistry);
     address availableRootsRegistryAddr = address(_availableRootsRegistry);
-    HydraS2Verifier hydraS2VerifierImplem = new HydraS2Verifier(
+    HydraS3Verifier hydraS3VerifierImplem = new HydraS3Verifier(
       commitmentMapperRegistryAddr,
       availableRootsRegistryAddr
     );
-    console.log("hydraS2Verifier Implem Deployed:", address(hydraS2VerifierImplem));
+    console.log("hydraS3Verifier Implem Deployed:", address(hydraS3VerifierImplem));
 
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-      address(hydraS2VerifierImplem),
+      address(hydraS3VerifierImplem),
       _readAddressFromDeploymentConfigAtKey(".proxyAdmin"),
-      abi.encodeWithSelector(hydraS2VerifierImplem.initialize.selector)
+      abi.encodeWithSelector(hydraS3VerifierImplem.initialize.selector)
     );
-    console.log("hydraS2Verifier Proxy Deployed:", address(proxy));
-    return HydraS2Verifier(address(proxy));
+    console.log("hydraS3Verifier Proxy Deployed:", address(proxy));
+    return HydraS3Verifier(address(proxy));
   }
 
   function _deploySismoConnectVerifier(address owner) private returns (SismoConnectVerifier) {
@@ -252,7 +252,7 @@ library ScriptTypes {
   struct DeployAllContracts {
     AvailableRootsRegistry availableRootsRegistry;
     CommitmentMapperRegistry commitmentMapperRegistry;
-    HydraS2Verifier hydraS2Verifier;
+    HydraS3Verifier hydraS3Verifier;
     SismoConnectVerifier sismoConnectVerifier;
     // external libraries
     AuthRequestBuilder authRequestBuilder;

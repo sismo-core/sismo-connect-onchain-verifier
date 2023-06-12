@@ -11,7 +11,7 @@ struct DeploymentConfig {
   address claimRequestBuilder;
   uint256[2] commitmentMapperEdDSAPubKey;
   address commitmentMapperRegistry;
-  address hydraS2Verifier;
+  address hydraS3Verifier;
   address owner;
   address proxyAdmin;
   address requestBuilder;
@@ -208,7 +208,7 @@ contract BaseDeploymentConfig is Script {
       commitmentMapperRegistry: ZERO_ADDRESS,
       sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
       sismoConnectVerifier: ZERO_ADDRESS,
-      hydraS2Verifier: ZERO_ADDRESS,
+      hydraS3Verifier: ZERO_ADDRESS,
       // external libraries
       authRequestBuilder: ZERO_ADDRESS,
       claimRequestBuilder: ZERO_ADDRESS,
@@ -288,7 +288,7 @@ contract BaseDeploymentConfig is Script {
       "commitmentMapperRegistry",
       address(deploymentConfig.commitmentMapperRegistry)
     );
-    vm.serializeAddress(chainName, "hydraS2Verifier", address(deploymentConfig.hydraS2Verifier));
+    vm.serializeAddress(chainName, "hydraS3Verifier", address(deploymentConfig.hydraS3Verifier));
     vm.serializeAddress(
       chainName,
       "sismoConnectVerifier",

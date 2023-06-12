@@ -27,19 +27,19 @@ declare -a contract_keys=("authRequestBuilder"
                           "availableRootsRegistry"
                           "claimRequestBuilder"
                           "commitmentMapperRegistry"
-                          "hydraS2Verifier"
+                          "hydraS3Verifier"
                           "requestBuilder"
                           "signatureBuilder"
                           "sismoConnectVerifier")
 
-declare -a contract_values=("authRequestBuilder-v1"
+declare -a contract_values=("authRequestBuilder-v1.1"
                             "sismoConnectAvailableRootsRegistry"
-                            "claimRequestBuilder-v1"
+                            "claimRequestBuilder-v1.1"
                             "sismoConnectCommitmentMapperRegistry"
-                            "hydraS2Verifier"
-                            "requestBuilder-v1"
-                            "signatureBuilder-v1"
-                            "sismoConnectVerifier-v1")
+                            "hydraS3Verifier"
+                            "requestBuilder-v1.1"
+                            "signatureBuilder-v1.1"
+                            "sismoConnectVerifier-v1.1")
 
 # Loop over contract names
 for index in "${!contract_keys[@]}"

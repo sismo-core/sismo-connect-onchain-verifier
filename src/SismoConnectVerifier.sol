@@ -13,7 +13,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
   using ClaimMatchingLib for Claim;
 
   uint8 public constant IMPLEMENTATION_VERSION = 1;
-  bytes32 public immutable SISMO_CONNECT_VERSION = "sismo-connect-v1";
+  bytes32 public immutable SISMO_CONNECT_VERSION = "sismo-connect-v1.1";
 
   mapping(bytes32 => IBaseVerifier) public _verifiers;
 

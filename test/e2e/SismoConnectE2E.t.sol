@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import "src/libs/utils/Fmt.sol";
-import {HydraS2BaseTest} from "../verifiers/hydra-s2/HydraS2BaseTest.t.sol";
+import {HydraS3BaseTest} from "../verifiers/hydra-s3/HydraS3BaseTest.t.sol";
 import {SismoConnect, RequestBuilder, ClaimRequestBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
 import {ZKDropERC721} from "src/ZKDropERC721.sol";
 import "src/libs/utils/Structs.sol";
@@ -18,7 +18,7 @@ import {BaseDeploymentConfig} from "script/BaseConfig.sol";
 // These tests are made with proofs generated from the Vault App
 // These tests should not use any Verifier mocks
 
-contract SismoConnectE2E is HydraS2BaseTest {
+contract SismoConnectE2E is HydraS3BaseTest {
   using ResponseBuilder for SismoConnectResponse;
   using ResponseBuilder for ResponseWithoutProofs;
 
@@ -28,7 +28,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
   // default values for tests
   bytes16 public DEFAULT_APP_ID = 0x11b1de449c6c4adb0b5775b3868b28b3;
   bytes16 public DEFAULT_NAMESPACE = bytes16(keccak256("main"));
-  bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1");
+  bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1.1");
   bytes public DEFAULT_SIGNED_MESSAGE = abi.encode(user);
 
   bool public DEFAULT_IS_IMPERSONATION_MODE = false;
@@ -70,7 +70,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
   }
 
   function test_SismoConnectLibWithOnlyClaimAndMessage() public {
-    (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithOneClaimAndSignature(
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithOneClaimAndSignature(
       commitmentMapperRegistry
     );
 
@@ -84,7 +84,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
   }
 
   function test_SismoConnectLibWithTwoClaimsAndMessage() public {
-    (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsAndSignature(
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithTwoClaimsAndSignature(
       commitmentMapperRegistry
     );
 
@@ -102,7 +102,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
   }
 
   function test_SismoConnectLibWithOnlyOneAuth() public {
-    (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithOnlyOneAuthAndMessage(
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithOnlyOneAuthAndMessage(
       commitmentMapperRegistry
     );
 
@@ -119,7 +119,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
   }
 
   function test_SismoConnectLibWithClaimAndAuth() public {
-    (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithOneClaimOneAuthAndOneMessage(
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithOneClaimOneAuthAndOneMessage(
       commitmentMapperRegistry
     );
     SismoConnectRequest memory request = requestBuilder.build({
@@ -169,7 +169,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
       signature: signature
     });
 
-    (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
       commitmentMapperRegistry
     );
 
@@ -199,7 +199,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
       signature: signature
     });
 
-    (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
       commitmentMapperRegistry
     );
 
@@ -236,7 +236,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
       signature: signature
     });
 
-    (, bytes memory responseEncoded) = hydraS2Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithTwoClaimsOneAuthAndOneSignature(
       commitmentMapperRegistry
     );
 
@@ -249,7 +249,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
 
   function test_OneClaimOneOptionalTwitterAuthOneGithubAuthWithSignature() public {
     commitmentMapperRegistry.updateCommitmentMapperEdDSAPubKey(
-      hydraS2Proofs.getEdDSAPubKeyDevBeta()
+      hydraS3Proofs.getEdDSAPubKeyDevBeta()
     );
 
     ClaimRequest[] memory claims = new ClaimRequest[](1);
@@ -280,7 +280,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
   }
 
   function test_GitHubAuth() public {
-    (, bytes memory encodedResponse) = hydraS2Proofs.getResponseWithGitHubAuth(
+    (, bytes memory encodedResponse) = hydraS3Proofs.getResponseWithGitHubAuth(
       commitmentMapperRegistry
     );
 
@@ -293,7 +293,7 @@ contract SismoConnectE2E is HydraS2BaseTest {
   }
 
   function test_GitHubAuthWithoutSignature() public {
-    (, bytes memory encodedResponse) = hydraS2Proofs.getResponseWithGitHubAuthWithoutSignature(
+    (, bytes memory encodedResponse) = hydraS3Proofs.getResponseWithGitHubAuthWithoutSignature(
       commitmentMapperRegistry
     );
 

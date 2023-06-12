@@ -38,23 +38,23 @@ contract BaseTest is Test {
 
     IAddressesProvider(sismoAddressProvider).set(
       address(sismoConnectVerifier),
-      string("sismoConnectVerifier-v1")
+      string("sismoConnectVerifier-v1.1")
     );
     IAddressesProvider(sismoAddressProvider).set(
       address(authRequestBuilder),
-      string("authRequestBuilder-v1")
+      string("authRequestBuilder-v1.1")
     );
     IAddressesProvider(sismoAddressProvider).set(
       address(claimRequestBuilder),
-      string("claimRequestBuilder-v1")
+      string("claimRequestBuilder-v1.1")
     );
     IAddressesProvider(sismoAddressProvider).set(
       address(signatureBuilder),
-      string("signatureBuilder-v1")
+      string("signatureBuilder-v1.1")
     );
     IAddressesProvider(sismoAddressProvider).set(
       address(requestBuilder),
-      string("requestBuilder-v1")
+      string("requestBuilder-v1.1")
     );
   }
 }

@@ -24,7 +24,7 @@ contract SismoConnectLibTest is VerifierMockBaseTest {
   // default values for tests
   bytes16 public DEFAULT_APP_ID = 0x11b1de449c6c4adb0b5775b3868b28b3;
   bytes16 public DEFAULT_NAMESPACE = bytes16(keccak256("main"));
-  bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1");
+  bytes32 public DEFAULT_VERSION = bytes32("sismo-connect-v1.1");
   bytes public DEFAULT_SIGNED_MESSAGE = abi.encode(user);
 
   bool public DEFAULT_IS_IMPERSONATION_MODE = false;
