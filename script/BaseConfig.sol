@@ -206,7 +206,7 @@ contract BaseDeploymentConfig is Script {
       commitmentMapperEdDSAPubKey: minimalConfig.commitmentMapperEdDSAPubKey,
       availableRootsRegistry: ZERO_ADDRESS,
       commitmentMapperRegistry: ZERO_ADDRESS,
-      sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
+      sismoAddressesProvider: ZERO_ADDRESS,
       sismoConnectVerifier: ZERO_ADDRESS,
       hydraS3Verifier: ZERO_ADDRESS,
       // external libraries
@@ -326,8 +326,8 @@ contract BaseDeploymentConfig is Script {
     vm.serializeString(chainName, "commitmentMapperEdDSAPubKey", commitmentMapperPubKeyConfig);
     string memory finalJson = vm.serializeAddress(
       chainName,
-      "sismoAddressesProvider",
-      SISMO_ADDRESSES_PROVIDER
+      "sismoAddressesProviderV2",
+      address(deploymentConfig.sismoAddressesProvider)
     );
 
     vm.writeJson(finalJson, _deploymentConfigFilePath());
