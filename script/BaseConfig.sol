@@ -35,7 +35,7 @@ contract BaseDeploymentConfig is Script {
 
   string public _chainName;
 
-  address immutable SISMO_ADDRESSES_PROVIDER = 0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05;
+  address immutable SISMO_ADDRESSES_PROVIDER_V2 = 0xBE4C66cB71C5b5b88cAfE4255E650CC30CBF606B;
   address immutable ZERO_ADDRESS = 0x0000000000000000000000000000000000000000;
 
   // Main Env
@@ -360,9 +360,10 @@ contract BaseDeploymentConfig is Script {
         "If you want to deploy to a chain different from localhost, you need to specify a chain name different from `test`."
       );
       // return the real config if we are NOT using a fork
-      isLocalFork == true
-        ? string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json")
-        : string.concat(vm.projectRoot(), "/script/deployments/", _chainName, ".json");
+      return
+        isLocalFork == true
+          ? string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json")
+          : string.concat(vm.projectRoot(), "/script/deployments/", _chainName, ".json");
     }
     // return the temporary config
     return string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json");

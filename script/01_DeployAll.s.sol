@@ -79,7 +79,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
       owner: _readAddressFromDeploymentConfigAtKey(".owner"),
       rootsOwner: _readAddressFromDeploymentConfigAtKey(".rootsOwner"),
       commitmentMapperEdDSAPubKey: _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig(),
-      sismoAddressesProvider: _readAddressFromDeploymentConfigAtKey(".sismoAddressesProviderV2"),
+      sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER_V2,
       availableRootsRegistry: address(availableRootsRegistry),
       commitmentMapperRegistry: address(commitmentMapperRegistry),
       hydraS3Verifier: address(hydraS3Verifier),

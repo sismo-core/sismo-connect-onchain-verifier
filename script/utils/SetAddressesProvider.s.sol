@@ -57,7 +57,7 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
   }
 
   function _setAddress(address contractAddress, string memory contractName) internal {
-    IAddressesProvider sismoAddressProvider = IAddressesProvider(SISMO_ADDRESSES_PROVIDER);
+    IAddressesProvider sismoAddressProvider = IAddressesProvider(SISMO_ADDRESSES_PROVIDER_V2);
     address currentContractAddress = sismoAddressProvider.get(contractName);
 
     if (currentContractAddress != contractAddress) {
