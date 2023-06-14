@@ -3,7 +3,7 @@
 # Get chain name from command line arguments to get the config file
 chain_name=$1
 config_file="./script/deployments/tmp/${chain_name}.json"
-ADDRESSES_PROVIDER_V2_ADDRESS=0xBE4C66cB71C5b5b88cAfE4255E650CC30CBF606B
+ADDRESSES_PROVIDER_V2_ADDRESS=0x80B22Ccf8d88cb4AC5636183D5A592206430f1f5
 
 # Deploy Sismo Connect protocol contracts on a local fork
 # Deployment is made from the first account of anvil

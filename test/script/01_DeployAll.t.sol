@@ -6,8 +6,8 @@ import "forge-std/console.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import "script/01_DeployAll.s.sol";
-import "script/DeployAvailableRootsRegistry.s.sol";
-import "script/DeployCommitmentMapperRegistry.s.sol";
+import {DeployAvailableRootsRegistry} from "script/DeployAvailableRootsRegistry.s.sol";
+import {DeployCommitmentMapperRegistry} from "script/DeployCommitmentMapperRegistry.s.sol";
 import "script/BaseConfig.sol";
 
 contract DeployAllTest is Test, BaseDeploymentConfig {

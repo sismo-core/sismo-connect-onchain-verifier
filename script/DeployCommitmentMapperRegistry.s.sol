@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
 import {CommitmentMapperRegistry} from "../src/periphery/CommitmentMapperRegistry.sol";
-import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {TransparentUpgradeableProxy} from "./utils/openzeppelin-contracts-tag-4.8.2/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 
 contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
@@ -12,7 +12,7 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
   // create2Factory address from https://github.com/Arachnid/deterministic-deployment-proxy
   address internal constant CREATE2_FACTORY_ADDRESS = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
   address internal constant DETERMINISTIC_DEPLOYMENT_ADDRESS =
-    0x4D9D4234f8E21a85665470e222A4945A18088B79;
+    0x7220FA203e949bB4af72e3bD2f14F98afB4679E2;
 
   function run() public returns (CommitmentMapperRegistry) {
     string memory chainName = vm.envString("CHAIN_NAME");
@@ -59,7 +59,7 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
     ) {
       require(
         false,
-        "CommitmentMapperRegistry contract address should be 0x4D9D4234f8E21a85665470e222A4945A18088B79!"
+        "CommitmentMapperRegistry contract address should be 0x7220FA203e949bB4af72e3bD2f14F98afB4679E2!"
       );
     }
 

@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
 import {AvailableRootsRegistry} from "../src/periphery/AvailableRootsRegistry.sol";
-import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {TransparentUpgradeableProxy} from "./utils/openzeppelin-contracts-tag-4.8.2/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 
 contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
@@ -12,7 +12,7 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
   // create2Factory address from https://github.com/Arachnid/deterministic-deployment-proxy
   address internal constant CREATE2_FACTORY_ADDRESS = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
   address internal constant DETERMINISTIC_DEPLOYMENT_ADDRESS =
-    0x54F328Bd304D489ebca0F642DC060673BA48eA19;
+    0x6d1EA2426647C3aDFCBDC623080C76AaC21366Cb;
 
   function run() public returns (AvailableRootsRegistry) {
     string memory chainName = vm.envString("CHAIN_NAME");
@@ -58,7 +58,7 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
     ) {
       require(
         false,
-        "AvailableRootsRegistry contract address should be 0x54F328Bd304D489ebca0F642DC060673BA48eA19!"
+        "AvailableRootsRegistry contract address should be 0x6d1EA2426647C3aDFCBDC623080C76AaC21366Cb!"
       );
     }
 

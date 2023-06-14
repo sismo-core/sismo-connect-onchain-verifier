@@ -36,7 +36,7 @@ contract BaseDeploymentConfig is Script {
   string public _chainName;
   bool public _checkIfEmpty;
 
-  address immutable SISMO_ADDRESSES_PROVIDER_V2 = 0xBE4C66cB71C5b5b88cAfE4255E650CC30CBF606B;
+  address immutable SISMO_ADDRESSES_PROVIDER_V2 = 0x80B22Ccf8d88cb4AC5636183D5A592206430f1f5;
   address immutable ZERO_ADDRESS = 0x0000000000000000000000000000000000000000;
 
   // Main Env
