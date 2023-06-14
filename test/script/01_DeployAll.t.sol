@@ -6,16 +6,60 @@ import "forge-std/console.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import "script/01_DeployAll.s.sol";
+import "script/DeployAvailableRootsRegistry.s.sol";
+import "script/DeployCommitmentMapperRegistry.s.sol";
+import "script/BaseConfig.sol";
 
-contract DeployAllTest is Test {
+contract DeployAllTest is Test, BaseDeploymentConfig {
   ScriptTypes.DeployAllContracts contracts;
+  AvailableRootsRegistry availableRootsRegistry;
+  CommitmentMapperRegistry commitmentMapperRegistry;
+  DeployAll deploy;
 
   address immutable PROXY_ADMIN = address(1);
   address immutable OWNER = address(2);
   address immutable ROOTS_OWNER = address(3);
 
   function setUp() public virtual {
-    DeployAll deploy = new DeployAll();
+    _chainName = "test";
+    _checkIfEmpty = true;
+
+    // Deploy AvailableRootsRegistry
+    DeployAvailableRootsRegistry deployAvailableRootsRegistry = new DeployAvailableRootsRegistry();
+    (
+      bool deployAvailableRootsRegistrySuccess,
+      bytes memory deployAvailableRootsRegistryResult
+    ) = address(deployAvailableRootsRegistry).delegatecall(
+        abi.encodeWithSelector(DeployAvailableRootsRegistry.runFor.selector, "test")
+      );
+    require(
+      deployAvailableRootsRegistrySuccess,
+      "DeployAvailableRootsRegistry script did not run successfully!"
+    );
+    availableRootsRegistry = abi.decode(
+      deployAvailableRootsRegistryResult,
+      (AvailableRootsRegistry)
+    );
+
+    // Deploy CommitmentMapperRegistry
+    DeployCommitmentMapperRegistry deployCommitmentMapperRegistry = new DeployCommitmentMapperRegistry();
+    (
+      bool deployCommitmentMapperRegistrySuccess,
+      bytes memory deployCommitmentMapperRegistryResult
+    ) = address(deployCommitmentMapperRegistry).delegatecall(
+        abi.encodeWithSelector(DeployCommitmentMapperRegistry.runFor.selector, "test")
+      );
+    require(
+      deployCommitmentMapperRegistrySuccess,
+      "DeployCommitmentMapperRegistry script did not run successfully!"
+    );
+    commitmentMapperRegistry = abi.decode(
+      deployCommitmentMapperRegistryResult,
+      (CommitmentMapperRegistry)
+    );
+
+    // Deploy All
+    deploy = new DeployAll();
 
     (bool success, bytes memory result) = address(deploy).delegatecall(
       abi.encodeWithSelector(DeployAll.runFor.selector, "test")
@@ -24,29 +68,19 @@ contract DeployAllTest is Test {
     contracts = abi.decode(result, (ScriptTypes.DeployAllContracts));
   }
 
-  function testDeployment() public view {
-    console.log(address(contracts.availableRootsRegistry));
-  }
-
-  function testAvailableRootsRegistryDeployed() public {
-    _expectDeployedWithProxy(address(contracts.availableRootsRegistry), PROXY_ADMIN);
-    assertEq(contracts.availableRootsRegistry.owner(), ROOTS_OWNER);
-  }
-
-  function testCommitmentMapperRegistryDeployed() public {
-    _expectDeployedWithProxy(address(contracts.commitmentMapperRegistry), PROXY_ADMIN);
-    assertEq(contracts.commitmentMapperRegistry.owner(), OWNER);
+  function testDeployment() public {
+    console.log(address(contracts.sismoConnectVerifier));
   }
 
   function testHydraS3Verifier() public {
     _expectDeployedWithProxy(address(contracts.hydraS3Verifier), PROXY_ADMIN);
     assertEq(
       address(contracts.hydraS3Verifier.COMMITMENT_MAPPER_REGISTRY()),
-      address(contracts.commitmentMapperRegistry)
+      address(commitmentMapperRegistry)
     );
     assertEq(
       address(contracts.hydraS3Verifier.AVAILABLE_ROOTS_REGISTRY()),
-      address(contracts.availableRootsRegistry)
+      address(availableRootsRegistry)
     );
   }
 
@@ -59,6 +93,10 @@ contract DeployAllTest is Test {
     assertEq(contracts.sismoConnectVerifier.owner(), OWNER);
   }
 
+  function test_RemoveFile() public {
+    removeFile();
+  }
+
   function _expectDeployedWithProxy(address proxy, address expectedAdmin) internal {
     // Expect proxy is deployed behin a TransparentUpgradeableProxy proxy with the right admin
     vm.prank(expectedAdmin);
@@ -67,5 +105,11 @@ contract DeployAllTest is Test {
     );
     assertEq(success, true);
     assertEq(abi.decode(result, (address)), PROXY_ADMIN);
+  }
+
+  function removeFile() internal {
+    console.log("Removing deploymentConfigFilePath", _deploymentConfigFilePath());
+
+    vm.removeFile(_deploymentConfigFilePath());
   }
 }

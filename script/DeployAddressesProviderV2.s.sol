@@ -14,8 +14,12 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
   address internal constant DETERMINISTIC_DEPLOYMENT_ADDRESS =
     0xBE4C66cB71C5b5b88cAfE4255E650CC30CBF606B;
 
-  function run() public {
+  function run() public returns (AddressesProviderV2) {
     string memory chainName = vm.envString("CHAIN_NAME");
+    return runFor(chainName);
+  }
+
+  function runFor(string memory chainName) public returns (AddressesProviderV2) {
     console.log("Run for CHAIN_NAME:", chainName);
     console.log("Deployer:", msg.sender);
 
@@ -90,7 +94,7 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
       owner: _readAddressFromDeploymentConfigAtKey(".owner"),
       rootsOwner: _readAddressFromDeploymentConfigAtKey(".rootsOwner"),
       commitmentMapperEdDSAPubKey: _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig(),
-      sismoAddressesProvider: address(addressesProviderV2),
+      sismoAddressesProviderV2: address(addressesProviderV2),
       availableRootsRegistry: _readAddressFromDeploymentConfigAtKey(".availableRootsRegistry"),
       commitmentMapperRegistry: _readAddressFromDeploymentConfigAtKey(".commitmentMapperRegistry"),
       hydraS3Verifier: _readAddressFromDeploymentConfigAtKey(".hydraS3Verifier"),
@@ -104,6 +108,8 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
     _saveDeploymentConfig(chainName, newDeploymentConfig);
 
     vm.stopBroadcast();
+
+    return AddressesProviderV2(address(addressesProviderV2));
   }
 
   function _getAddress(

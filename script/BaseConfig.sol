@@ -17,7 +17,7 @@ struct DeploymentConfig {
   address requestBuilder;
   address rootsOwner;
   address signatureBuilder;
-  address sismoAddressesProvider;
+  address sismoAddressesProviderV2;
   address sismoConnectVerifier;
 }
 
@@ -34,6 +34,7 @@ contract BaseDeploymentConfig is Script {
   DeploymentConfig config;
 
   string public _chainName;
+  bool public _checkIfEmpty;
 
   address immutable SISMO_ADDRESSES_PROVIDER_V2 = 0xBE4C66cB71C5b5b88cAfE4255E650CC30CBF606B;
   address immutable ZERO_ADDRESS = 0x0000000000000000000000000000000000000000;
@@ -199,9 +200,15 @@ contract BaseDeploymentConfig is Script {
       owner: minimalConfig.owner,
       rootsOwner: minimalConfig.rootsOwner,
       commitmentMapperEdDSAPubKey: minimalConfig.commitmentMapperEdDSAPubKey,
-      availableRootsRegistry: ZERO_ADDRESS,
-      commitmentMapperRegistry: ZERO_ADDRESS,
-      sismoAddressesProvider: ZERO_ADDRESS,
+      availableRootsRegistry: _tryReadingAddressFromDeploymentConfigAtKey(
+        ".availableRootsRegistry"
+      ),
+      commitmentMapperRegistry: _tryReadingAddressFromDeploymentConfigAtKey(
+        ".commitmentMapperRegistry"
+      ),
+      sismoAddressesProviderV2: _tryReadingAddressFromDeploymentConfigAtKey(
+        ".sismoAddressesProviderV2"
+      ),
       sismoConnectVerifier: ZERO_ADDRESS,
       hydraS3Verifier: ZERO_ADDRESS,
       // external libraries
@@ -216,6 +223,7 @@ contract BaseDeploymentConfig is Script {
 
   function _setDeploymentConfig(string memory chainName, bool checkIfEmpty) internal {
     _chainName = chainName;
+    _checkIfEmpty = checkIfEmpty;
     // read deployment config from file if the chain is different from `test`
     string memory filePath = string.concat(_deploymentConfigFilePath());
 
@@ -247,6 +255,21 @@ contract BaseDeploymentConfig is Script {
       abi.decode(encodedAddress, (address)) == address(0x20)
         ? address(0)
         : abi.decode(encodedAddress, (address));
+  }
+
+  function _tryReadingAddressFromDeploymentConfigAtKey(
+    string memory key
+  ) internal view returns (address) {
+    try vm.parseJson(vm.readFile(_deploymentConfigFilePath()), key) returns (
+      bytes memory encodedAddress
+    ) {
+      return
+        abi.decode(encodedAddress, (address)) == address(0x20)
+          ? address(0)
+          : abi.decode(encodedAddress, (address));
+    } catch {
+      return ZERO_ADDRESS;
+    }
   }
 
   function _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig()
@@ -322,7 +345,7 @@ contract BaseDeploymentConfig is Script {
     string memory finalJson = vm.serializeAddress(
       chainName,
       "sismoAddressesProviderV2",
-      address(deploymentConfig.sismoAddressesProvider)
+      address(deploymentConfig.sismoAddressesProviderV2)
     );
 
     vm.writeJson(finalJson, _deploymentConfigFilePath());

@@ -14,8 +14,12 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
   address internal constant DETERMINISTIC_DEPLOYMENT_ADDRESS =
     0x4D9D4234f8E21a85665470e222A4945A18088B79;
 
-  function run() public {
+  function run() public returns (CommitmentMapperRegistry) {
     string memory chainName = vm.envString("CHAIN_NAME");
+    return runFor(chainName);
+  }
+
+  function runFor(string memory chainName) public returns (CommitmentMapperRegistry) {
     console.log("Run for CHAIN_NAME:", chainName);
     console.log("Deployer:", msg.sender);
 
@@ -39,19 +43,22 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
 
     vm.startBroadcast(deployer);
 
-    if (commitmentMapperRegistryAddress != address(0)) {
+    if ((commitmentMapperRegistryAddress != address(0)) && (!_compareStrings(chainName, "test"))) {
       require(false, "CommitmentMapperRegistry contract is already deployed!");
     }
 
-    if (deployer != 0x36D79cf2448b6063DdA4338352da4AFD4C16bf24) {
+    if (
+      (deployer != 0x36D79cf2448b6063DdA4338352da4AFD4C16bf24) &&
+      (!_compareStrings(chainName, "test"))
+    ) {
       require(
         false,
         "Only 0x36D79cf2448b6063DdA4338352da4AFD4C16bf24 can deploy CommitmentMapperRegistry contract!"
       );
     }
     if (
-      _getAddress(SALT, TRANSPARENT_UPGRADEABLE_PROXY_INIT_CODE_HASH, CREATE2_FACTORY_ADDRESS) !=
-      DETERMINISTIC_DEPLOYMENT_ADDRESS
+      (_getAddress(SALT, TRANSPARENT_UPGRADEABLE_PROXY_INIT_CODE_HASH, CREATE2_FACTORY_ADDRESS) !=
+        DETERMINISTIC_DEPLOYMENT_ADDRESS) && (!_compareStrings(chainName, "test"))
     ) {
       require(
         false,
@@ -99,7 +106,7 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
       owner: _readAddressFromDeploymentConfigAtKey(".owner"),
       rootsOwner: _readAddressFromDeploymentConfigAtKey(".rootsOwner"),
       commitmentMapperEdDSAPubKey: commitmentMapperPubKeys,
-      sismoAddressesProvider: _readAddressFromDeploymentConfigAtKey(".sismoAddressesProviderV2"),
+      sismoAddressesProviderV2: _readAddressFromDeploymentConfigAtKey(".sismoAddressesProviderV2"),
       availableRootsRegistry: _readAddressFromDeploymentConfigAtKey(".availableRootsRegistry"),
       commitmentMapperRegistry: address(commitmentMapperRegistry),
       hydraS3Verifier: _readAddressFromDeploymentConfigAtKey(".hydraS3Verifier"),
@@ -113,6 +120,8 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
     _saveDeploymentConfig(chainName, newDeploymentConfig);
 
     vm.stopBroadcast();
+
+    return CommitmentMapperRegistry(address(commitmentMapperRegistry));
   }
 
   function _getAddress(
