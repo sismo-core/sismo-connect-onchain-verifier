@@ -3,16 +3,16 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
 import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
-import {CommitmentMapperRegistry} from "../src/periphery/CommitmentMapperRegistry.sol";
+import {AvailableRootsRegistry} from "../src/periphery/AvailableRootsRegistry.sol";
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
 
-contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
-  bytes32 internal constant SALT = keccak256("sismo-commitment-mapper-registry");
+contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
+  bytes32 internal constant SALT = keccak256("sismo-available-roots-registry");
   // create2Factory address from https://github.com/Arachnid/deterministic-deployment-proxy
   address internal constant CREATE2_FACTORY_ADDRESS = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
   address internal constant DETERMINISTIC_DEPLOYMENT_ADDRESS =
-    0x4D9D4234f8E21a85665470e222A4945A18088B79;
+    0x54F328Bd304D489ebca0F642DC060673BA48eA19;
 
   function run() public {
     string memory chainName = vm.envString("CHAIN_NAME");
@@ -21,12 +21,10 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
 
     _setDeploymentConfig({chainName: chainName, checkIfEmpty: true});
 
-    address commitmentMapperRegistryAddress = _readAddressFromDeploymentConfigAtKey(
-      ".commitmentMapperRegistry"
+    address avaialbleRootsRegistryAddress = _readAddressFromDeploymentConfigAtKey(
+      ".availableRootsRegistry"
     );
     address owner = _readAddressFromDeploymentConfigAtKey(".owner");
-    uint256[2]
-      memory commitmentMapperPubKeys = _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig();
     address proxyAdmin = _readAddressFromDeploymentConfigAtKey(".proxyAdmin");
     address deployer = msg.sender;
 
@@ -39,14 +37,14 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
 
     vm.startBroadcast(deployer);
 
-    if (commitmentMapperRegistryAddress != address(0)) {
-      require(false, "CommitmentMapperRegistry contract is already deployed!");
+    if (avaialbleRootsRegistryAddress != address(0)) {
+      require(false, "AvailableRootsRegistry contract is already deployed!");
     }
 
     if (deployer != 0x36D79cf2448b6063DdA4338352da4AFD4C16bf24) {
       require(
         false,
-        "Only 0x36D79cf2448b6063DdA4338352da4AFD4C16bf24 can deploy CommitmentMapperRegistry contract!"
+        "Only 0x36D79cf2448b6063DdA4338352da4AFD4C16bf24 can deploy AvailableRootsRegistry contract!"
       );
     }
     if (
@@ -55,53 +53,43 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
     ) {
       require(
         false,
-        "CommitmentMapperRegistry contract address should be 0x4D9D4234f8E21a85665470e222A4945A18088B79!"
+        "AvailableRootsRegistry contract address should be 0x54F328Bd304D489ebca0F642DC060673BA48eA19!"
       );
     }
 
-    console.log("Deploying CommitmentMapperRegistry Proxy...");
+    console.log("Deploying AvailableRootsRegistry Proxy...");
 
     // deterministicly deploy the proxy by porviding the create2Factory address as implementation address
-    TransparentUpgradeableProxy commitmentMapperRegistry = new TransparentUpgradeableProxy{
+    TransparentUpgradeableProxy availabableRootsRegistry = new TransparentUpgradeableProxy{
       salt: SALT
     }(CREATE2_FACTORY_ADDRESS, deployer, bytes(""));
-    console.log("CommitmentMapperRegistry Proxy Deployed:", address(commitmentMapperRegistry));
+    console.log("AvailableRootsRegistry Proxy Deployed:", address(availabableRootsRegistry));
 
-    CommitmentMapperRegistry commitmentMapperRegistryImplem = new CommitmentMapperRegistry(
-      deployer,
-      commitmentMapperPubKeys
-    );
-    console.log(
-      "CommitmentMapperRegistry Implem Deployed:",
-      address(commitmentMapperRegistryImplem)
-    );
+    AvailableRootsRegistry availabableRootsRegistryImplem = new AvailableRootsRegistry(deployer);
+    console.log("AvailableRootsRegistry Implem Deployed:", address(availabableRootsRegistryImplem));
 
     // Upgrade the proxy to use the correct deployed implementation
-    commitmentMapperRegistry.upgradeToAndCall(
-      address(commitmentMapperRegistryImplem),
-      abi.encodeWithSelector(
-        commitmentMapperRegistryImplem.initialize.selector,
-        deployer,
-        commitmentMapperPubKeys
-      )
+    availabableRootsRegistry.upgradeToAndCall(
+      address(availabableRootsRegistryImplem),
+      abi.encodeWithSelector(availabableRootsRegistryImplem.initialize.selector, deployer)
     );
 
     // change proxy admin to proxyAdmin
-    commitmentMapperRegistry.changeAdmin(proxyAdmin);
-    console.log("CommitmentMapperRegistry proxy admin changed from", deployer, "to", proxyAdmin);
+    availabableRootsRegistry.changeAdmin(proxyAdmin);
+    console.log("AvailableRootsRegistry proxy admin changed from", deployer, "to", proxyAdmin);
 
     // transfer ownership to owner
-    commitmentMapperRegistryImplem.transferOwnership(owner);
-    console.log("CommitmentMapperRegistry ownership transferred from", deployer, "to", owner);
+    availabableRootsRegistryImplem.transferOwnership(owner);
+    console.log("AvailableRootsRegistry ownership transferred from", deployer, "to", owner);
 
     DeploymentConfig memory newDeploymentConfig = DeploymentConfig({
       proxyAdmin: _readAddressFromDeploymentConfigAtKey(".proxyAdmin"),
       owner: _readAddressFromDeploymentConfigAtKey(".owner"),
       rootsOwner: _readAddressFromDeploymentConfigAtKey(".rootsOwner"),
-      commitmentMapperEdDSAPubKey: commitmentMapperPubKeys,
+      commitmentMapperEdDSAPubKey: _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig(),
       sismoAddressesProvider: _readAddressFromDeploymentConfigAtKey(".sismoAddressesProviderV2"),
-      availableRootsRegistry: _readAddressFromDeploymentConfigAtKey(".availableRootsRegistry"),
-      commitmentMapperRegistry: address(commitmentMapperRegistry),
+      availableRootsRegistry: address(availabableRootsRegistry),
+      commitmentMapperRegistry: _readAddressFromDeploymentConfigAtKey(".commitmentMapperRegistry"),
       hydraS3Verifier: _readAddressFromDeploymentConfigAtKey(".hydraS3Verifier"),
       sismoConnectVerifier: _readAddressFromDeploymentConfigAtKey(".sismoConnectVerifier"),
       authRequestBuilder: _readAddressFromDeploymentConfigAtKey(".authRequestBuilder"),
