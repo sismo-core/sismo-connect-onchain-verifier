@@ -50,6 +50,7 @@ contract BaseDeploymentConfig is Script {
   address immutable TESTNET_PROXY_ADMIN = 0x246E71bC2a257f4BE9C7fAD4664E6D7444844Adc;
   address immutable TESTNET_OWNER = 0xBB8FcA8f2381CFeEDe5D7541d7bF76343EF6c67B;
   address immutable TESTNET_GOERLI_ROOTS_OWNER = 0xa687922C4bf2eB22297FdF89156B49eD3727618b;
+  address immutable TESTNET_SEPOLIA_ROOTS_OWNER = 0x1C0c54EA7Bb55f655fb8Ff6D51557368bA8624E6;
   address immutable TESTNET_MUMBAI_ROOTS_OWNER = 0xCA0583A6682607282963d3E2545Cd2e75697C2bb;
   address immutable TESTNET_SCROLL_GOERLI_ROOTS_OWNER = 0x8f9c04d7bA132Fd0CbA124eFCE3936328d217458;
 
@@ -73,6 +74,7 @@ contract BaseDeploymentConfig is Script {
     Gnosis,
     Polygon,
     TestnetGoerli,
+    TestnetSepolia,
     TestnetMumbai,
     ScrollTestnetGoerli,
     StagingGoerli,
@@ -89,6 +91,8 @@ contract BaseDeploymentConfig is Script {
       return DeployChain.Polygon;
     } else if (_compareStrings(chainName, "testnet-goerli")) {
       return DeployChain.TestnetGoerli;
+    } else if (_compareStrings(chainName, "testnet-sepolia")) {
+      return DeployChain.TestnetSepolia;
     } else if (_compareStrings(chainName, "testnet-mumbai")) {
       return DeployChain.TestnetMumbai;
     } else if (_compareStrings(chainName, "scroll-testnet-goerli")) {
@@ -139,6 +143,16 @@ contract BaseDeploymentConfig is Script {
         proxyAdmin: TESTNET_PROXY_ADMIN,
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_GOERLI_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.TestnetSepolia) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: TESTNET_PROXY_ADMIN,
+        owner: TESTNET_OWNER,
+        rootsOwner: TESTNET_SEPOLIA_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
