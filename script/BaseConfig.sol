@@ -52,6 +52,8 @@ contract BaseDeploymentConfig is Script {
   address immutable TESTNET_GOERLI_ROOTS_OWNER = 0xa687922C4bf2eB22297FdF89156B49eD3727618b;
   address immutable TESTNET_SEPOLIA_ROOTS_OWNER = 0x1C0c54EA7Bb55f655fb8Ff6D51557368bA8624E6;
   address immutable TESTNET_MUMBAI_ROOTS_OWNER = 0xCA0583A6682607282963d3E2545Cd2e75697C2bb;
+  address immutable TESTNET_OPTIMISM_GOERLI_ROOTS_OWNER =
+    0xe807B5153e3eD4767C3F4EB50b65Fab90c57596B;
   address immutable TESTNET_SCROLL_GOERLI_ROOTS_OWNER = 0x8f9c04d7bA132Fd0CbA124eFCE3936328d217458;
 
   // Sismo Staging env (Sismo internal use only)
@@ -76,6 +78,7 @@ contract BaseDeploymentConfig is Script {
     TestnetGoerli,
     TestnetSepolia,
     TestnetMumbai,
+    OptimismGoerli,
     ScrollTestnetGoerli,
     StagingGoerli,
     StagingMumbai,
@@ -95,6 +98,8 @@ contract BaseDeploymentConfig is Script {
       return DeployChain.TestnetSepolia;
     } else if (_compareStrings(chainName, "testnet-mumbai")) {
       return DeployChain.TestnetMumbai;
+    } else if (_compareStrings(chainName, "optimism-goerli")) {
+      return DeployChain.OptimismGoerli;
     } else if (_compareStrings(chainName, "scroll-testnet-goerli")) {
       return DeployChain.ScrollTestnetGoerli;
     } else if (_compareStrings(chainName, "staging-goerli")) {
@@ -163,6 +168,16 @@ contract BaseDeploymentConfig is Script {
         proxyAdmin: TESTNET_PROXY_ADMIN,
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_MUMBAI_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.OptimismGoerli) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: TESTNET_PROXY_ADMIN,
+        owner: TESTNET_OWNER,
+        rootsOwner: TESTNET_OPTIMISM_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
