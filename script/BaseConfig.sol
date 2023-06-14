@@ -54,6 +54,8 @@ contract BaseDeploymentConfig is Script {
   address immutable TESTNET_MUMBAI_ROOTS_OWNER = 0xCA0583A6682607282963d3E2545Cd2e75697C2bb;
   address immutable TESTNET_OPTIMISM_GOERLI_ROOTS_OWNER =
     0xe807B5153e3eD4767C3F4EB50b65Fab90c57596B;
+  address immutable TESTNET_ARBITRUM_GOERLI_ROOTS_OWNER =
+    0x8eAb4616d47F82C890fdb6eE311A4C0aE34ba7fb;
   address immutable TESTNET_SCROLL_GOERLI_ROOTS_OWNER = 0x8f9c04d7bA132Fd0CbA124eFCE3936328d217458;
 
   // Sismo Staging env (Sismo internal use only)
@@ -79,6 +81,7 @@ contract BaseDeploymentConfig is Script {
     TestnetSepolia,
     TestnetMumbai,
     OptimismGoerli,
+    ArbitrumGoerli,
     ScrollTestnetGoerli,
     StagingGoerli,
     StagingMumbai,
@@ -100,6 +103,8 @@ contract BaseDeploymentConfig is Script {
       return DeployChain.TestnetMumbai;
     } else if (_compareStrings(chainName, "optimism-goerli")) {
       return DeployChain.OptimismGoerli;
+    } else if (_compareStrings(chainName, "arbitrum-goerli")) {
+      return DeployChain.ArbitrumGoerli;
     } else if (_compareStrings(chainName, "scroll-testnet-goerli")) {
       return DeployChain.ScrollTestnetGoerli;
     } else if (_compareStrings(chainName, "staging-goerli")) {
@@ -178,6 +183,16 @@ contract BaseDeploymentConfig is Script {
         proxyAdmin: TESTNET_PROXY_ADMIN,
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_OPTIMISM_GOERLI_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.ArbitrumGoerli) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: TESTNET_PROXY_ADMIN,
+        owner: TESTNET_OWNER,
+        rootsOwner: TESTNET_ARBITRUM_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
@@ -272,8 +287,54 @@ contract BaseDeploymentConfig is Script {
     if (checkIfEmpty) {
       if (_compareStrings(json, "") || _compareStrings(chainName, "test") || _isLocalFork()) {
         _saveDeploymentConfig(chainName, _getEmptyDeploymentConfig(getChainName(chainName)));
+      } else {
+        _readDeploymentConfig();
       }
     }
+  }
+
+  function _readDeploymentConfig() internal {
+    address owner = _tryReadingAddressFromDeploymentConfigAtKey(".owner");
+    address proxyAdmin = _tryReadingAddressFromDeploymentConfigAtKey(".proxyAdmin");
+    address rootsOwner = _tryReadingAddressFromDeploymentConfigAtKey(".rootsOwner");
+    uint256[2]
+      memory commitmentMapperEdDSAPubKey = _tryReadingCommitmentMapperEdDSAPubKeyFromDeploymentConfig();
+    address availableRootsRegistry = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".availableRootsRegistry"
+    );
+    address commitmentMapperRegistry = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".commitmentMapperRegistry"
+    );
+    address sismoAddressesProviderV2 = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".sismoAddressesProviderV2"
+    );
+    address sismoConnectVerifier = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".sismoConnectVerifier"
+    );
+    address hydraS3Verifier = _tryReadingAddressFromDeploymentConfigAtKey(".hydraS3Verifier");
+    address authRequestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".authRequestBuilder");
+    address claimRequestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".claimRequestBuilder"
+    );
+    address signatureBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".signatureBuilder");
+    address requestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".requestBuilder");
+
+    config = DeploymentConfig({
+      proxyAdmin: proxyAdmin,
+      owner: owner,
+      rootsOwner: rootsOwner,
+      commitmentMapperEdDSAPubKey: commitmentMapperEdDSAPubKey,
+      availableRootsRegistry: availableRootsRegistry,
+      commitmentMapperRegistry: commitmentMapperRegistry,
+      sismoAddressesProviderV2: sismoAddressesProviderV2,
+      sismoConnectVerifier: sismoConnectVerifier,
+      hydraS3Verifier: hydraS3Verifier,
+      // external libraries
+      authRequestBuilder: authRequestBuilder,
+      claimRequestBuilder: claimRequestBuilder,
+      signatureBuilder: signatureBuilder,
+      requestBuilder: requestBuilder
+    });
   }
 
   function _readAddressFromDeploymentConfigAtKey(
@@ -317,6 +378,20 @@ contract BaseDeploymentConfig is Script {
           "Error reading commitmentMapperEdDSAPubKey from deployment config, you need to specify a public key."
         )
       );
+    }
+  }
+
+  function _tryReadingCommitmentMapperEdDSAPubKeyFromDeploymentConfig()
+    internal
+    view
+    returns (uint256[2] memory pubKey)
+  {
+    try
+      vm.parseJson(vm.readFile(_deploymentConfigFilePath()), ".commitmentMapperEdDSAPubKey")
+    returns (bytes memory value) {
+      return abi.decode(value, (uint256[2]));
+    } catch {
+      return [uint256(0), uint256(0)];
     }
   }
 
@@ -377,7 +452,17 @@ contract BaseDeploymentConfig is Script {
       address(deploymentConfig.sismoAddressesProviderV2)
     );
 
-    vm.writeJson(finalJson, _deploymentConfigFilePath());
+    if (_compareStrings(chainName, "test") || _isLocalFork()) {
+      vm.writeJson(finalJson, _deploymentConfigFilePath());
+    } else {
+      try vm.envBool("OVERRIDE_DEPLOYMENT_CONFIG") returns (bool overrideDeploymentConfig) {
+        if (overrideDeploymentConfig == true) {
+          vm.writeJson(finalJson, _deploymentConfigFilePath());
+        }
+      } catch {
+        console.log("OVERRIDE_DEPLOYMENT_CONFIG not set, skipping deployment config override.");
+      }
+    }
   }
 
   function _deploymentConfigFilePath() internal view returns (string memory) {

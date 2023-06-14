@@ -17,41 +17,17 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
 
     vm.startBroadcast();
 
-    _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".sismoConnectVerifier"),
-      string("sismoConnectVerifier-v1.1")
-    );
-    _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".hydraS3Verifier"),
-      string("hydraS3Verifier")
-    );
-    _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".availableRootsRegistry"),
-      string("sismoConnectAvailableRootsRegistry")
-    );
-    _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".commitmentMapperRegistry"),
-      string("sismoConnectCommitmentMapperRegistry")
-    );
+    _setAddress(config.sismoConnectVerifier, string("sismoConnectVerifier-v1.1"));
+    _setAddress(config.hydraS3Verifier, string("hydraS3Verifier"));
+    _setAddress(config.availableRootsRegistry, string("sismoConnectAvailableRootsRegistry"));
+    _setAddress(config.commitmentMapperRegistry, string("sismoConnectCommitmentMapperRegistry"));
 
     // external libraries
 
-    _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".authRequestBuilder"),
-      string("authRequestBuilder-v1.1")
-    );
-    _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".claimRequestBuilder"),
-      string("claimRequestBuilder-v1.1")
-    );
-    _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".signatureBuilder"),
-      string("signatureBuilder-v1.1")
-    );
-    _setAddress(
-      _readAddressFromDeploymentConfigAtKey(".requestBuilder"),
-      string("requestBuilder-v1.1")
-    );
+    _setAddress(config.authRequestBuilder, string("authRequestBuilder-v1.1"));
+    _setAddress(config.claimRequestBuilder, string("claimRequestBuilder-v1.1"));
+    _setAddress(config.signatureBuilder, string("signatureBuilder-v1.1"));
+    _setAddress(config.requestBuilder, string("requestBuilder-v1.1"));
 
     vm.stopBroadcast();
   }

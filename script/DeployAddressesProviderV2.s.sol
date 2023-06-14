@@ -25,11 +25,9 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
 
     _setDeploymentConfig({chainName: chainName, checkIfEmpty: true});
 
-    address addressesProviderV2Address = _readAddressFromDeploymentConfigAtKey(
-      ".sismoAddressesProviderV2"
-    );
-    address owner = _readAddressFromDeploymentConfigAtKey(".owner");
-    address proxyAdmin = _readAddressFromDeploymentConfigAtKey(".proxyAdmin");
+    address addressesProviderV2Address = config.sismoAddressesProviderV2;
+    address owner = config.owner;
+    address proxyAdmin = config.proxyAdmin;
     address deployer = msg.sender;
 
     bytes32 TRANSPARENT_UPGRADEABLE_PROXY_INIT_CODE_HASH = keccak256(
@@ -90,19 +88,19 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
     console.log("AddressesPoviderV2 ownership transferred from", deployer, "to", owner);
 
     DeploymentConfig memory newDeploymentConfig = DeploymentConfig({
-      proxyAdmin: _readAddressFromDeploymentConfigAtKey(".proxyAdmin"),
-      owner: _readAddressFromDeploymentConfigAtKey(".owner"),
-      rootsOwner: _readAddressFromDeploymentConfigAtKey(".rootsOwner"),
-      commitmentMapperEdDSAPubKey: _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig(),
+      proxyAdmin: config.proxyAdmin,
+      owner: config.owner,
+      rootsOwner: config.rootsOwner,
+      commitmentMapperEdDSAPubKey: config.commitmentMapperEdDSAPubKey,
       sismoAddressesProviderV2: address(addressesProviderV2),
-      availableRootsRegistry: _readAddressFromDeploymentConfigAtKey(".availableRootsRegistry"),
-      commitmentMapperRegistry: _readAddressFromDeploymentConfigAtKey(".commitmentMapperRegistry"),
-      hydraS3Verifier: _readAddressFromDeploymentConfigAtKey(".hydraS3Verifier"),
-      sismoConnectVerifier: _readAddressFromDeploymentConfigAtKey(".sismoConnectVerifier"),
-      authRequestBuilder: _readAddressFromDeploymentConfigAtKey(".authRequestBuilder"),
-      claimRequestBuilder: _readAddressFromDeploymentConfigAtKey(".claimRequestBuilder"),
-      signatureBuilder: _readAddressFromDeploymentConfigAtKey(".signatureBuilder"),
-      requestBuilder: _readAddressFromDeploymentConfigAtKey(".requestBuilder")
+      availableRootsRegistry: config.availableRootsRegistry,
+      commitmentMapperRegistry: config.commitmentMapperRegistry,
+      hydraS3Verifier: config.hydraS3Verifier,
+      sismoConnectVerifier: config.sismoConnectVerifier,
+      authRequestBuilder: config.authRequestBuilder,
+      claimRequestBuilder: config.claimRequestBuilder,
+      signatureBuilder: config.signatureBuilder,
+      requestBuilder: config.requestBuilder
     });
 
     _saveDeploymentConfig(chainName, newDeploymentConfig);

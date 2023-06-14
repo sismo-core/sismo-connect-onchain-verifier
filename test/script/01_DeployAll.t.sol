@@ -14,7 +14,6 @@ contract DeployAllTest is Test, BaseDeploymentConfig {
   ScriptTypes.DeployAllContracts contracts;
   AvailableRootsRegistry availableRootsRegistry;
   CommitmentMapperRegistry commitmentMapperRegistry;
-  DeployAll deploy;
 
   address immutable PROXY_ADMIN = address(1);
   address immutable OWNER = address(2);
@@ -58,8 +57,8 @@ contract DeployAllTest is Test, BaseDeploymentConfig {
       (CommitmentMapperRegistry)
     );
 
-    // Deploy All
-    deploy = new DeployAll();
+    // Deploy Sismo Connect contracts
+    DeployAll deploy = new DeployAll();
 
     (bool success, bytes memory result) = address(deploy).delegatecall(
       abi.encodeWithSelector(DeployAll.runFor.selector, "test")
