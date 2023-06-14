@@ -64,11 +64,6 @@ contract BaseDeploymentConfig is Script {
   uint256 immutable PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y =
     0x20706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa;
 
-  uint256 immutable DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X =
-    0x2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f0256;
-  uint256 immutable DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y =
-    0x30423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74;
-
   error ChainNotConfigured(DeployChain chain);
   error ChainNameNotFound(string chainName);
 
@@ -144,8 +139,8 @@ contract BaseDeploymentConfig is Script {
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.TestnetMumbai) {
@@ -154,8 +149,8 @@ contract BaseDeploymentConfig is Script {
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_MUMBAI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.ScrollTestnetGoerli) {
@@ -164,8 +159,8 @@ contract BaseDeploymentConfig is Script {
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_SCROLL_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.StagingGoerli) {
@@ -174,8 +169,8 @@ contract BaseDeploymentConfig is Script {
         owner: STAGING_OWNER,
         rootsOwner: STAGING_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.StagingMumbai) {
@@ -184,8 +179,8 @@ contract BaseDeploymentConfig is Script {
         owner: STAGING_OWNER,
         rootsOwner: STAGING_MUMBAI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.Test) {
