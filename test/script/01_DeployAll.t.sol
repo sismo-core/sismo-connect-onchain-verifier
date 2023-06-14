@@ -68,10 +68,6 @@ contract DeployAllTest is Test, BaseDeploymentConfig {
     contracts = abi.decode(result, (ScriptTypes.DeployAllContracts));
   }
 
-  function testDeployment() public {
-    console.log(address(contracts.sismoConnectVerifier));
-  }
-
   function testHydraS3Verifier() public {
     _expectDeployedWithProxy(address(contracts.hydraS3Verifier), PROXY_ADMIN);
     assertEq(

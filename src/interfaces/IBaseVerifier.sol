@@ -11,5 +11,5 @@ interface IBaseVerifier {
     bool isImpersonationMode,
     bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
-  ) external view returns (VerifiedAuth memory, VerifiedClaim memory);
+  ) external returns (VerifiedAuth memory, VerifiedClaim memory);
 }

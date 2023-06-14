@@ -51,7 +51,7 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
     bool isImpersonationMode,
     bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
-  ) external view override returns (VerifiedAuth memory, VerifiedClaim memory) {
+  ) external returns (VerifiedAuth memory, VerifiedClaim memory) {
     // Verify the sismoConnectProof version corresponds to the current verifier.
     if (sismoConnectProof.provingScheme != HYDRA_S3_VERSION) {
       revert InvalidVersion(sismoConnectProof.provingScheme);
@@ -216,6 +216,7 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
         );
       }
       userIdFromProof = uint256(uint160(input.destinationIdentifier));
+      _checkSismoIdentifierValidity(userIdFromProof, auth.authType);
     }
 
     // check that the userId from the proof is the same as the userId in the auth
@@ -252,15 +253,45 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
     }
   }
 
-  function _checkSnarkProof(HydraS3ProofData memory snarkProofData) internal view {
-    if (
-      !verifyProof(
+  function _checkSismoIdentifierValidity(uint256 userId, AuthType authType) private pure {
+    // the userId is 160 bits long (20 bytes), since it has the format of an evm address
+    if (authType == AuthType.GITHUB) {
+      // check that the userId starts with 0x1001 -> sismoIdentifier for dataSource GITHUB
+      // 160 bits - 16 bits = 144 bits
+      // we check that the first 16 bits are equal to 0x1001
+      if ((userId) >> 144 != 0x1001) {
+        revert InvalidSismoIdentifier(userId, uint8(authType));
+      }
+    }
+    if (authType == AuthType.TWITTER) {
+      // check that the userId starts with 0x1002 -> sismoIdentifier for dataSource Twitter
+      // 160 bits - 16 bits = 144 bits
+      // we check that the first 16 bits are equal to 0x1002
+      if ((userId) >> 144 != 0x1002) {
+        revert InvalidSismoIdentifier(userId, uint8(authType));
+      }
+    }
+  }
+
+  function _checkSnarkProof(HydraS3ProofData memory snarkProofData) internal {
+    // low-level call to the `verifyProof` function
+    // since the function only accepts arguments located in calldata
+    (bool success, bytes memory result) = address(this).call(
+      abi.encodeWithSelector(
+        this.verifyProof.selector,
         snarkProofData.proof.a,
         snarkProofData.proof.b,
         snarkProofData.proof.c,
         snarkProofData.input
       )
-    ) {
+    );
+
+    if (!success) {
+      revert CallToVerifyProofFailed();
+    }
+    bool isVerified = abi.decode(result, (bool));
+
+    if (!isVerified) {
       revert InvalidProof();
     }
   }
