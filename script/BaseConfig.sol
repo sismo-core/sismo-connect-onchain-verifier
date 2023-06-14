@@ -45,6 +45,7 @@ contract BaseDeploymentConfig is Script {
   address immutable MAIN_GNOSIS_ROOTS_OWNER = 0xEf809a50de35c762FBaCf1ae1F6B861CE42911D1;
   address immutable MAIN_POLYGON_ROOTS_OWNER = 0xF0a0B692e1c764281c211948D03edEeF5Fb57111;
   address immutable MAIN_OPTIMISM_ROOTS_OWNER = 0xf8640cE5532BCbc788489Bf5A786635ae585258B;
+  address immutable MAIN_ARBITRUM_ONE_ROOTS_OWNER = 0x1BB9AD70F529e36B7Ffed0cfA44fA4cf0213Fa09;
   address immutable MAIN_MAINNET_ROOTS_OWNER = 0x2a265b954B96d4940B94eb69E8Fc8E7346369D05;
 
   // Testnet Env
@@ -79,6 +80,7 @@ contract BaseDeploymentConfig is Script {
     Gnosis,
     Polygon,
     Optimism,
+    ArbitrumOne,
     TestnetGoerli,
     TestnetSepolia,
     TestnetMumbai,
@@ -99,6 +101,8 @@ contract BaseDeploymentConfig is Script {
       return DeployChain.Polygon;
     } else if (_compareStrings(chainName, "optimism")) {
       return DeployChain.Optimism;
+    } else if (_compareStrings(chainName, "arbitrum-one")) {
+      return DeployChain.ArbitrumOne;
     } else if (_compareStrings(chainName, "testnet-goerli")) {
       return DeployChain.TestnetGoerli;
     } else if (_compareStrings(chainName, "testnet-sepolia")) {
@@ -157,6 +161,16 @@ contract BaseDeploymentConfig is Script {
         proxyAdmin: MAIN_PROXY_ADMIN,
         owner: MAIN_OWNER,
         rootsOwner: MAIN_OPTIMISM_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.ArbitrumOne) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: MAIN_PROXY_ADMIN,
+        owner: MAIN_OWNER,
+        rootsOwner: MAIN_ARBITRUM_ONE_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
