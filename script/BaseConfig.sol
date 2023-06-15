@@ -518,11 +518,11 @@ contract BaseDeploymentConfig is Script {
       // return the real config if we are NOT using a fork
       return
         isLocalFork == true
-          ? string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json")
-          : string.concat(vm.projectRoot(), "/script/deployments/", _chainName, ".json");
+          ? string.concat(vm.projectRoot(), "/deployments/tmp/", _chainName, ".json")
+          : string.concat(vm.projectRoot(), "/deployments/", _chainName, ".json");
     }
     // return the temporary config
-    return string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json");
+    return string.concat(vm.projectRoot(), "/deployments/tmp/", _chainName, ".json");
   }
 
   function _isLocalFork() internal view returns (bool) {
