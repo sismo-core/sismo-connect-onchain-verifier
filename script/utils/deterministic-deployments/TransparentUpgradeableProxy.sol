@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.7.0) (proxy/transparent/TransparentUpgradeableProxy.sol)
 
-///////////////////////////////////////////////////////////
-// This contract should be used for Sismo's deterministic deployments of proxies.
-// It is a copy of the OpenZeppelin's TransparentUpgradeableProxy.sol contract.
-// The tag of the OpenZeppelin library used alogn this contract should be v4.8.2.
-// The commit hash should be d00acef4059807535af0bd0dd0ddf619747a044b
-///////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+//  This contract should be used for Sismo's deterministic deployments of proxies. //
+//  It is a copy of the OpenZeppelin's TransparentUpgradeableProxy.sol contract.   //
+//  The tag of the OpenZeppelin library used along this contract should be v4.8.2. //
+//  The commit hash should be d00acef4059807535af0bd0dd0ddf619747a044b.            //
+/////////////////////////////////////////////////////////////////////////////////////
 
 pragma solidity ^0.8.0;
 

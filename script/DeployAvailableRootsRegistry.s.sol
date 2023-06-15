@@ -12,7 +12,7 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
   // create2Factory address from https://github.com/Arachnid/deterministic-deployment-proxy
   address internal constant CREATE2_FACTORY_ADDRESS = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
   address internal constant DETERMINISTIC_DEPLOYMENT_ADDRESS =
-    0x96AaCf331b02a4B4C2A95b949363E75ce6775125;
+    0xfB548eC30347c220E4e7733248ff25e3699A4648;
 
   function run() public returns (AvailableRootsRegistry) {
     string memory chainName = vm.envString("CHAIN_NAME");
@@ -58,7 +58,7 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
     ) {
       require(
         false,
-        "AvailableRootsRegistry contract address should be 0x96AaCf331b02a4B4C2A95b949363E75ce6775125!"
+        "AvailableRootsRegistry contract address should be 0xfB548eC30347c220E4e7733248ff25e3699A4648!"
       );
     }
 

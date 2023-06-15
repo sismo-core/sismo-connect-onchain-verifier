@@ -12,7 +12,7 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
   // create2Factory address from https://github.com/Arachnid/deterministic-deployment-proxy
   address internal constant CREATE2_FACTORY_ADDRESS = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
   address internal constant DETERMINISTIC_DEPLOYMENT_ADDRESS =
-    0x76ad41f674D432D8c1CccC161Cd17D39892Ce5bE;
+    0x2ff87b43dbE95d94F56F059cA3506d5d4E8F0470;
 
   function run() public returns (CommitmentMapperRegistry) {
     string memory chainName = vm.envString("CHAIN_NAME");
@@ -59,7 +59,7 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
     ) {
       require(
         false,
-        "CommitmentMapperRegistry contract address should be 0x76ad41f674D432D8c1CccC161Cd17D39892Ce5bE!"
+        "CommitmentMapperRegistry contract address should be 0x2ff87b43dbE95d94F56F059cA3506d5d4E8F0470!"
       );
     }
 

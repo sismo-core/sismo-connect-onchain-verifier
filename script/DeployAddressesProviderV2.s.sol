@@ -12,7 +12,7 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
   // create2Factory address from https://github.com/Arachnid/deterministic-deployment-proxy
   address internal constant CREATE2_FACTORY_ADDRESS = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
   address internal constant DETERMINISTIC_DEPLOYMENT_ADDRESS =
-    0x477D530a0f36af5EBeF0E4905eD13e1aE010B1A8;
+    0x9aDAdEa65C21214C02fCEDCb9D84CC9447AaC169;
 
   function run() public returns (AddressesProviderV2) {
     string memory chainName = vm.envString("CHAIN_NAME");
@@ -55,7 +55,7 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
     ) {
       require(
         false,
-        "AddressesPoviderV2 contract address should be 0x477D530a0f36af5EBeF0E4905eD13e1aE010B1A8!"
+        "AddressesPoviderV2 contract address should be 0x9aDAdEa65C21214C02fCEDCb9D84CC9447AaC169!"
       );
     }
 

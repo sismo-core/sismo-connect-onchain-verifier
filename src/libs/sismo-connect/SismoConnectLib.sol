@@ -15,7 +15,7 @@ contract SismoConnect {
   uint256 public constant SISMO_CONNECT_LIB_VERSION = 2;
 
   IAddressesProvider public constant ADDRESSES_PROVIDER_V2 =
-    IAddressesProvider(0x477D530a0f36af5EBeF0E4905eD13e1aE010B1A8);
+    IAddressesProvider(0x9aDAdEa65C21214C02fCEDCb9D84CC9447AaC169);
 
   ISismoConnectVerifier internal _sismoConnectVerifier;
 
