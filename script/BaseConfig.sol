@@ -314,6 +314,8 @@ contract BaseDeploymentConfig is Script {
       } else {
         _readDeploymentConfig();
       }
+    } else {
+      _readDeploymentConfig();
     }
   }
 
