@@ -4,6 +4,8 @@ verbosity = 1
 libs = ["lib"]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
+bytecode_hash="none"
+
 [fmt]
 ignore = ["test/libs/SimoConnectLib.t.sol"]
 

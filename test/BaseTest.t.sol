@@ -13,7 +13,7 @@ contract BaseTest is Test {
   address immutable user1 = vm.addr(1);
   address immutable user2 = vm.addr(2);
   address immutable owner = vm.addr(3);
-  address immutable sismoAddressProviderV2 = 0x9aDAdEa65C21214C02fCEDCb9D84CC9447AaC169;
+  address immutable sismoAddressProviderV2 = 0x3Cd5334eB64ebBd4003b72022CC25465f1BFcEe6;
 
   AddressesProviderMock addressesProvider;
   SismoConnectVerifier sismoConnectVerifier;
