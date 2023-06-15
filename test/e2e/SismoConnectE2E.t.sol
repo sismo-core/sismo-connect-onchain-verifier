@@ -301,6 +301,29 @@ contract SismoConnectE2E is HydraS3BaseTest {
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
   }
 
+  function test_RevertWithInvalidSismoIdentifier() public {
+    (SismoConnectResponse memory response, ) = hydraS3Proofs
+      .getResponseWithGitHubAuthWithoutSignature(commitmentMapperRegistry);
+
+    // specify in the response that the proof comes from a telegram ownership
+    // but the proof is actually a github ownership
+    response.proofs[0].auths[0].authType = AuthType.TELEGRAM;
+
+    // request a telegram proof of ownership
+    SismoConnectRequest memory request = requestBuilder.build({
+      auth: sismoConnect.exposed_buildAuth({authType: AuthType.TELEGRAM})
+    });
+
+    vm.expectRevert(
+      abi.encodeWithSignature(
+        "InvalidSismoIdentifier(bytes32,uint8)",
+        0x0000000000000000000000001001000000000000000000000000000099990370,
+        4
+      )
+    );
+    sismoConnect.exposed_verify({responseBytes: abi.encode(response), request: request});
+  }
+
   // helpers
 
   function emptyResponse() private pure returns (SismoConnectResponse memory) {

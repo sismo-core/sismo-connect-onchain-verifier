@@ -260,7 +260,7 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
       // 160 bits - 16 bits = 144 bits
       // we check that the first 16 bits are equal to 0x1001
       if ((userId) >> 144 != 0x1001) {
-        revert InvalidSismoIdentifier(userId, uint8(authType));
+        revert InvalidSismoIdentifier(bytes32(userId), uint8(authType));
       }
     }
     if (authType == AuthType.TWITTER) {
@@ -268,7 +268,15 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
       // 160 bits - 16 bits = 144 bits
       // we check that the first 16 bits are equal to 0x1002
       if ((userId) >> 144 != 0x1002) {
-        revert InvalidSismoIdentifier(userId, uint8(authType));
+        revert InvalidSismoIdentifier(bytes32(userId), uint8(authType));
+      }
+    }
+    if (authType == AuthType.TELEGRAM) {
+      // check that the userId starts with 0x1003 -> sismoIdentifier for dataSource Telegram
+      // 160 bits - 16 bits = 144 bits
+      // we check that the first 16 bits are equal to 0x1003
+      if ((userId) >> 144 != 0x1003) {
+        revert InvalidSismoIdentifier(bytes32(userId), uint8(authType));
       }
     }
   }
