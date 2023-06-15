@@ -25,7 +25,7 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
 
     _setDeploymentConfig({chainName: chainName, checkIfEmpty: true});
 
-    address avaialbleRootsRegistryAddress = config.availableRootsRegistry;
+    address availableRootsRegistryAddress = config.availableRootsRegistry;
     address owner = config.owner;
     address proxyAdmin = config.proxyAdmin;
     address deployer = msg.sender;
@@ -39,7 +39,7 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
 
     vm.startBroadcast(deployer);
 
-    if ((avaialbleRootsRegistryAddress != address(0)) && (!_compareStrings(chainName, "test"))) {
+    if ((availableRootsRegistryAddress != address(0)) && (!_compareStrings(chainName, "test"))) {
       require(false, "AvailableRootsRegistry contract is already deployed!");
     }
 
