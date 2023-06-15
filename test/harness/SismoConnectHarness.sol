@@ -10,7 +10,7 @@ contract SismoConnectHarness is SismoConnect {
   constructor(
     bytes16 appId,
     bool isImpersonationMode
-  ) SismoConnect(SismoConnectConfigBuilder.build(appId, isImpersonationMode)) {}
+  ) SismoConnect(buildConfig(appId, isImpersonationMode)) {}
 
   function exposed_buildClaim(bytes16 groupId) external view returns (ClaimRequest memory) {
     return buildClaim(groupId);

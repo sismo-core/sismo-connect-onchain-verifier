@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "forge-std/console.sol";
 import "src/libs/utils/Fmt.sol";
 import {HydraS3BaseTest} from "../verifiers/hydra-s3/HydraS3BaseTest.t.sol";
-import {SismoConnect, RequestBuilder, ClaimRequestBuilder, SismoConnectConfigBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
+import {SismoConnect, RequestBuilder, ClaimRequestBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
 import {ZKDropERC721} from "src/ZKDropERC721.sol";
 import "src/libs/utils/Structs.sol";
 import {SismoConnectHarness} from "test/harness/SismoConnectHarness.sol";
@@ -57,7 +57,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
 
     zkdrop = new ZKDropERC721({
-      config: SismoConnectConfigBuilder.build({appId: APP_ID_ZK_DROP}),
+      appId: APP_ID_ZK_DROP,
       groupId: ZK,
       name: "ZKDrop test",
       symbol: "test",

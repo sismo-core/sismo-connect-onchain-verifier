@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {SismoConnectConfigBuilder} from "../utils/SismoConnectConfigBuilder.sol";
 import {RequestBuilder, SismoConnectRequest, SismoConnectResponse, SismoConnectConfig} from "../utils/RequestBuilder.sol";
 import {AuthRequestBuilder, AuthRequest, Auth, VerifiedAuth, AuthType} from "../utils/AuthRequestBuilder.sol";
 import {ClaimRequestBuilder, ClaimRequest, Claim, VerifiedClaim, ClaimType} from "../utils/ClaimRequestBuilder.sol";
 import {SignatureBuilder, SignatureRequest, Signature} from "../utils/SignatureBuilder.sol";
+import {VaultConfig} from "../utils/Structs.sol";
 import {ISismoConnectVerifier, SismoConnectVerifiedResult} from "../../interfaces/ISismoConnectVerifier.sol";
 import {IAddressesProvider} from "../../periphery/interfaces/IAddressesProvider.sol";
 import {SismoConnectHelper} from "../utils/SismoConnectHelper.sol";
@@ -43,6 +43,25 @@ contract SismoConnect {
       ADDRESSES_PROVIDER_V2.get(string("signatureBuilder-v1.1"))
     );
     _requestBuilder = RequestBuilder(ADDRESSES_PROVIDER_V2.get(string("requestBuilder-v1.1")));
+  }
+
+  function buildConfig(bytes16 appId) internal pure returns (SismoConnectConfig memory) {
+    return SismoConnectConfig({appId: appId, vault: buildVaultConfig()});
+  }
+
+  function buildConfig(
+    bytes16 appId,
+    bool isImpersonationMode
+  ) internal pure returns (SismoConnectConfig memory) {
+    return SismoConnectConfig({appId: appId, vault: buildVaultConfig(isImpersonationMode)});
+  }
+
+  function buildVaultConfig() internal pure returns (VaultConfig memory) {
+    return VaultConfig({isImpersonationMode: false});
+  }
+
+  function buildVaultConfig(bool isImpersonationMode) internal pure returns (VaultConfig memory) {
+    return VaultConfig({isImpersonationMode: isImpersonationMode});
   }
 
   function verify(

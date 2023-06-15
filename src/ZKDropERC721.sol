@@ -17,9 +17,9 @@ contract ZKDropERC721 is ERC721, SismoConnect {
     string memory name,
     string memory symbol,
     string memory baseTokenURI,
-    SismoConnectConfig memory config,
+    bytes16 appId,
     bytes16 groupId
-  ) ERC721(name, symbol) SismoConnect(config) {
+  ) ERC721(name, symbol) SismoConnect(buildConfig(appId)) {
     GROUP_ID = groupId;
     _setBaseTokenURI(baseTokenURI);
   }
