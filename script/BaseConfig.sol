@@ -272,12 +272,8 @@ contract BaseDeploymentConfig is Script {
       owner: minimalConfig.owner,
       rootsOwner: minimalConfig.rootsOwner,
       commitmentMapperEdDSAPubKey: minimalConfig.commitmentMapperEdDSAPubKey,
-      availableRootsRegistry: _tryReadingAddressFromDeploymentConfigAtKey(
-        ".availableRootsRegistry"
-      ),
-      commitmentMapperRegistry: _tryReadingAddressFromDeploymentConfigAtKey(
-        ".commitmentMapperRegistry"
-      ),
+      availableRootsRegistry: ZERO_ADDRESS,
+      commitmentMapperRegistry: ZERO_ADDRESS,
       sismoAddressesProviderV2: _tryReadingAddressFromDeploymentConfigAtKey(
         ".sismoAddressesProviderV2"
       ),

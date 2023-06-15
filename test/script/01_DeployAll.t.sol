@@ -12,8 +12,6 @@ import "script/BaseConfig.sol";
 
 contract DeployAllTest is Test, BaseDeploymentConfig {
   ScriptTypes.DeployAllContracts contracts;
-  AvailableRootsRegistry availableRootsRegistry;
-  CommitmentMapperRegistry commitmentMapperRegistry;
 
   address immutable PROXY_ADMIN = address(1);
   address immutable OWNER = address(2);
@@ -23,41 +21,6 @@ contract DeployAllTest is Test, BaseDeploymentConfig {
     _chainName = "test";
     _checkIfEmpty = true;
 
-    // Deploy AvailableRootsRegistry
-    DeployAvailableRootsRegistry deployAvailableRootsRegistry = new DeployAvailableRootsRegistry();
-    (
-      bool deployAvailableRootsRegistrySuccess,
-      bytes memory deployAvailableRootsRegistryResult
-    ) = address(deployAvailableRootsRegistry).delegatecall(
-        abi.encodeWithSelector(DeployAvailableRootsRegistry.runFor.selector, "test")
-      );
-    require(
-      deployAvailableRootsRegistrySuccess,
-      "DeployAvailableRootsRegistry script did not run successfully!"
-    );
-    availableRootsRegistry = abi.decode(
-      deployAvailableRootsRegistryResult,
-      (AvailableRootsRegistry)
-    );
-
-    // Deploy CommitmentMapperRegistry
-    DeployCommitmentMapperRegistry deployCommitmentMapperRegistry = new DeployCommitmentMapperRegistry();
-    (
-      bool deployCommitmentMapperRegistrySuccess,
-      bytes memory deployCommitmentMapperRegistryResult
-    ) = address(deployCommitmentMapperRegistry).delegatecall(
-        abi.encodeWithSelector(DeployCommitmentMapperRegistry.runFor.selector, "test")
-      );
-    require(
-      deployCommitmentMapperRegistrySuccess,
-      "DeployCommitmentMapperRegistry script did not run successfully!"
-    );
-    commitmentMapperRegistry = abi.decode(
-      deployCommitmentMapperRegistryResult,
-      (CommitmentMapperRegistry)
-    );
-
-    // Deploy Sismo Connect contracts
     DeployAll deploy = new DeployAll();
 
     (bool success, bytes memory result) = address(deploy).delegatecall(
@@ -67,15 +30,25 @@ contract DeployAllTest is Test, BaseDeploymentConfig {
     contracts = abi.decode(result, (ScriptTypes.DeployAllContracts));
   }
 
+  function testAvailableRootsRegistryDeployed() public {
+    _expectDeployedWithProxy(address(contracts.availableRootsRegistry), PROXY_ADMIN);
+    assertEq(contracts.availableRootsRegistry.owner(), ROOTS_OWNER);
+  }
+
+  function testCommitmentMapperRegistryDeployed() public {
+    _expectDeployedWithProxy(address(contracts.commitmentMapperRegistry), PROXY_ADMIN);
+    assertEq(contracts.commitmentMapperRegistry.owner(), OWNER);
+  }
+
   function testHydraS3Verifier() public {
     _expectDeployedWithProxy(address(contracts.hydraS3Verifier), PROXY_ADMIN);
     assertEq(
       address(contracts.hydraS3Verifier.COMMITMENT_MAPPER_REGISTRY()),
-      address(commitmentMapperRegistry)
+      address(contracts.commitmentMapperRegistry)
     );
     assertEq(
       address(contracts.hydraS3Verifier.AVAILABLE_ROOTS_REGISTRY()),
-      address(availableRootsRegistry)
+      address(contracts.availableRootsRegistry)
     );
   }
 

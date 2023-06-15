@@ -19,6 +19,8 @@ import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 
 contract DeployAll is Script, BaseDeploymentConfig {
+  AvailableRootsRegistry availableRootsRegistry;
+  CommitmentMapperRegistry commitmentMapperRegistry;
   HydraS3Verifier hydraS3Verifier;
   SismoConnectVerifier sismoConnectVerifier;
 
@@ -38,12 +40,15 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
     _setDeploymentConfig({chainName: chainName, checkIfEmpty: true});
 
-    address commitmentMapperRegistryAddress = config.commitmentMapperRegistry;
-    address availableRootsRegistryAddress = config.availableRootsRegistry;
+    availableRootsRegistry = _deployAvailableRootsRegistry(config.rootsOwner);
+    commitmentMapperRegistry = _deployCommitmentMapperRegistry(
+      config.owner,
+      config.commitmentMapperEdDSAPubKey
+    );
 
     hydraS3Verifier = _deployHydraS3Verifier(
-      commitmentMapperRegistryAddress,
-      availableRootsRegistryAddress
+      address(commitmentMapperRegistry),
+      address(availableRootsRegistry)
     );
     sismoConnectVerifier = _deploySismoConnectVerifier(msg.sender);
 
@@ -54,6 +59,8 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
     sismoConnectVerifier.transferOwnership(config.owner);
 
+    contracts.availableRootsRegistry = availableRootsRegistry;
+    contracts.commitmentMapperRegistry = commitmentMapperRegistry;
     contracts.hydraS3Verifier = hydraS3Verifier;
     contracts.sismoConnectVerifier = sismoConnectVerifier;
 
@@ -75,8 +82,8 @@ contract DeployAll is Script, BaseDeploymentConfig {
       rootsOwner: config.rootsOwner,
       commitmentMapperEdDSAPubKey: config.commitmentMapperEdDSAPubKey,
       sismoAddressesProviderV2: config.sismoAddressesProviderV2,
-      availableRootsRegistry: availableRootsRegistryAddress,
-      commitmentMapperRegistry: commitmentMapperRegistryAddress,
+      availableRootsRegistry: address(availableRootsRegistry),
+      commitmentMapperRegistry: address(commitmentMapperRegistry),
       hydraS3Verifier: address(hydraS3Verifier),
       sismoConnectVerifier: address(sismoConnectVerifier),
       authRequestBuilder: address(authRequestBuilder),
@@ -88,6 +95,53 @@ contract DeployAll is Script, BaseDeploymentConfig {
     _saveDeploymentConfig(chainName, newDeploymentConfig);
 
     vm.stopBroadcast();
+  }
+
+  function _deployAvailableRootsRegistry(address owner) private returns (AvailableRootsRegistry) {
+    address availableRootsRegistryAddress = config.availableRootsRegistry;
+    if (availableRootsRegistryAddress != address(0)) {
+      console.log("Using existing availableRootsRegistry:", availableRootsRegistryAddress);
+      return AvailableRootsRegistry(availableRootsRegistryAddress);
+    }
+    AvailableRootsRegistry rootsRegistryImplem = new AvailableRootsRegistry(owner);
+    console.log("rootsRegistry Implem Deployed:", address(rootsRegistryImplem));
+
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+      address(rootsRegistryImplem),
+      config.proxyAdmin,
+      abi.encodeWithSelector(rootsRegistryImplem.initialize.selector, owner)
+    );
+    console.log("rootsRegistry Proxy Deployed:", address(proxy));
+    return AvailableRootsRegistry(address(proxy));
+  }
+
+  function _deployCommitmentMapperRegistry(
+    address owner,
+    uint256[2] memory commitmentMapperEdDSAPubKey
+  ) private returns (CommitmentMapperRegistry) {
+    address commitmentMapperRegistryAddress = config.commitmentMapperRegistry;
+    if (commitmentMapperRegistryAddress != address(0)) {
+      console.log("Using existing commitmentMapperRegistry:", commitmentMapperRegistryAddress);
+      return CommitmentMapperRegistry(commitmentMapperRegistryAddress);
+    }
+    CommitmentMapperRegistry commitmentMapperImplem = new CommitmentMapperRegistry(
+      owner,
+      commitmentMapperEdDSAPubKey
+    );
+    console.log("commitmentMapper Implem Deployed:", address(commitmentMapperImplem));
+    console.log("owner:", owner);
+
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+      address(commitmentMapperImplem),
+      config.proxyAdmin,
+      abi.encodeWithSelector(
+        commitmentMapperImplem.initialize.selector,
+        owner,
+        commitmentMapperEdDSAPubKey
+      )
+    );
+    console.log("commitmentMapper Proxy Deployed:", address(proxy));
+    return CommitmentMapperRegistry(address(proxy));
   }
 
   function _deployHydraS3Verifier(
@@ -190,6 +244,8 @@ contract DeployAll is Script, BaseDeploymentConfig {
 
 library ScriptTypes {
   struct DeployAllContracts {
+    AvailableRootsRegistry availableRootsRegistry;
+    CommitmentMapperRegistry commitmentMapperRegistry;
     HydraS3Verifier hydraS3Verifier;
     SismoConnectVerifier sismoConnectVerifier;
     // external libraries

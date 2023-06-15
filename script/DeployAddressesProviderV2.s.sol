@@ -62,29 +62,35 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
     console.log("Deploying AddressesPoviderV2 Proxy...");
 
     // deterministicly deploy the proxy by porviding the create2Factory address as implementation address
-    TransparentUpgradeableProxy addressesProviderV2 = new TransparentUpgradeableProxy{salt: SALT}(
-      CREATE2_FACTORY_ADDRESS,
-      deployer,
-      bytes("")
-    );
-    console.log("AddressesPoviderV2 Proxy Deployed:", address(addressesProviderV2));
+    TransparentUpgradeableProxy addressesProviderV2Proxy = new TransparentUpgradeableProxy{
+      salt: SALT
+    }(CREATE2_FACTORY_ADDRESS, deployer, bytes(""));
+    console.log("AddressesPoviderV2 Proxy Deployed:", address(addressesProviderV2Proxy));
 
     AddressesProviderV2 addressesProviderV2Implem = new AddressesProviderV2(deployer);
     console.log("AddressesPoviderV2 Implem Deployed:", address(addressesProviderV2Implem));
 
     // Upgrade the proxy to use the correct deployed implementation
-    addressesProviderV2.upgradeToAndCall(
+    addressesProviderV2Proxy.upgradeToAndCall(
       address(addressesProviderV2Implem),
       abi.encodeWithSelector(addressesProviderV2Implem.initialize.selector, deployer)
     );
 
     // change proxy admin to proxyAdmin
-    addressesProviderV2.changeAdmin(proxyAdmin);
-    console.log("AddressesPoviderV2 proxy admin changed from", deployer, "to", proxyAdmin);
+    if (addressesProviderV2Proxy.admin() != proxyAdmin) {
+      addressesProviderV2Proxy.changeAdmin(proxyAdmin);
+      console.log("AddressesPoviderV2 proxy admin changed from", deployer, "to", proxyAdmin);
+    }
+
+    AddressesProviderV2 addressesProviderV2 = AddressesProviderV2(
+      address(addressesProviderV2Proxy)
+    );
 
     // transfer ownership to owner
-    addressesProviderV2Implem.transferOwnership(owner);
-    console.log("AddressesPoviderV2 ownership transferred from", deployer, "to", owner);
+    if (addressesProviderV2.owner() != owner) {
+      addressesProviderV2.transferOwnership(owner);
+      console.log("AddressesPoviderV2 ownership transferred from", deployer, "to", owner);
+    }
 
     DeploymentConfig memory newDeploymentConfig = DeploymentConfig({
       proxyAdmin: config.proxyAdmin,
@@ -106,7 +112,7 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
 
     vm.stopBroadcast();
 
-    return AddressesProviderV2(address(addressesProviderV2));
+    return addressesProviderV2;
   }
 
   function _getAddress(

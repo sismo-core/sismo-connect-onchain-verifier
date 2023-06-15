@@ -66,10 +66,10 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
     console.log("Deploying CommitmentMapperRegistry Proxy...");
 
     // deterministicly deploy the proxy by porviding the create2Factory address as implementation address
-    TransparentUpgradeableProxy commitmentMapperRegistry = new TransparentUpgradeableProxy{
+    TransparentUpgradeableProxy commitmentMapperRegistryProxy = new TransparentUpgradeableProxy{
       salt: SALT
     }(CREATE2_FACTORY_ADDRESS, deployer, bytes(""));
-    console.log("CommitmentMapperRegistry Proxy Deployed:", address(commitmentMapperRegistry));
+    console.log("CommitmentMapperRegistry Proxy Deployed:", address(commitmentMapperRegistryProxy));
 
     CommitmentMapperRegistry commitmentMapperRegistryImplem = new CommitmentMapperRegistry(
       deployer,
@@ -81,7 +81,7 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
     );
 
     // Upgrade the proxy to use the correct deployed implementation
-    commitmentMapperRegistry.upgradeToAndCall(
+    commitmentMapperRegistryProxy.upgradeToAndCall(
       address(commitmentMapperRegistryImplem),
       abi.encodeWithSelector(
         commitmentMapperRegistryImplem.initialize.selector,
@@ -90,13 +90,21 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
       )
     );
 
-    // change proxy admin to proxyAdmin
-    commitmentMapperRegistry.changeAdmin(proxyAdmin);
-    console.log("CommitmentMapperRegistry proxy admin changed from", deployer, "to", proxyAdmin);
+    if (commitmentMapperRegistryProxy.admin() != proxyAdmin) {
+      // change proxy admin to proxyAdmin
+      commitmentMapperRegistryProxy.changeAdmin(proxyAdmin);
+      console.log("CommitmentMapperRegistry proxy admin changed from", deployer, "to", proxyAdmin);
+    }
 
-    // transfer ownership to owner
-    commitmentMapperRegistryImplem.transferOwnership(owner);
-    console.log("CommitmentMapperRegistry ownership transferred from", deployer, "to", owner);
+    CommitmentMapperRegistry commitmentMapperRegistry = CommitmentMapperRegistry(
+      address(commitmentMapperRegistryProxy)
+    );
+
+    if (commitmentMapperRegistry.owner() != owner) {
+      // change owner to owner
+      commitmentMapperRegistry.transferOwnership(owner);
+      console.log("CommitmentMapperRegistry ownership transferred from", deployer, "to", owner);
+    }
 
     DeploymentConfig memory newDeploymentConfig = DeploymentConfig({
       proxyAdmin: proxyAdmin,
@@ -118,7 +126,7 @@ contract DeployCommitmentMapperRegistry is Script, BaseDeploymentConfig {
 
     vm.stopBroadcast();
 
-    return CommitmentMapperRegistry(address(commitmentMapperRegistry));
+    return commitmentMapperRegistry;
   }
 
   function _getAddress(

@@ -65,27 +65,35 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
     console.log("Deploying AvailableRootsRegistry Proxy...");
 
     // deterministicly deploy the proxy by porviding the create2Factory address as implementation address
-    TransparentUpgradeableProxy availabableRootsRegistry = new TransparentUpgradeableProxy{
+    TransparentUpgradeableProxy availableRootsRegistryProxy = new TransparentUpgradeableProxy{
       salt: SALT
     }(CREATE2_FACTORY_ADDRESS, deployer, bytes(""));
-    console.log("AvailableRootsRegistry Proxy Deployed:", address(availabableRootsRegistry));
+    console.log("AvailableRootsRegistry Proxy Deployed:", address(availableRootsRegistryProxy));
 
-    AvailableRootsRegistry availabableRootsRegistryImplem = new AvailableRootsRegistry(deployer);
-    console.log("AvailableRootsRegistry Implem Deployed:", address(availabableRootsRegistryImplem));
+    AvailableRootsRegistry availableRootsRegistryImplem = new AvailableRootsRegistry(deployer);
+    console.log("AvailableRootsRegistry Implem Deployed:", address(availableRootsRegistryImplem));
 
     // Upgrade the proxy to use the correct deployed implementation
-    availabableRootsRegistry.upgradeToAndCall(
-      address(availabableRootsRegistryImplem),
-      abi.encodeWithSelector(availabableRootsRegistryImplem.initialize.selector, deployer)
+    availableRootsRegistryProxy.upgradeToAndCall(
+      address(availableRootsRegistryImplem),
+      abi.encodeWithSelector(availableRootsRegistryImplem.initialize.selector, deployer)
     );
 
-    // change proxy admin to proxyAdmin
-    availabableRootsRegistry.changeAdmin(proxyAdmin);
-    console.log("AvailableRootsRegistry proxy admin changed from", deployer, "to", proxyAdmin);
+    if (availableRootsRegistryProxy.admin() != proxyAdmin) {
+      // change proxy admin to proxyAdmin
+      availableRootsRegistryProxy.changeAdmin(proxyAdmin);
+      console.log("AvailableRootsRegistry proxy admin changed from", deployer, "to", proxyAdmin);
+    }
 
-    // transfer ownership to owner
-    availabableRootsRegistryImplem.transferOwnership(owner);
-    console.log("AvailableRootsRegistry ownership transferred from", deployer, "to", owner);
+    AvailableRootsRegistry availableRootsRegistry = AvailableRootsRegistry(
+      address(availableRootsRegistryProxy)
+    );
+
+    if (availableRootsRegistry.owner() != owner) {
+      // transfer ownership to owner
+      availableRootsRegistry.transferOwnership(owner);
+      console.log("AvailableRootsRegistry ownership transferred from", deployer, "to", owner);
+    }
 
     DeploymentConfig memory newDeploymentConfig = DeploymentConfig({
       proxyAdmin: proxyAdmin,
@@ -93,7 +101,7 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
       rootsOwner: config.rootsOwner,
       commitmentMapperEdDSAPubKey: config.commitmentMapperEdDSAPubKey,
       sismoAddressesProviderV2: config.sismoAddressesProviderV2,
-      availableRootsRegistry: address(availabableRootsRegistry),
+      availableRootsRegistry: address(availableRootsRegistry),
       commitmentMapperRegistry: config.commitmentMapperRegistry,
       hydraS3Verifier: config.hydraS3Verifier,
       sismoConnectVerifier: config.sismoConnectVerifier,
@@ -107,7 +115,7 @@ contract DeployAvailableRootsRegistry is Script, BaseDeploymentConfig {
 
     vm.stopBroadcast();
 
-    return AvailableRootsRegistry(address(availabableRootsRegistry));
+    return availableRootsRegistry;
   }
 
   function _getAddress(
