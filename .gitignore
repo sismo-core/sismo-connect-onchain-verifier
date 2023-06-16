@@ -16,4 +16,4 @@ lib
 # Deployment files
 **deployments/test.json
 **/tmp/*
-!**/tmp/test.json
+!**/tmp/example.json

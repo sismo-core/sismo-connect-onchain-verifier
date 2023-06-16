@@ -7,7 +7,10 @@ import "src/libs/sismo-connect/SismoConnectLib.sol";
 // It is NOT deployed in production
 // see: https://book.getfoundry.sh/tutorials/best-practices?highlight=coverage#test-harnesses
 contract SismoConnectHarness is SismoConnect {
-  constructor(bytes16 appId) SismoConnect(appId) {}
+  constructor(
+    bytes16 appId,
+    bool isImpersonationMode
+  ) SismoConnect(buildConfig(appId, isImpersonationMode)) {}
 
   function exposed_buildClaim(bytes16 groupId) external view returns (ClaimRequest memory) {
     return buildClaim(groupId);

@@ -5,7 +5,7 @@ import "./Structs.sol";
 
 library ProofBuilder {
   // default values for SismoConnect Proof
-  bytes32 public constant DEFAULT_PROOF_PROVING_SCHEME = bytes32("hydra-s2.1");
+  bytes32 public constant DEFAULT_PROOF_PROVING_SCHEME = bytes32("hydra-s3.1");
   bytes public constant DEFAULT_PROOF_EXTRA_DATA = "";
 
   function build(

@@ -11,13 +11,13 @@ struct DeploymentConfig {
   address claimRequestBuilder;
   uint256[2] commitmentMapperEdDSAPubKey;
   address commitmentMapperRegistry;
-  address hydraS2Verifier;
+  address hydraS3Verifier;
   address owner;
   address proxyAdmin;
   address requestBuilder;
   address rootsOwner;
   address signatureBuilder;
-  address sismoAddressesProvider;
+  address sismoAddressesProviderV2;
   address sismoConnectVerifier;
 }
 
@@ -34,8 +34,9 @@ contract BaseDeploymentConfig is Script {
   DeploymentConfig config;
 
   string public _chainName;
+  bool public _checkIfEmpty;
 
-  address immutable SISMO_ADDRESSES_PROVIDER = 0x3340Ac0CaFB3ae34dDD53dba0d7344C1Cf3EFE05;
+  address immutable SISMO_ADDRESSES_PROVIDER_V2 = 0x3Cd5334eB64ebBd4003b72022CC25465f1BFcEe6;
   address immutable ZERO_ADDRESS = 0x0000000000000000000000000000000000000000;
 
   // Main Env
@@ -43,13 +44,20 @@ contract BaseDeploymentConfig is Script {
   address immutable MAIN_OWNER = 0x00c92065F759c3d1c94d08C27a2Ab97a1c874Cbc;
   address immutable MAIN_GNOSIS_ROOTS_OWNER = 0xEf809a50de35c762FBaCf1ae1F6B861CE42911D1;
   address immutable MAIN_POLYGON_ROOTS_OWNER = 0xF0a0B692e1c764281c211948D03edEeF5Fb57111;
+  address immutable MAIN_OPTIMISM_ROOTS_OWNER = 0xf8640cE5532BCbc788489Bf5A786635ae585258B;
+  address immutable MAIN_ARBITRUM_ONE_ROOTS_OWNER = 0x1BB9AD70F529e36B7Ffed0cfA44fA4cf0213Fa09;
   address immutable MAIN_MAINNET_ROOTS_OWNER = 0x2a265b954B96d4940B94eb69E8Fc8E7346369D05;
 
   // Testnet Env
   address immutable TESTNET_PROXY_ADMIN = 0x246E71bC2a257f4BE9C7fAD4664E6D7444844Adc;
   address immutable TESTNET_OWNER = 0xBB8FcA8f2381CFeEDe5D7541d7bF76343EF6c67B;
   address immutable TESTNET_GOERLI_ROOTS_OWNER = 0xa687922C4bf2eB22297FdF89156B49eD3727618b;
+  address immutable TESTNET_SEPOLIA_ROOTS_OWNER = 0x1C0c54EA7Bb55f655fb8Ff6D51557368bA8624E6;
   address immutable TESTNET_MUMBAI_ROOTS_OWNER = 0xCA0583A6682607282963d3E2545Cd2e75697C2bb;
+  address immutable TESTNET_OPTIMISM_GOERLI_ROOTS_OWNER =
+    0xe807B5153e3eD4767C3F4EB50b65Fab90c57596B;
+  address immutable TESTNET_ARBITRUM_GOERLI_ROOTS_OWNER =
+    0x8eAb4616d47F82C890fdb6eE311A4C0aE34ba7fb;
   address immutable TESTNET_SCROLL_GOERLI_ROOTS_OWNER = 0x8f9c04d7bA132Fd0CbA124eFCE3936328d217458;
 
   // Sismo Staging env (Sismo internal use only)
@@ -64,11 +72,6 @@ contract BaseDeploymentConfig is Script {
   uint256 immutable PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y =
     0x20706798455f90ed993f8dac8075fc1538738a25f0c928da905c0dffd81869fa;
 
-  uint256 immutable DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X =
-    0x2ab71fb864979b71106135acfa84afc1d756cda74f8f258896f896b4864f0256;
-  uint256 immutable DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y =
-    0x30423b4c502f1cd4179a425723bf1e15c843733af2ecdee9aef6a0451ef2db74;
-
   error ChainNotConfigured(DeployChain chain);
   error ChainNameNotFound(string chainName);
 
@@ -76,8 +79,13 @@ contract BaseDeploymentConfig is Script {
     Mainnet,
     Gnosis,
     Polygon,
+    Optimism,
+    ArbitrumOne,
     TestnetGoerli,
+    TestnetSepolia,
     TestnetMumbai,
+    OptimismGoerli,
+    ArbitrumGoerli,
     ScrollTestnetGoerli,
     StagingGoerli,
     StagingMumbai,
@@ -91,10 +99,20 @@ contract BaseDeploymentConfig is Script {
       return DeployChain.Gnosis;
     } else if (_compareStrings(chainName, "polygon")) {
       return DeployChain.Polygon;
+    } else if (_compareStrings(chainName, "optimism")) {
+      return DeployChain.Optimism;
+    } else if (_compareStrings(chainName, "arbitrum-one")) {
+      return DeployChain.ArbitrumOne;
     } else if (_compareStrings(chainName, "testnet-goerli")) {
       return DeployChain.TestnetGoerli;
+    } else if (_compareStrings(chainName, "testnet-sepolia")) {
+      return DeployChain.TestnetSepolia;
     } else if (_compareStrings(chainName, "testnet-mumbai")) {
       return DeployChain.TestnetMumbai;
+    } else if (_compareStrings(chainName, "optimism-goerli")) {
+      return DeployChain.OptimismGoerli;
+    } else if (_compareStrings(chainName, "arbitrum-goerli")) {
+      return DeployChain.ArbitrumGoerli;
     } else if (_compareStrings(chainName, "scroll-testnet-goerli")) {
       return DeployChain.ScrollTestnetGoerli;
     } else if (_compareStrings(chainName, "staging-goerli")) {
@@ -138,14 +156,44 @@ contract BaseDeploymentConfig is Script {
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
+    } else if (chain == DeployChain.Optimism) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: MAIN_PROXY_ADMIN,
+        owner: MAIN_OWNER,
+        rootsOwner: MAIN_OPTIMISM_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.ArbitrumOne) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: MAIN_PROXY_ADMIN,
+        owner: MAIN_OWNER,
+        rootsOwner: MAIN_ARBITRUM_ONE_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
     } else if (chain == DeployChain.TestnetGoerli) {
       minimalConfig = MinimalConfig({
         proxyAdmin: TESTNET_PROXY_ADMIN,
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.TestnetSepolia) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: TESTNET_PROXY_ADMIN,
+        owner: TESTNET_OWNER,
+        rootsOwner: TESTNET_SEPOLIA_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.TestnetMumbai) {
@@ -154,8 +202,28 @@ contract BaseDeploymentConfig is Script {
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_MUMBAI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.OptimismGoerli) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: TESTNET_PROXY_ADMIN,
+        owner: TESTNET_OWNER,
+        rootsOwner: TESTNET_OPTIMISM_GOERLI_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.ArbitrumGoerli) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: TESTNET_PROXY_ADMIN,
+        owner: TESTNET_OWNER,
+        rootsOwner: TESTNET_ARBITRUM_GOERLI_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.ScrollTestnetGoerli) {
@@ -164,8 +232,8 @@ contract BaseDeploymentConfig is Script {
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_SCROLL_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.StagingGoerli) {
@@ -174,8 +242,8 @@ contract BaseDeploymentConfig is Script {
         owner: STAGING_OWNER,
         rootsOwner: STAGING_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.StagingMumbai) {
@@ -184,8 +252,8 @@ contract BaseDeploymentConfig is Script {
         owner: STAGING_OWNER,
         rootsOwner: STAGING_MUMBAI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
-          DEV_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
     } else if (chain == DeployChain.Test) {
@@ -206,9 +274,11 @@ contract BaseDeploymentConfig is Script {
       commitmentMapperEdDSAPubKey: minimalConfig.commitmentMapperEdDSAPubKey,
       availableRootsRegistry: ZERO_ADDRESS,
       commitmentMapperRegistry: ZERO_ADDRESS,
-      sismoAddressesProvider: SISMO_ADDRESSES_PROVIDER,
+      sismoAddressesProviderV2: _tryReadingAddressFromDeploymentConfigAtKey(
+        ".sismoAddressesProviderV2"
+      ),
       sismoConnectVerifier: ZERO_ADDRESS,
-      hydraS2Verifier: ZERO_ADDRESS,
+      hydraS3Verifier: ZERO_ADDRESS,
       // external libraries
       authRequestBuilder: ZERO_ADDRESS,
       claimRequestBuilder: ZERO_ADDRESS,
@@ -221,6 +291,7 @@ contract BaseDeploymentConfig is Script {
 
   function _setDeploymentConfig(string memory chainName, bool checkIfEmpty) internal {
     _chainName = chainName;
+    _checkIfEmpty = checkIfEmpty;
     // read deployment config from file if the chain is different from `test`
     string memory filePath = string.concat(_deploymentConfigFilePath());
 
@@ -240,8 +311,56 @@ contract BaseDeploymentConfig is Script {
     if (checkIfEmpty) {
       if (_compareStrings(json, "") || _compareStrings(chainName, "test") || _isLocalFork()) {
         _saveDeploymentConfig(chainName, _getEmptyDeploymentConfig(getChainName(chainName)));
+      } else {
+        _readDeploymentConfig();
       }
+    } else {
+      _readDeploymentConfig();
     }
+  }
+
+  function _readDeploymentConfig() internal {
+    address owner = _tryReadingAddressFromDeploymentConfigAtKey(".owner");
+    address proxyAdmin = _tryReadingAddressFromDeploymentConfigAtKey(".proxyAdmin");
+    address rootsOwner = _tryReadingAddressFromDeploymentConfigAtKey(".rootsOwner");
+    uint256[2]
+      memory commitmentMapperEdDSAPubKey = _tryReadingCommitmentMapperEdDSAPubKeyFromDeploymentConfig();
+    address availableRootsRegistry = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".availableRootsRegistry"
+    );
+    address commitmentMapperRegistry = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".commitmentMapperRegistry"
+    );
+    address sismoAddressesProviderV2 = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".sismoAddressesProviderV2"
+    );
+    address sismoConnectVerifier = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".sismoConnectVerifier"
+    );
+    address hydraS3Verifier = _tryReadingAddressFromDeploymentConfigAtKey(".hydraS3Verifier");
+    address authRequestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".authRequestBuilder");
+    address claimRequestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(
+      ".claimRequestBuilder"
+    );
+    address signatureBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".signatureBuilder");
+    address requestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".requestBuilder");
+
+    config = DeploymentConfig({
+      proxyAdmin: proxyAdmin,
+      owner: owner,
+      rootsOwner: rootsOwner,
+      commitmentMapperEdDSAPubKey: commitmentMapperEdDSAPubKey,
+      availableRootsRegistry: availableRootsRegistry,
+      commitmentMapperRegistry: commitmentMapperRegistry,
+      sismoAddressesProviderV2: sismoAddressesProviderV2,
+      sismoConnectVerifier: sismoConnectVerifier,
+      hydraS3Verifier: hydraS3Verifier,
+      // external libraries
+      authRequestBuilder: authRequestBuilder,
+      claimRequestBuilder: claimRequestBuilder,
+      signatureBuilder: signatureBuilder,
+      requestBuilder: requestBuilder
+    });
   }
 
   function _readAddressFromDeploymentConfigAtKey(
@@ -252,6 +371,21 @@ contract BaseDeploymentConfig is Script {
       abi.decode(encodedAddress, (address)) == address(0x20)
         ? address(0)
         : abi.decode(encodedAddress, (address));
+  }
+
+  function _tryReadingAddressFromDeploymentConfigAtKey(
+    string memory key
+  ) internal view returns (address) {
+    try vm.parseJson(vm.readFile(_deploymentConfigFilePath()), key) returns (
+      bytes memory encodedAddress
+    ) {
+      return
+        abi.decode(encodedAddress, (address)) == address(0x20)
+          ? address(0)
+          : abi.decode(encodedAddress, (address));
+    } catch {
+      return ZERO_ADDRESS;
+    }
   }
 
   function _readCommitmentMapperEdDSAPubKeyFromDeploymentConfig()
@@ -273,6 +407,20 @@ contract BaseDeploymentConfig is Script {
     }
   }
 
+  function _tryReadingCommitmentMapperEdDSAPubKeyFromDeploymentConfig()
+    internal
+    view
+    returns (uint256[2] memory pubKey)
+  {
+    try
+      vm.parseJson(vm.readFile(_deploymentConfigFilePath()), ".commitmentMapperEdDSAPubKey")
+    returns (bytes memory value) {
+      return abi.decode(value, (uint256[2]));
+    } catch {
+      return [uint256(0), uint256(0)];
+    }
+  }
+
   function _saveDeploymentConfig(
     string memory chainName,
     DeploymentConfig memory deploymentConfig
@@ -288,7 +436,7 @@ contract BaseDeploymentConfig is Script {
       "commitmentMapperRegistry",
       address(deploymentConfig.commitmentMapperRegistry)
     );
-    vm.serializeAddress(chainName, "hydraS2Verifier", address(deploymentConfig.hydraS2Verifier));
+    vm.serializeAddress(chainName, "hydraS3Verifier", address(deploymentConfig.hydraS3Verifier));
     vm.serializeAddress(
       chainName,
       "sismoConnectVerifier",
@@ -326,11 +474,21 @@ contract BaseDeploymentConfig is Script {
     vm.serializeString(chainName, "commitmentMapperEdDSAPubKey", commitmentMapperPubKeyConfig);
     string memory finalJson = vm.serializeAddress(
       chainName,
-      "sismoAddressesProvider",
-      SISMO_ADDRESSES_PROVIDER
+      "sismoAddressesProviderV2",
+      address(deploymentConfig.sismoAddressesProviderV2)
     );
 
-    vm.writeJson(finalJson, _deploymentConfigFilePath());
+    if (_compareStrings(chainName, "test") || _isLocalFork()) {
+      vm.writeJson(finalJson, _deploymentConfigFilePath());
+    } else {
+      try vm.envBool("OVERRIDE_DEPLOYMENT_CONFIG") returns (bool overrideDeploymentConfig) {
+        if (overrideDeploymentConfig == true) {
+          vm.writeJson(finalJson, _deploymentConfigFilePath());
+        }
+      } catch {
+        console.log("OVERRIDE_DEPLOYMENT_CONFIG not set, skipping deployment config override.");
+      }
+    }
   }
 
   function _deploymentConfigFilePath() internal view returns (string memory) {
@@ -360,12 +518,13 @@ contract BaseDeploymentConfig is Script {
         "If you want to deploy to a chain different from localhost, you need to specify a chain name different from `test`."
       );
       // return the real config if we are NOT using a fork
-      isLocalFork == true
-        ? string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json")
-        : string.concat(vm.projectRoot(), "/script/deployments/", _chainName, ".json");
+      return
+        isLocalFork == true
+          ? string.concat(vm.projectRoot(), "/deployments/tmp/", _chainName, ".json")
+          : string.concat(vm.projectRoot(), "/deployments/", _chainName, ".json");
     }
     // return the temporary config
-    return string.concat(vm.projectRoot(), "/script/deployments/tmp/", _chainName, ".json");
+    return string.concat(vm.projectRoot(), "/deployments/tmp/", _chainName, ".json");
   }
 
   function _isLocalFork() internal view returns (bool) {

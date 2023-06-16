@@ -1,3 +1,3 @@
 forge-std/=lib/forge-std/src/
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
-@sismo-core/hydra-s2/=lib/hydra-s2-zkps/package/contracts/
+@sismo-core/hydra-s3/=lib/hydra-s3-zkps/package/contracts/

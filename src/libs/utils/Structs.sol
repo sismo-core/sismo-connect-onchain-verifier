@@ -2,11 +2,19 @@
 pragma solidity ^0.8.17;
 
 struct SismoConnectRequest {
-  bytes16 appId;
   bytes16 namespace;
   AuthRequest[] auths;
   ClaimRequest[] claims;
   SignatureRequest signature;
+}
+
+struct SismoConnectConfig {
+  bytes16 appId;
+  VaultConfig vault;
+}
+
+struct VaultConfig {
+  bool isImpersonationMode;
 }
 
 struct AuthRequest {

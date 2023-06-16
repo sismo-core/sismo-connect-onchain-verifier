@@ -11,6 +11,7 @@ contract VerifierMock is IBaseVerifier {
   function verify(
     bytes16,
     bytes16,
+    bool,
     bytes memory,
     SismoConnectProof memory sismoConnectProof
   ) external pure override returns (VerifiedAuth memory, VerifiedClaim memory) {
@@ -20,7 +21,7 @@ contract VerifierMock is IBaseVerifier {
     VerifiedClaim memory verifiedClaim;
     if (sismoConnectProof.auths.length == 1) {
       // Get the Auth from the sismoConnectProof
-      // We only support one Auth in the hydra-s2 proving scheme
+      // We only support one Auth in the hydra-s3 proving scheme
       Auth memory auth = sismoConnectProof.auths[0];
       verifiedAuth = VerifiedAuth({
         authType: auth.authType,
@@ -32,7 +33,7 @@ contract VerifierMock is IBaseVerifier {
     }
     if (sismoConnectProof.claims.length == 1) {
       // Get the Claim from the sismoConnectProof
-      // We only support one Claim in the hydra-s2 proving scheme
+      // We only support one Claim in the hydra-s3 proving scheme
       Claim memory claim = sismoConnectProof.claims[0];
       verifiedClaim = VerifiedClaim({
         claimType: claim.claimType,

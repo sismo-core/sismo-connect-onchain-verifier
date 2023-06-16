@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-contract IHydraS2Verifier {
+contract IHydraS3Verifier {
   error InvalidProof();
+  error CallToVerifyProofFailed();
+  error InvalidSismoIdentifier(bytes32 userId, uint8 authType);
   error OnlyOneAuthAndOneClaimIsSupported();
 
   error InvalidVersion(bytes32 version);

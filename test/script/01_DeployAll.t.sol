@@ -6,8 +6,11 @@ import "forge-std/console.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import "script/01_DeployAll.s.sol";
+import {DeployAvailableRootsRegistry} from "script/DeployAvailableRootsRegistry.s.sol";
+import {DeployCommitmentMapperRegistry} from "script/DeployCommitmentMapperRegistry.s.sol";
+import "script/BaseConfig.sol";
 
-contract DeployAllTest is Test {
+contract DeployAllTest is Test, BaseDeploymentConfig {
   ScriptTypes.DeployAllContracts contracts;
 
   address immutable PROXY_ADMIN = address(1);
@@ -15,6 +18,9 @@ contract DeployAllTest is Test {
   address immutable ROOTS_OWNER = address(3);
 
   function setUp() public virtual {
+    _chainName = "test";
+    _checkIfEmpty = true;
+
     DeployAll deploy = new DeployAll();
 
     (bool success, bytes memory result) = address(deploy).delegatecall(
@@ -22,10 +28,6 @@ contract DeployAllTest is Test {
     );
     require(success, "Deploy script did not run successfully!");
     contracts = abi.decode(result, (ScriptTypes.DeployAllContracts));
-  }
-
-  function testDeployment() public view {
-    console.log(address(contracts.availableRootsRegistry));
   }
 
   function testAvailableRootsRegistryDeployed() public {
@@ -38,14 +40,14 @@ contract DeployAllTest is Test {
     assertEq(contracts.commitmentMapperRegistry.owner(), OWNER);
   }
 
-  function testHydraS2Verifier() public {
-    _expectDeployedWithProxy(address(contracts.hydraS2Verifier), PROXY_ADMIN);
+  function testHydraS3Verifier() public {
+    _expectDeployedWithProxy(address(contracts.hydraS3Verifier), PROXY_ADMIN);
     assertEq(
-      address(contracts.hydraS2Verifier.COMMITMENT_MAPPER_REGISTRY()),
+      address(contracts.hydraS3Verifier.COMMITMENT_MAPPER_REGISTRY()),
       address(contracts.commitmentMapperRegistry)
     );
     assertEq(
-      address(contracts.hydraS2Verifier.AVAILABLE_ROOTS_REGISTRY()),
+      address(contracts.hydraS3Verifier.AVAILABLE_ROOTS_REGISTRY()),
       address(contracts.availableRootsRegistry)
     );
   }
@@ -53,10 +55,14 @@ contract DeployAllTest is Test {
   function testSismoConnectVerifier() public {
     _expectDeployedWithProxy(address(contracts.sismoConnectVerifier), PROXY_ADMIN);
     assertEq(
-      contracts.sismoConnectVerifier.getVerifier("hydra-s2.1"),
-      address(contracts.hydraS2Verifier)
+      contracts.sismoConnectVerifier.getVerifier("hydra-s3.1"),
+      address(contracts.hydraS3Verifier)
     );
     assertEq(contracts.sismoConnectVerifier.owner(), OWNER);
+  }
+
+  function test_RemoveFile() public {
+    removeFile();
   }
 
   function _expectDeployedWithProxy(address proxy, address expectedAdmin) internal {
@@ -67,5 +73,11 @@ contract DeployAllTest is Test {
     );
     assertEq(success, true);
     assertEq(abi.decode(result, (address)), PROXY_ADMIN);
+  }
+
+  function removeFile() internal {
+    console.log("Removing deploymentConfigFilePath", _deploymentConfigFilePath());
+
+    vm.removeFile(_deploymentConfigFilePath());
   }
 }
