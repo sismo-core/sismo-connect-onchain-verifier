@@ -126,6 +126,31 @@ contract BaseDeploymentConfig is Script {
   }
 
   function _getEmptyDeploymentConfig(DeployChain chain) internal returns (DeploymentConfig memory) {
+    minimalConfig = _getMinimalConfig(chain);
+
+    config = DeploymentConfig({
+      proxyAdmin: minimalConfig.proxyAdmin,
+      owner: minimalConfig.owner,
+      rootsOwner: minimalConfig.rootsOwner,
+      commitmentMapperEdDSAPubKey: minimalConfig.commitmentMapperEdDSAPubKey,
+      availableRootsRegistry: ZERO_ADDRESS,
+      commitmentMapperRegistry: ZERO_ADDRESS,
+      sismoAddressesProviderV2: _tryReadingAddressFromDeploymentConfigAtKey(
+        ".sismoAddressesProviderV2"
+      ),
+      sismoConnectVerifier: ZERO_ADDRESS,
+      hydraS3Verifier: ZERO_ADDRESS,
+      // external libraries
+      authRequestBuilder: ZERO_ADDRESS,
+      claimRequestBuilder: ZERO_ADDRESS,
+      signatureBuilder: ZERO_ADDRESS,
+      requestBuilder: ZERO_ADDRESS
+    });
+
+    return config;
+  }
+
+  function _getMinimalConfig(DeployChain chain) internal returns (MinimalConfig memory) {
     if (chain == DeployChain.Mainnet) {
       minimalConfig = MinimalConfig({
         proxyAdmin: MAIN_PROXY_ADMIN,
@@ -267,26 +292,7 @@ contract BaseDeploymentConfig is Script {
       revert ChainNotConfigured(chain);
     }
 
-    config = DeploymentConfig({
-      proxyAdmin: minimalConfig.proxyAdmin,
-      owner: minimalConfig.owner,
-      rootsOwner: minimalConfig.rootsOwner,
-      commitmentMapperEdDSAPubKey: minimalConfig.commitmentMapperEdDSAPubKey,
-      availableRootsRegistry: ZERO_ADDRESS,
-      commitmentMapperRegistry: ZERO_ADDRESS,
-      sismoAddressesProviderV2: _tryReadingAddressFromDeploymentConfigAtKey(
-        ".sismoAddressesProviderV2"
-      ),
-      sismoConnectVerifier: ZERO_ADDRESS,
-      hydraS3Verifier: ZERO_ADDRESS,
-      // external libraries
-      authRequestBuilder: ZERO_ADDRESS,
-      claimRequestBuilder: ZERO_ADDRESS,
-      signatureBuilder: ZERO_ADDRESS,
-      requestBuilder: ZERO_ADDRESS
-    });
-
-    return config;
+    return minimalConfig;
   }
 
   function _setDeploymentConfig(string memory chainName, bool checkIfEmpty) internal {
@@ -310,21 +316,22 @@ contract BaseDeploymentConfig is Script {
     // if the config is not created, create a new empty one
     if (checkIfEmpty) {
       if (_compareStrings(json, "") || _compareStrings(chainName, "test") || _isLocalFork()) {
-        _saveDeploymentConfig(chainName, _getEmptyDeploymentConfig(getChainName(chainName)));
+        _saveDeploymentConfig(chainName, _getEmptyDeploymentConfig(getChainName(_chainName)));
       } else {
-        _readDeploymentConfig();
+        _readDeploymentConfig(_chainName);
       }
     } else {
-      _readDeploymentConfig();
+      _readDeploymentConfig(_chainName);
     }
   }
 
-  function _readDeploymentConfig() internal {
-    address owner = _tryReadingAddressFromDeploymentConfigAtKey(".owner");
-    address proxyAdmin = _tryReadingAddressFromDeploymentConfigAtKey(".proxyAdmin");
-    address rootsOwner = _tryReadingAddressFromDeploymentConfigAtKey(".rootsOwner");
-    uint256[2]
-      memory commitmentMapperEdDSAPubKey = _tryReadingCommitmentMapperEdDSAPubKeyFromDeploymentConfig();
+  function _readDeploymentConfig(string memory chainName) internal {
+    _chainName = chainName;
+    minimalConfig = _getMinimalConfig(getChainName(chainName));
+    address owner = minimalConfig.owner;
+    address proxyAdmin = minimalConfig.proxyAdmin;
+    address rootsOwner = minimalConfig.rootsOwner;
+    uint256[2] memory commitmentMapperEdDSAPubKey = minimalConfig.commitmentMapperEdDSAPubKey;
     address availableRootsRegistry = _tryReadingAddressFromDeploymentConfigAtKey(
       ".availableRootsRegistry"
     );
