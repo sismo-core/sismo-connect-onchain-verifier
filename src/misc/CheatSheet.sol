@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "../libs/sismo-connect/SismoConnectLib.sol";
+import "forge-std/console.sol";
 
 contract CheatSheet is SismoConnect {
   // reference your appId
@@ -77,6 +78,15 @@ contract CheatSheet is SismoConnect {
       signature: _signatureBuilder.build({message: abi.encode("I love Sismo!")})
     });
 
-    // implement some logic if the proof is successful
+    uint256 vaultId = SismoConnectHelper.getUserId(result, AuthType.VAULT);
+    uint256 githubId = SismoConnectHelper.getUserId(result, AuthType.GITHUB);
+    uint256 telegramId = SismoConnectHelper.getUserId(result, AuthType.TELEGRAM);
+    uint256[] memory evmAccountIds = SismoConnectHelper.getUserIds(result, AuthType.EVM_ACCOUNT);
+
+    console.log("Vault ID: %s", vaultId);
+    console.log("Github ID: %s", githubId);
+    console.log("Telegram ID: %s", telegramId);
+    console.log("First EVM Account ID: %s", evmAccountIds[0]);
+    console.log("Second EVM Account ID: %s", evmAccountIds[1]);
   }
 }
