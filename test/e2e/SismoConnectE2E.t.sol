@@ -13,6 +13,8 @@ import {AuthBuilder} from "src/libs/utils/AuthBuilder.sol";
 import {ClaimBuilder} from "src/libs/utils/ClaimBuilder.sol";
 import {ResponseBuilder, ResponseWithoutProofs} from "test/utils/ResponseBuilderLib.sol";
 import {BaseDeploymentConfig} from "script/BaseConfig.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {UpgradeableExample} from "test/misc/UpgradeableExample.sol";
 
 // E2E tests for SismoConnect Solidity Library
 // These tests are made with proofs generated from the Vault App
@@ -299,6 +301,48 @@ contract SismoConnectE2E is HydraS3BaseTest {
     });
 
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
+  }
+
+  function test_withProxy() public {
+    SignatureRequest memory signatureRequest = sismoConnect.exposed_buildSignature({
+      message: abi.encode(user)
+    });
+
+    UpgradeableExample sismoConnectImplem = new UpgradeableExample(
+      DEFAULT_APP_ID,
+      DEFAULT_IS_IMPERSONATION_MODE,
+      0xe9ed316946d3d98dfcd829a53ec9822e
+    );
+
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
+      address(sismoConnectImplem),
+      address(1),
+      abi.encodeWithSelector(
+        sismoConnectImplem.initialize.selector,
+        bytes16(0xe9ed316946d3d98dfcd829a53ec9822e)
+      )
+    );
+
+    UpgradeableExample upgradeable = UpgradeableExample(address(proxy));
+
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithOneClaimAndSignature(
+      commitmentMapperRegistry
+    );
+
+    upgradeable.exposed_verify({responseBytes: responseEncoded, signature: signatureRequest});
+
+    // add an additional groupId in the contract
+    upgradeable.addGroupId({groupId: 0xff7653240feecd7448150005a95ac86b});
+
+    // verify again
+    // it should throw since the response is the same but another claim request is required
+    vm.expectRevert(
+      abi.encodeWithSignature(
+        "ClaimGroupIdNotFound(bytes16)",
+        bytes16(0xff7653240feecd7448150005a95ac86b)
+      )
+    );
+    upgradeable.exposed_verify({responseBytes: responseEncoded, signature: signatureRequest});
   }
 
   function test_RevertWithInvalidSismoIdentifier() public {
