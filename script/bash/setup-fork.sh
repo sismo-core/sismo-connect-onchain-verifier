@@ -40,7 +40,7 @@ declare -a contract_values=("authRequestBuilder-v1.1"
                             "hydraS3Verifier"
                             "requestBuilder-v1.1"
                             "signatureBuilder-v1.1"
-                            "sismoConnectVerifier-v1.1")
+                            "sismoConnectVerifier-v1.2")
 
 # Loop over contract names
 for index in "${!contract_keys[@]}"

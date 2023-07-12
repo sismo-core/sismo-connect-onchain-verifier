@@ -38,7 +38,7 @@ contract BaseTest is Test {
 
     IAddressesProvider(sismoAddressProviderV2).set(
       address(sismoConnectVerifier),
-      string("sismoConnectVerifier-v1.1")
+      string("sismoConnectVerifier-v1.2")
     );
     IAddressesProvider(sismoAddressProviderV2).set(
       address(authRequestBuilder),

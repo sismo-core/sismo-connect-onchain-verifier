@@ -17,7 +17,7 @@ contract SetAddressesProvider is Script, BaseDeploymentConfig {
 
     vm.startBroadcast();
 
-    _setAddress(config.sismoConnectVerifier, string("sismoConnectVerifier-v1.1"));
+    _setAddress(config.sismoConnectVerifier, string("sismoConnectVerifier-v1.2"));
     _setAddress(config.hydraS3Verifier, string("hydraS3Verifier"));
     _setAddress(config.availableRootsRegistry, string("sismoConnectAvailableRootsRegistry"));
     _setAddress(config.commitmentMapperRegistry, string("sismoConnectCommitmentMapperRegistry"));

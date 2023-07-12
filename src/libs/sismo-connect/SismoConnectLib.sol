@@ -34,7 +34,7 @@ contract SismoConnect {
     IS_IMPERSONATION_MODE = _config.vault.isImpersonationMode;
 
     _sismoConnectVerifier = ISismoConnectVerifier(
-      ADDRESSES_PROVIDER_V2.get(string("sismoConnectVerifier-v1.1"))
+      ADDRESSES_PROVIDER_V2.get(string("sismoConnectVerifier-v1.2"))
     );
     // external libraries
     _authRequestBuilder = AuthRequestBuilder(
