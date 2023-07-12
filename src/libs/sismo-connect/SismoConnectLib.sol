@@ -653,7 +653,7 @@ contract SismoConnect {
   function buildSignature(
     bytes memory message,
     bytes memory extraData
-  ) external view returns (SignatureRequest memory) {
+  ) internal view returns (SignatureRequest memory) {
     return _signatureBuilder.build(message, extraData);
   }
 
@@ -661,18 +661,18 @@ contract SismoConnect {
     bytes memory message,
     bool isSelectableByUser,
     bytes memory extraData
-  ) external view returns (SignatureRequest memory) {
+  ) internal view returns (SignatureRequest memory) {
     return _signatureBuilder.build(message, isSelectableByUser, extraData);
   }
 
-  function buildSignature(bool isSelectableByUser) external view returns (SignatureRequest memory) {
+  function buildSignature(bool isSelectableByUser) internal view returns (SignatureRequest memory) {
     return _signatureBuilder.build(isSelectableByUser);
   }
 
   function buildSignature(
     bool isSelectableByUser,
     bytes memory extraData
-  ) external view returns (SignatureRequest memory) {
+  ) internal view returns (SignatureRequest memory) {
     return _signatureBuilder.build(isSelectableByUser, extraData);
   }
 
