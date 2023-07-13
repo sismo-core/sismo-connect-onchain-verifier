@@ -1,5 +1,9 @@
 #! /bin/bash 
 
+# Usage
+# in a first terminal, launch a fork with anvil: `anvil --fork-url https://rpc.ankr.com/polygon_mumbai`
+# in a second terminal, setup the fork to your needs: `yarn setup-fork testnet-mumbai`
+
 # Get chain name from command line arguments to get the config file
 chain_name=$1
 config_file="./deployments/tmp/${chain_name}.json"
@@ -40,7 +44,7 @@ declare -a contract_values=("authRequestBuilder-v1.1"
                             "hydraS3Verifier"
                             "requestBuilder-v1.1"
                             "signatureBuilder-v1.1"
-                            "sismoConnectVerifier-v1.1")
+                            "sismoConnectVerifier-v1.2")
 
 # Loop over contract names
 for index in "${!contract_keys[@]}"

@@ -33,7 +33,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
 
   function test_RevertWith_InvalidVersionOfProvingScheme() public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     invalidResponse.proofs[0].provingScheme = bytes32("fake-proving-scheme");
     // register the fake proving scheme to the HydraS3Verifier address i the SismoConnectVerifier contract
     // if the proving scheme is not registered, it will revert without an error since the SismoConnectVerifier will not be able to find the verifier when routing
@@ -58,7 +58,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         uint256(keccak256(abi.encodePacked(appId, bytes16(0)))) % HydraS3Lib.SNARK_FIELD
     );
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOnlyOneAuthAndMessage(commitmentMapperRegistry);
+      .getResponseWithOnlyOneAuthAndMessage();
     // we change the vaultNamespace to be equal to a random one instead of the coorect appId
     // vaultNamespace is at index 11 is in the snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(
@@ -82,7 +82,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
 
   function test_RevertWith_DestinationVerificationNotEnabled() public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOnlyOneAuthAndMessage(commitmentMapperRegistry);
+      .getResponseWithOnlyOneAuthAndMessage();
     // we change the authType to be equal to GITHUB instead of ANON
     invalidResponse.proofs[0].auths[0] = Auth({
       authType: AuthType.GITHUB,
@@ -110,10 +110,10 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     uint256 incorrectCommitmentMapperPubKeyX
   ) public {
     // we assume that the incorrectCommitmentMapperPubKeyX is different from the correct commitmentMapperPubKeyX when fuzzing
-    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS3Proofs.getEdDSAPubKeyDevBeta()[0]);
+    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS3Proofs.getEdDSAPubKey()[0]);
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOnlyOneAuthAndMessage(commitmentMapperRegistry);
-    // we change the authType to be equal to GITHUB instead of ANON to be able to check the commitmentMapperRegistry public key
+      .getResponseWithOnlyOneAuthAndMessage();
+    // we change the authType to be equal to GITHUB instead of ANON to be able to check the  public key
     invalidResponse.proofs[0].auths[0] = Auth({
       authType: AuthType.GITHUB,
       isAnon: false,
@@ -140,8 +140,8 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
-        bytes32(hydraS3Proofs.getEdDSAPubKeyDevBeta()[0]),
-        bytes32(hydraS3Proofs.getEdDSAPubKeyDevBeta()[1]),
+        bytes32(hydraS3Proofs.getEdDSAPubKey()[0]),
+        bytes32(hydraS3Proofs.getEdDSAPubKey()[1]),
         bytes32(incorrectCommitmentMapperPubKeyX),
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
@@ -157,10 +157,10 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     uint256 incorrectCommitmentMapperPubKeyY
   ) public {
     // we assume that the incorrectCommitmentMapperPubKeyY is different from the correct commitmentMapperPubKeyY when fuzzing
-    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS3Proofs.getEdDSAPubKeyDevBeta()[1]);
+    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS3Proofs.getEdDSAPubKey()[1]);
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOnlyOneAuthAndMessage(commitmentMapperRegistry);
-    // we change the authType to be equal to GITHUB instead of ANON to be able to check the commitmentMapperRegistry public key
+      .getResponseWithOnlyOneAuthAndMessage();
+    // we change the authType to be equal to GITHUB instead of ANON to be able to check the  public key
     invalidResponse.proofs[0].auths[0] = Auth({
       authType: AuthType.GITHUB,
       isAnon: false,
@@ -186,8 +186,8 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
-        bytes32(hydraS3Proofs.getEdDSAPubKeyDevBeta()[0]),
-        bytes32(hydraS3Proofs.getEdDSAPubKeyDevBeta()[1]),
+        bytes32(hydraS3Proofs.getEdDSAPubKey()[0]),
+        bytes32(hydraS3Proofs.getEdDSAPubKey()[1]),
         bytes32(snarkProof._getCommitmentMapperPubKey()[0]),
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
@@ -203,7 +203,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     // we force that the invalidClaimValue is different from the correct claimValue when fuzzing
     vm.assume(invalidClaimValue != 1);
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     // claimValue is at index 7 in the snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(invalidResponse, 7, invalidClaimValue);
     vm.expectRevert(abi.encodeWithSignature("ClaimValueMismatch()"));
@@ -229,7 +229,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         _encodeRequestIdentifier(groupId, bytes16("latest"), appId, bytes16(keccak256("main")))
     );
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     // requestIdentifier is at index 5 in the snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(
       invalidResponse,
@@ -254,9 +254,9 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     uint256 incorrectCommitmentMapperPubKeyX
   ) public {
     // we assume that the incorrectCommitmentMapperPubKeyX is different from the correct commitmentMapperPubKeyX when fuzzing
-    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS3Proofs.getEdDSAPubKeyDevBeta()[0]);
+    vm.assume(incorrectCommitmentMapperPubKeyX != hydraS3Proofs.getEdDSAPubKey()[0]);
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     // commitmentMapperPubKeyX is at index 2 in snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(
       invalidResponse,
@@ -266,13 +266,30 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
-        bytes32(hydraS3Proofs.getEdDSAPubKeyDevBeta()[0]),
-        bytes32(hydraS3Proofs.getEdDSAPubKeyDevBeta()[1]),
+        bytes32(hydraS3Proofs.getEdDSAPubKey()[0]),
+        bytes32(hydraS3Proofs.getEdDSAPubKey()[1]),
         bytes32(incorrectCommitmentMapperPubKeyX),
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
     sismoConnect.exposed_verify({
+      responseBytes: abi.encode(invalidResponse),
+      claim: claimRequest,
+      signature: signature
+    });
+
+    // it should also revert whe in impersonation mode
+    SismoConnectHarness impersonationSismoConnect = new SismoConnectHarness(appId, true);
+    vm.expectRevert(
+      abi.encodeWithSignature(
+        "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
+        bytes32(hydraS3Proofs.getImpersonationEdDSAPubKey()[0]),
+        bytes32(hydraS3Proofs.getImpersonationEdDSAPubKey()[1]),
+        bytes32(incorrectCommitmentMapperPubKeyX),
+        bytes32(snarkProof._getCommitmentMapperPubKey()[1])
+      )
+    );
+    impersonationSismoConnect.exposed_verify({
       responseBytes: abi.encode(invalidResponse),
       claim: claimRequest,
       signature: signature
@@ -283,9 +300,9 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     uint256 incorrectCommitmentMapperPubKeyY
   ) public {
     // we assume that the incorrectCommitmentMapperPubKeyY is different from the correct commitmentMapperPubKeyY when fuzzing
-    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS3Proofs.getEdDSAPubKeyDevBeta()[1]);
+    vm.assume(incorrectCommitmentMapperPubKeyY != hydraS3Proofs.getEdDSAPubKey()[1]);
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     // commitmentMapperPubKeyY is at index 3 in the snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(
       invalidResponse,
@@ -295,8 +312,8 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
-        bytes32(hydraS3Proofs.getEdDSAPubKeyDevBeta()[0]),
-        bytes32(hydraS3Proofs.getEdDSAPubKeyDevBeta()[1]),
+        bytes32(hydraS3Proofs.getEdDSAPubKey()[0]),
+        bytes32(hydraS3Proofs.getEdDSAPubKey()[1]),
         bytes32(snarkProof._getCommitmentMapperPubKey()[0]),
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
@@ -306,11 +323,28 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
       claim: claimRequest,
       signature: signature
     });
+
+    // it should also revert whe in impersonation mode
+    SismoConnectHarness impersonationSismoConnect = new SismoConnectHarness(appId, true);
+    vm.expectRevert(
+      abi.encodeWithSignature(
+        "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
+        bytes32(hydraS3Proofs.getImpersonationEdDSAPubKey()[0]),
+        bytes32(hydraS3Proofs.getImpersonationEdDSAPubKey()[1]),
+        bytes32(snarkProof._getCommitmentMapperPubKey()[0]),
+        bytes32(incorrectCommitmentMapperPubKeyY)
+      )
+    );
+    impersonationSismoConnect.exposed_verify({
+      responseBytes: abi.encode(invalidResponse),
+      claim: claimRequest,
+      signature: signature
+    });
   }
 
   function test_RevertWith_SourceVerificationNotEnabled() public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     // we change the sourceVerificationEnabled to be equal to false instead of true
     // sourceVerificationEnabled is at index 12 in snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(invalidResponse, 12, uint256(0));
@@ -326,7 +360,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     uint256 invalidRegistryTreeRoot
   ) public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
 
     // we shift the return of the mocked AvailableRootsregistry contract to be always false
     availableRootsRegistry.switchIsRootAvailable();
@@ -350,7 +384,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     uint256 incorrectAccountsTreeValue
   ) public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     uint256 correctAccountsTreeValue = abi
       .decode(invalidResponse.proofs[0].proofData, (HydraS3ProofData))
       ._getAccountsTreeValue();
@@ -378,7 +412,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
 
   function test_RevertWith_ClaimTypeMismatch() public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     // we change the claimComparator to be equal to 1, the claimType should be EQ to not revert
     // but we keep the claimType of GTE in the claimRequest
     uint256 incorrectClaimComparator = 1;
@@ -404,7 +438,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
 
   function testFuzz_RevertWith_InvalidExtraData(uint256 incorrectExtraData) public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     uint256 correctExtraData = abi
       .decode(invalidResponse.proofs[0].proofData, (HydraS3ProofData))
       ._getExtraData();
@@ -432,7 +466,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
 
   function testFuzz_RevertWith_InvalidProof(uint256 incorrectProofIdentifier) public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
-      .getResponseWithOneClaimAndSignature(commitmentMapperRegistry);
+      .getResponseWithOneClaimAndSignature();
     uint256 correctProofIdentifier = abi
       .decode(invalidResponse.proofs[0].proofData, (HydraS3ProofData))
       ._getProofIdentifier();

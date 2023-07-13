@@ -37,6 +37,12 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
   // Registry storing the Registry Tree Roots of the Attester's available ClaimData
   IAvailableRootsRegistry public immutable AVAILABLE_ROOTS_REGISTRY;
 
+  // Impersonation Commitment Mapper EdDSA Public key
+  uint256 public constant impersonationCommitmentMapperPubKeyX =
+    0x1801b584700a740f9576cc7e83745895452edc518a9ce60b430e1272fc4eb93b;
+  uint256 public constant impersonationCommitmentMapperPubKeyY =
+    0x057cf80de4f8dd3e4c56f948f40c28c3acbeca71ef9f825597bf8cc059f1238b;
+
   constructor(address commitmentMapperRegistry, address availableRootsRegistry) {
     COMMITMENT_MAPPER_REGISTRY = ICommitmentMapperRegistry(commitmentMapperRegistry);
     AVAILABLE_ROOTS_REGISTRY = IAvailableRootsRegistry(availableRootsRegistry);
@@ -81,7 +87,8 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
         hydraS3Proof.input,
         sismoConnectProof.proofData,
         auth,
-        appId
+        appId,
+        isImpersonationMode
       );
     }
     if (sismoConnectProof.claims.length == 1) {
@@ -133,10 +140,7 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
     // In impersonation mode, we use the EdDSA public key of the Impersonation Commitment Mapper
     // otherwise we use the EdDSA public key of the Commitment Mapper Registry
     uint256[2] memory commitmentMapperPubKey = isImpersonationMode
-      ? [
-        0x1801b584700a740f9576cc7e83745895452edc518a9ce60b430e1272fc4eb93b,
-        0x057cf80de4f8dd3e4c56f948f40c28c3acbeca71ef9f825597bf8cc059f1238b
-      ]
+      ? [impersonationCommitmentMapperPubKeyX, impersonationCommitmentMapperPubKeyY]
       : COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
 
     if (
@@ -187,7 +191,8 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
     HydraS3ProofInput memory input,
     bytes memory proofData,
     Auth memory auth,
-    bytes16 appId
+    bytes16 appId,
+    bool isImpersonationMode
   ) private view returns (VerifiedAuth memory) {
     uint256 userIdFromProof;
     if (auth.authType == AuthType.VAULT) {
@@ -203,7 +208,9 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
         revert DestinationVerificationNotEnabled();
       }
       // commitmentMapperPubKey
-      uint256[2] memory commitmentMapperPubKey = COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
+      uint256[2] memory commitmentMapperPubKey = isImpersonationMode
+        ? [impersonationCommitmentMapperPubKeyX, impersonationCommitmentMapperPubKeyY]
+        : COMMITMENT_MAPPER_REGISTRY.getEdDSAPubKey();
       if (
         input.commitmentMapperPubKey[0] != commitmentMapperPubKey[0] ||
         input.commitmentMapperPubKey[1] != commitmentMapperPubKey[1]
