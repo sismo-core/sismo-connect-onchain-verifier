@@ -6,13 +6,13 @@ import "forge-std/console.sol";
 
 contract CheatSheet is SismoConnect {
   // reference your appId
-  bytes16 public constant APP_ID = 0x32403ced4b65f2079eda77c84e7d2be6;
+  bytes16 private _appId = 0x32403ced4b65f2079eda77c84e7d2be6;
   // allow impersonation
-  bool public constant IS_IMPERSONATION_MODE = true;
+  bool private _isImpersonationMode = true;
 
   constructor()
     // use buildConfig helper to easily build a Sismo Connect config in Solidity
-    SismoConnect(buildConfig({appId: APP_ID, isImpersonationMode: IS_IMPERSONATION_MODE}))
+    SismoConnect(buildConfig({appId: _appId, isImpersonationMode: _isImpersonationMode}))
   {}
 
   function verifySismoConnectResponse(bytes memory response) public {

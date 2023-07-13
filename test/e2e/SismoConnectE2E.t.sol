@@ -302,9 +302,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
 
     UpgradeableExample upgradeable = UpgradeableExample(address(proxy));
 
-    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithOneClaimAndSignature(
-      commitmentMapperRegistry
-    );
+    (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithOneClaimAndSignature();
 
     upgradeable.exposed_verify({responseBytes: responseEncoded, signature: signatureRequest});
 
