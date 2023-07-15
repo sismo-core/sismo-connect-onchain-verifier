@@ -1,7 +1,7 @@
 {
   "name": "@sismo-core/sismo-connect-solidity",
   "description": "Sismo Connect Library",
-  "version": "0.0.16",
+  "version": "0.0.19",
   "scripts": {
     "prepare": "mkdir -p contracts; cp -r ../src/* contracts"
   },
