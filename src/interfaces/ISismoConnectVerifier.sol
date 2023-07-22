@@ -15,7 +15,7 @@ interface ISismoConnectVerifier {
     SismoConnectResponse memory response,
     SismoConnectRequest memory request,
     SismoConnectConfig memory config
-  ) external returns (SismoConnectVerifiedResult memory);
+  ) external view returns (SismoConnectVerifiedResult memory);
 
   function SISMO_CONNECT_VERSION() external view returns (bytes32);
 }

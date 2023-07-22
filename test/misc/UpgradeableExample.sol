@@ -36,7 +36,7 @@ contract UpgradeableExample is SismoConnect, Initializable {
   function exposed_verify(
     bytes memory responseBytes,
     SignatureRequest memory signature
-  ) external returns (SismoConnectVerifiedResult memory) {
+  ) external view returns (SismoConnectVerifiedResult memory) {
     ClaimRequest[] memory claims = new ClaimRequest[](_groupIds.length);
     for (uint256 i = 0; i < _groupIds.length; i++) {
       claims[i] = buildClaim(_groupIds[i]);

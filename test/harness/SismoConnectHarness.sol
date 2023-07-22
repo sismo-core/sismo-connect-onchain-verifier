@@ -71,7 +71,7 @@ contract SismoConnectHarness is SismoConnect {
   function exposed_verify(
     bytes memory responseBytes,
     ClaimRequest memory claim
-  ) external returns (SismoConnectVerifiedResult memory) {
+  ) external view returns (SismoConnectVerifiedResult memory) {
     return verify({responseBytes: responseBytes, claim: claim});
   }
 
@@ -79,7 +79,7 @@ contract SismoConnectHarness is SismoConnect {
     bytes memory responseBytes,
     ClaimRequest memory claim,
     bytes16 namespace
-  ) external returns (SismoConnectVerifiedResult memory) {
+  ) external view returns (SismoConnectVerifiedResult memory) {
     return verify({responseBytes: responseBytes, claim: claim, namespace: namespace});
   }
 
@@ -87,7 +87,7 @@ contract SismoConnectHarness is SismoConnect {
     bytes memory responseBytes,
     ClaimRequest memory claim,
     SignatureRequest memory signature
-  ) external returns (SismoConnectVerifiedResult memory) {
+  ) external view returns (SismoConnectVerifiedResult memory) {
     return verify({responseBytes: responseBytes, claim: claim, signature: signature});
   }
 
@@ -95,14 +95,14 @@ contract SismoConnectHarness is SismoConnect {
     bytes memory responseBytes,
     AuthRequest memory auth,
     SignatureRequest memory signature
-  ) external returns (SismoConnectVerifiedResult memory) {
+  ) external view returns (SismoConnectVerifiedResult memory) {
     return verify({responseBytes: responseBytes, auth: auth, signature: signature});
   }
 
   function exposed_verify(
     bytes memory responseBytes,
     SismoConnectRequest memory request
-  ) external returns (SismoConnectVerifiedResult memory) {
+  ) external view returns (SismoConnectVerifiedResult memory) {
     return verify({responseBytes: responseBytes, request: request});
   }
 }

@@ -15,7 +15,7 @@ contract CheatSheet is SismoConnect {
     SismoConnect(buildConfig({appId: _appId, isImpersonationMode: _isImpersonationMode}))
   {}
 
-  function verifySismoConnectResponse(bytes memory response) public {
+  function verifySismoConnectResponse(bytes memory response) public view {
     // Recreate the request made in the fontend to verify the proof
     AuthRequest[] memory auths = new AuthRequest[](6);
     auths[0] = _authRequestBuilder.build({authType: AuthType.VAULT});

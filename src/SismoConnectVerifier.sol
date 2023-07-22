@@ -49,7 +49,7 @@ contract SismoConnectVerifier is ISismoConnectVerifier, Initializable, Ownable {
     SismoConnectResponse memory response,
     SismoConnectRequest memory request,
     SismoConnectConfig memory config
-  ) external override returns (SismoConnectVerifiedResult memory) {
+  ) external view override returns (SismoConnectVerifiedResult memory) {
     if (response.appId != config.appId) {
       revert AppIdMismatch(response.appId, config.appId);
     }
