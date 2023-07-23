@@ -73,7 +73,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     cheatsheet = new CheatSheet();
   }
 
-  function test_SismoConnectLibWithOnlyClaimAndMessage() public {
+  function test_SismoConnectLibWithOnlyClaimAndMessage() public view {
     (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithOneClaimAndSignature();
 
     sismoConnect.exposed_verify({
@@ -85,7 +85,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     });
   }
 
-  function test_SismoConnectLibWithTwoClaimsAndMessage() public {
+  function test_SismoConnectLibWithTwoClaimsAndMessage() public view {
     (, bytes memory responseEncoded) = hydraS3Proofs.getResponseWithTwoClaimsAndSignature();
 
     ClaimRequest[] memory claims = new ClaimRequest[](2);
@@ -144,7 +144,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     zkdrop.claimWithSismoConnect(responseEncoded, user);
   }
 
-  function test_TwoClaimsOneVaultAuthWithSignature() public {
+  function test_TwoClaimsOneVaultAuthWithSignature() public view {
     ClaimRequest[] memory claims = new ClaimRequest[](2);
     claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
     claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
@@ -168,7 +168,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     console.log("Claims in Verified result: %s", verifiedResult.claims.length);
   }
 
-  function test_ThreeClaimsOneVaultAuthWithSignatureOneClaimOptional() public {
+  function test_ThreeClaimsOneVaultAuthWithSignatureOneClaimOptional() public view {
     ClaimRequest[] memory claims = new ClaimRequest[](3);
     claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
     claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
@@ -197,7 +197,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     console.log("Claims in Verified result: %s", verifiedResult.claims.length);
   }
 
-  function test_ThreeClaimsOneVaultAuthOneTwitterAuthWithSignatureOneClaimOptional() public {
+  function test_ThreeClaimsOneVaultAuthOneTwitterAuthWithSignatureOneClaimOptional() public view {
     ClaimRequest[] memory claims = new ClaimRequest[](3);
     claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
     claims[1] = claimRequestBuilder.build({groupId: 0x02d241fdb9d4330c564ffc0a36af05f6});
@@ -231,7 +231,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     console.log("Claims in Verified result: %s", verifiedResult.claims.length);
   }
 
-  function test_OneClaimOneOptionalTwitterAuthOneGithubAuthWithSignature() public {
+  function test_OneClaimOneOptionalTwitterAuthOneGithubAuthWithSignature() public view {
     ClaimRequest[] memory claims = new ClaimRequest[](1);
     claims[0] = claimRequestBuilder.build({groupId: 0xe9ed316946d3d98dfcd829a53ec9822e});
 
@@ -259,7 +259,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     console.log("Claims in Verified result: %s", verifiedResult.claims.length);
   }
 
-  function test_GitHubAuth() public {
+  function test_GitHubAuth() public view {
     (, bytes memory encodedResponse) = hydraS3Proofs.getResponseWithGitHubAuth();
 
     SismoConnectRequest memory request = requestBuilder.build({
@@ -270,7 +270,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     sismoConnect.exposed_verify({responseBytes: encodedResponse, request: request});
   }
 
-  function test_GitHubAuthWithoutSignature() public {
+  function test_GitHubAuthWithoutSignature() public view {
     (, bytes memory encodedResponse) = hydraS3Proofs.getResponseWithGitHubAuthWithoutSignature();
 
     SismoConnectRequest memory request = requestBuilder.build({
@@ -343,7 +343,7 @@ contract SismoConnectE2E is HydraS3BaseTest {
     sismoConnect.exposed_verify({responseBytes: abi.encode(response), request: request});
   }
 
-  function test_CheatSheet() public {
+  function test_CheatSheet() public view {
     bytes memory responseBytes = hydraS3Proofs.getCheatSheetResponse();
     cheatsheet.verifySismoConnectResponse(responseBytes);
   }

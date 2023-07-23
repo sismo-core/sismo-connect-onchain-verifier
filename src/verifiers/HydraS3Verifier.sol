@@ -289,8 +289,6 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
   }
 
   function _checkSnarkProof(HydraS3ProofData memory snarkProofData) internal view {
-    // low-level call to the `verifyProof` function
-    // since the function only accepts arguments located in calldata
     bool isVerified = this.verifyProof(
       snarkProofData.proof.a,
       snarkProofData.proof.b,
