@@ -115,13 +115,14 @@ library ResponseBuilder {
     bytes memory proofData,
     bytes32 provingScheme
   ) public pure returns (SismoConnectResponse memory) {
-    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
-    proofs[0] = ProofBuilder.build({
+    SismoConnectProof[] memory newProofs = new SismoConnectProof[](1);
+    newProofs[0] = ProofBuilder.build({
       auth: auth,
       proofData: proofData,
       provingScheme: provingScheme
     });
-    response.proofs = proofs;
+    SismoConnectProof[] memory allProofs = getAllProofs(response, newProofs);
+    response.proofs = allProofs;
     return response;
   }
 
@@ -130,9 +131,10 @@ library ResponseBuilder {
     Auth memory auth,
     bytes memory proofData
   ) public pure returns (SismoConnectResponse memory) {
-    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
-    proofs[0] = ProofBuilder.build({auth: auth, proofData: proofData, provingScheme: ""});
-    response.proofs = proofs;
+    SismoConnectProof[] memory newProofs = new SismoConnectProof[](1);
+    newProofs[0] = ProofBuilder.build({auth: auth, proofData: proofData, provingScheme: ""});
+    SismoConnectProof[] memory allProofs = getAllProofs(response, newProofs);
+    response.proofs = allProofs;
     return response;
   }
 
@@ -197,13 +199,14 @@ library ResponseBuilder {
     bytes memory proofData,
     bytes32 provingScheme
   ) public pure returns (SismoConnectResponse memory) {
-    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
-    proofs[0] = ProofBuilder.build({
+    SismoConnectProof[] memory newProofs = new SismoConnectProof[](1);
+    newProofs[0] = ProofBuilder.build({
       claim: claim,
       proofData: proofData,
       provingScheme: provingScheme
     });
-    response.proofs = proofs;
+    SismoConnectProof[] memory allProofs = getAllProofs(response, newProofs);
+    response.proofs = allProofs;
     return response;
   }
 
@@ -212,9 +215,10 @@ library ResponseBuilder {
     Claim memory claim,
     bytes memory proofData
   ) public pure returns (SismoConnectResponse memory) {
-    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
-    proofs[0] = ProofBuilder.build({claim: claim, proofData: proofData, provingScheme: ""});
-    response.proofs = proofs;
+    SismoConnectProof[] memory newProofs = new SismoConnectProof[](1);
+    newProofs[0] = ProofBuilder.build({claim: claim, proofData: proofData, provingScheme: ""});
+    SismoConnectProof[] memory allProofs = getAllProofs(response, newProofs);
+    response.proofs = allProofs;
     return response;
   }
 
@@ -223,9 +227,10 @@ library ResponseBuilder {
     Claim memory claim,
     bytes32 provingScheme
   ) public pure returns (SismoConnectResponse memory) {
-    SismoConnectProof[] memory proofs = new SismoConnectProof[](1);
-    proofs[0] = ProofBuilder.build({claim: claim, proofData: "", provingScheme: provingScheme});
-    response.proofs = proofs;
+    SismoConnectProof[] memory newProofs = new SismoConnectProof[](1);
+    newProofs[0] = ProofBuilder.build({claim: claim, proofData: "", provingScheme: provingScheme});
+    SismoConnectProof[] memory allProofs = getAllProofs(response, newProofs);
+    response.proofs = allProofs;
     return response;
   }
 
@@ -253,6 +258,26 @@ library ResponseBuilder {
     Claim memory claim
   ) external pure returns (SismoConnectResponse memory) {
     return withClaim(response, claim, "");
+  }
+
+  ////////////////////////////////
+  //  Multiple Proof Addition  //
+  //////////////////////////////
+
+  function getAllProofs(
+    SismoConnectResponse memory response,
+    SismoConnectProof[] memory newProofs
+  ) private pure returns (SismoConnectProof[] memory) {
+    uint32 proofsLength = uint32(response.proofs.length);
+    uint32 newProofsLength = uint32(newProofs.length);
+    SismoConnectProof[] memory allProofs = new SismoConnectProof[](proofsLength + newProofsLength);
+    for (uint32 i = 0; i < proofsLength; i++) {
+      allProofs[i] = response.proofs[i];
+    }
+    for (uint32 i = 0; i < newProofsLength; i++) {
+      allProofs[proofsLength + i] = newProofs[i];
+    }
+    return allProofs;
   }
 
   ////////////////////////////////

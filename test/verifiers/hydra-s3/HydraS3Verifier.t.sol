@@ -1,16 +1,13 @@
-// SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {HydraS3BaseTest} from "./HydraS3BaseTest.t.sol";
-import {SismoConnectHarness} from "test/harness/SismoConnectHarness.sol";
-import "src/libs/sismo-connect/SismoConnectLib.sol";
 import {HydraS3ProofData, HydraS3Lib, HydraS3ProofInput} from "src/verifiers/HydraS3Lib.sol";
 
 contract HydraS3VerifierTest is HydraS3BaseTest {
   using HydraS3Lib for HydraS3ProofData;
 
-  SismoConnectHarness sismoConnect;
   address user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
   bytes16 constant appId = 0x11b1de449c6c4adb0b5775b3868b28b3;
   bytes16 constant groupId = 0xe9ed316946d3d98dfcd829a53ec9822e;

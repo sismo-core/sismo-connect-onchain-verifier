@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 import {BaseTest} from "test/BaseTest.t.sol";
@@ -8,7 +8,7 @@ contract VerifierMockBaseTest is BaseTest {
   VerifierMock verifierMock;
 
   function setUp() public virtual override {
-    super.setUp();
+    BaseTest.setUp();
 
     verifierMock = new VerifierMock();
 

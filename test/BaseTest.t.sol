@@ -6,8 +6,10 @@ import "forge-std/console.sol";
 import {AddressesProviderMock} from "test/mocks/AddressesProviderMock.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 import {SismoConnectVerifier} from "src/SismoConnectVerifier.sol";
-import {SismoConnect} from "src/libs/SismoLib.sol";
-import {RequestBuilder, AuthRequestBuilder, ClaimRequestBuilder, SignatureBuilder} from "src/libs/sismo-connect/SismoConnectLib.sol";
+import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
+import {AuthRequestBuilder} from "src/libs/utils/AuthRequestBuilder.sol";
+import {ClaimRequestBuilder} from "src/libs/utils/ClaimRequestBuilder.sol";
+import {SignatureBuilder} from "src/libs/utils/SignatureBuilder.sol";
 
 contract BaseTest is Test {
   address immutable user1 = vm.addr(1);
