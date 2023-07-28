@@ -11,10 +11,10 @@ import "src/periphery/CommitmentMapperRegistry.sol";
 import {HydraS3Verifier} from "src/verifiers/HydraS3Verifier.sol";
 
 import {SismoConnectVerifier} from "src/SismoConnectVerifier.sol";
-import {AuthRequestBuilder} from "src/libs/utils/AuthRequestBuilder.sol";
-import {ClaimRequestBuilder} from "src/libs/utils/ClaimRequestBuilder.sol";
-import {SignatureBuilder} from "src/libs/utils/SignatureBuilder.sol";
-import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
+import {AuthRequestBuilder} from "src/utils/AuthRequestBuilder.sol";
+import {ClaimRequestBuilder} from "src/utils/ClaimRequestBuilder.sol";
+import {SignatureBuilder} from "src/utils/SignatureBuilder.sol";
+import {RequestBuilder} from "src/utils/RequestBuilder.sol";
 import {DeploymentConfig, BaseDeploymentConfig} from "script/BaseConfig.sol";
 import {IAddressesProvider} from "src/periphery/interfaces/IAddressesProvider.sol";
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "src/libs/utils/Structs.sol";
-import {ProofBuilder} from "src/libs/utils/SismoConnectProofBuilder.sol";
+import "src/utils/Structs.sol";
+import {ProofBuilder} from "src/utils/SismoConnectProofBuilder.sol";
 
 // We introduce an intermediate struct that will not store the proofs
 // This is useful to be able to store this struct in the a contract storage

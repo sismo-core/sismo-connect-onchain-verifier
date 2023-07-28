@@ -8,13 +8,15 @@ import {CommitmentMapperRegistryMock, ICommitmentMapperRegistry} from "test/mock
 import {AvailableRootsRegistryMock} from "test/mocks/AvailableRootsRegistryMock.sol";
 
 contract HydraS3BaseTest is BaseTest {
-  HydraS3Proofs immutable hydraS3Proofs = new HydraS3Proofs();
+  HydraS3Proofs hydraS3Proofs;
   HydraS3Verifier hydraS3Verifier;
   ICommitmentMapperRegistry commitmentMapperRegistry;
   AvailableRootsRegistryMock availableRootsRegistry;
 
   function setUp() public virtual override {
-    super.setUp();
+    BaseTest.setUp();
+
+    hydraS3Proofs = new HydraS3Proofs();
 
     commitmentMapperRegistry = new CommitmentMapperRegistryMock();
     availableRootsRegistry = new AvailableRootsRegistryMock();

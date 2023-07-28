@@ -5,12 +5,12 @@ import "forge-std/console.sol";
 import {ResponseBuilder, ResponseWithoutProofs} from "test/utils/ResponseBuilderLib.sol";
 import {VerifierMockBaseTest} from "test/verifiers/mocks/VerifierMockBaseTest.t.sol";
 import {BaseDeploymentConfig} from "script/BaseConfig.sol";
-import {RequestBuilder} from "src/libs/utils/RequestBuilder.sol";
-import {ClaimRequestBuilder} from "src/libs/utils/ClaimRequestBuilder.sol";
-import {AuthBuilder} from "src/libs/utils/AuthBuilder.sol";
-import {ClaimBuilder} from "src/libs/utils/ClaimBuilder.sol";
-import "src/libs/utils/Structs.sol";
-import "src/libs/utils/Fmt.sol";
+import {RequestBuilder} from "src/utils/RequestBuilder.sol";
+import {ClaimRequestBuilder} from "src/utils/ClaimRequestBuilder.sol";
+import {AuthBuilder} from "src/utils/AuthBuilder.sol";
+import {ClaimBuilder} from "src/utils/ClaimBuilder.sol";
+import "src/utils/Structs.sol";
+import "src/utils/Fmt.sol";
 
 contract SismoConnectVerifierTest is VerifierMockBaseTest {
   using ResponseBuilder for SismoConnectResponse;
@@ -534,7 +534,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
     });
   }
 
-  function test_OneAuthOneClaimOneSignature() public {
+  function test_OneAuthOneClaimOneSignature() public view {
     SismoConnectResponse memory validResponse = DEFAULT_RESPONSE
       .withAuth({
         auth: AuthBuilder.build({authType: AuthType.VAULT}),

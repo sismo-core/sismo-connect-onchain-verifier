@@ -4,45 +4,78 @@ pragma solidity ^0.8.17;
 import "forge-std/console.sol";
 import {HydraS3BaseTest} from "./HydraS3BaseTest.t.sol";
 import {HydraS3ProofData, HydraS3Lib, HydraS3ProofInput} from "src/verifiers/HydraS3Lib.sol";
+import {ClaimBuilder} from "src/utils/ClaimBuilder.sol";
+import {AuthBuilder} from "src/utils/AuthBuilder.sol";
+import "src/utils/Structs.sol";
 
 contract HydraS3VerifierTest is HydraS3BaseTest {
   using HydraS3Lib for HydraS3ProofData;
+  using ClaimBuilder for bytes16;
+  using AuthBuilder for uint8;
 
   address user = 0x7def1d6D28D6bDa49E69fa89aD75d160BEcBa3AE;
-  bytes16 constant appId = 0x11b1de449c6c4adb0b5775b3868b28b3;
-  bytes16 constant groupId = 0xe9ed316946d3d98dfcd829a53ec9822e;
-
+  bytes16 constant DEFAULT_APP_ID = 0x11b1de449c6c4adb0b5775b3868b28b3;
+  bytes16 constant DEFAULT_GROUP_ID = 0xe9ed316946d3d98dfcd829a53ec9822e;
+  bytes16 constant DEFAULT_GROUP_TIMESTAMP = bytes16("latest");
+  bytes16 public DEFAULT_NAMESPACE = bytes16(keccak256("main"));
   bool public DEFAULT_IS_IMPERSONATION_MODE = false;
-
-  ClaimRequest claimRequest;
-  AuthRequest authRequest;
-  SignatureRequest signature;
 
   HydraS3ProofData snarkProof;
 
+  SignatureRequest public DEFAULT_SIGNATURE_REQUEST =
+    SignatureRequest({message: abi.encode(user), isSelectableByUser: false, extraData: ""});
+
   function setUp() public virtual override {
-    super.setUp();
-    sismoConnect = new SismoConnectHarness(appId, DEFAULT_IS_IMPERSONATION_MODE);
-    claimRequest = sismoConnect.exposed_buildClaim({groupId: groupId});
-    authRequest = sismoConnect.exposed_buildAuth({authType: AuthType.VAULT});
-    signature = sismoConnect.exposed_buildSignature({message: abi.encode(user)});
+    HydraS3BaseTest.setUp();
   }
 
   function test_RevertWith_InvalidVersionOfProvingScheme() public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
       .getResponseWithOneClaimAndSignature();
     invalidResponse.proofs[0].provingScheme = bytes32("fake-proving-scheme");
-    // register the fake proving scheme to the HydraS3Verifier address i the SismoConnectVerifier contract
-    // if the proving scheme is not registered, it will revert without an error since the SismoConnectVerifier will not be able to find the verifier when routing
-    vm.prank(owner);
-    sismoConnectVerifier.registerVerifier(bytes32("fake-proving-scheme"), address(hydraS3Verifier));
+
     vm.expectRevert(
       abi.encodeWithSignature("InvalidVersion(bytes32)", bytes32("fake-proving-scheme"))
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
+    });
+  }
+
+  function test_RevertWith_OnlyOneAuthAndOneClaimIsSupported() public {
+    (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
+      .getResponseWithOneClaimOneAuthAndOneMessage();
+
+    Auth[] memory auths = new Auth[](2);
+    // take the first auth from the valid response
+    auths[0] = invalidResponse.proofs[1].auths[0];
+    // we add a second auth to the proof
+    auths[1] = AuthBuilder.build({authType: AuthType.VAULT});
+
+    Claim[] memory claims = new Claim[](2);
+    claims[0] = invalidResponse.proofs[0].claims[0];
+    // we add a second claim to the proof
+    claims[1] = ClaimBuilder.build({groupId: DEFAULT_GROUP_ID});
+
+    invalidResponse.proofs[0] = SismoConnectProof({
+      provingScheme: invalidResponse.proofs[0].provingScheme,
+      auths: auths,
+      claims: claims,
+      proofData: invalidResponse.proofs[0].proofData,
+      extraData: ""
+    });
+
+    vm.expectRevert(abi.encodeWithSignature("OnlyOneAuthAndOneClaimIsSupported()"));
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -52,7 +85,7 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     vm.assume(invalidVaultNamespace < 2 ** 128 - 1);
     vm.assume(
       invalidVaultNamespace !=
-        uint256(keccak256(abi.encodePacked(appId, bytes16(0)))) % HydraS3Lib.SNARK_FIELD
+        uint256(keccak256(abi.encodePacked(DEFAULT_APP_ID, bytes16(0)))) % HydraS3Lib.SNARK_FIELD
     );
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
       .getResponseWithOnlyOneAuthAndMessage();
@@ -67,13 +100,15 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
       abi.encodeWithSignature(
         "VaultNamespaceMismatch(uint256,uint256)",
         snarkProof._getVaultNamespace(),
-        uint256(keccak256(abi.encodePacked(appId, bytes16(0)))) % HydraS3Lib.SNARK_FIELD
+        uint256(keccak256(abi.encodePacked(DEFAULT_APP_ID, bytes16(0)))) % HydraS3Lib.SNARK_FIELD
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      auth: authRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -89,17 +124,14 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
       extraData: ""
     });
 
-    // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    AuthRequest memory githubAuthRequest = sismoConnect.exposed_buildAuth({
-      authType: AuthType.GITHUB
-    });
-
-    // this should revert because the destinationVerificationEnabled is false and the AuthType is different from ANON
+    // this should revert because the destinationVerificationEnabled is false and the AuthType is different from VAULT
     vm.expectRevert(abi.encodeWithSignature("DestinationVerificationNotEnabled()"));
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      auth: githubAuthRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -130,10 +162,6 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     // destinationVerificationEnabled at index 13 in the snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(invalidResponse, 13, uint256(1)); // true
 
-    // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    AuthRequest memory githubAuthRequest = sismoConnect.exposed_buildAuth({
-      authType: AuthType.GITHUB
-    });
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -143,10 +171,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      auth: githubAuthRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -176,10 +206,6 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     // with an AuthType different from ANON, the destinationVerificationEnabled should be true
     invalidResponse = _changeProofDataInSismoConnectResponse(invalidResponse, 13, uint256(1)); // destinationVerificationEnabled at index 13 is equal to true
 
-    // we change the authType to be equal to GITHUB instead of ANON, so it is the same as in the response and we can test the revert of the destinationVerificationEnabled
-    AuthRequest memory githubAuthRequest = sismoConnect.exposed_buildAuth({
-      authType: AuthType.GITHUB
-    });
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -189,10 +215,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      auth: githubAuthRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -204,10 +232,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     // claimValue is at index 7 in the snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(invalidResponse, 7, invalidClaimValue);
     vm.expectRevert(abi.encodeWithSignature("ClaimValueMismatch()"));
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -215,16 +245,13 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     uint256 incorrectRequestIdentifier
   ) public {
     uint256 correctRequestIdentifier = _encodeRequestIdentifier(
-      groupId,
-      bytes16("latest"),
-      appId,
-      bytes16(keccak256("main"))
+      DEFAULT_GROUP_ID,
+      DEFAULT_GROUP_TIMESTAMP,
+      DEFAULT_APP_ID,
+      DEFAULT_NAMESPACE
     );
     // we force that the incorrectRequestIdentifier is different from the correct requestIdentifier when fuzzing
-    vm.assume(
-      incorrectRequestIdentifier !=
-        _encodeRequestIdentifier(groupId, bytes16("latest"), appId, bytes16(keccak256("main")))
-    );
+    vm.assume(incorrectRequestIdentifier != correctRequestIdentifier);
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
       .getResponseWithOneClaimAndSignature();
     // requestIdentifier is at index 5 in the snarkProof's inputs
@@ -240,10 +267,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         correctRequestIdentifier
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -269,14 +298,15 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
 
-    // it should also revert whe in impersonation mode
-    SismoConnectHarness impersonationSismoConnect = new SismoConnectHarness(appId, true);
+    // it should also revert when impersonation mode is set to true
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -286,10 +316,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         bytes32(snarkProof._getCommitmentMapperPubKey()[1])
       )
     );
-    impersonationSismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: true,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -315,14 +347,15 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
 
-    // it should also revert whe in impersonation mode
-    SismoConnectHarness impersonationSismoConnect = new SismoConnectHarness(appId, true);
+    // it should also revert when impersonation mode is set to true
     vm.expectRevert(
       abi.encodeWithSignature(
         "CommitmentMapperPubKeyMismatch(bytes32,bytes32,bytes32,bytes32)",
@@ -332,10 +365,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         bytes32(incorrectCommitmentMapperPubKeyY)
       )
     );
-    impersonationSismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: true,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -346,10 +381,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     // sourceVerificationEnabled is at index 12 in snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(invalidResponse, 12, uint256(0));
     vm.expectRevert(abi.encodeWithSignature("SourceVerificationNotEnabled()"));
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -370,10 +407,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
     vm.expectRevert(
       abi.encodeWithSignature("RegistryRootNotAvailable(uint256)", invalidRegistryTreeRoot)
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -400,18 +439,20 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         correctAccountsTreeValue
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
   function test_RevertWith_ClaimTypeMismatch() public {
     (SismoConnectResponse memory invalidResponse, ) = hydraS3Proofs
       .getResponseWithOneClaimAndSignature();
-    // we change the claimComparator to be equal to 1, the claimType should be EQ to not revert
-    // but we keep the claimType of GTE in the claimRequest
+    // we change the claimComparator to be equal to 1 in the proof, the claimType should be EQ to not revert
+    // but we keep the claimType of GTE in the claim
     uint256 incorrectClaimComparator = 1;
     // claimComparator is at index 9 in snarkProof's inputs
     invalidResponse = _changeProofDataInSismoConnectResponse(
@@ -423,13 +464,15 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
       abi.encodeWithSignature(
         "ClaimTypeMismatch(uint256,uint256)",
         incorrectClaimComparator,
-        claimRequest.claimType
+        invalidResponse.proofs[0].claims[0].claimType
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -454,10 +497,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
         correctExtraData
       )
     );
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
@@ -477,10 +522,12 @@ contract HydraS3VerifierTest is HydraS3BaseTest {
       incorrectProofIdentifier
     );
     vm.expectRevert(abi.encodeWithSignature("InvalidProof()"));
-    sismoConnect.exposed_verify({
-      responseBytes: abi.encode(invalidResponse),
-      claim: claimRequest,
-      signature: signature
+    hydraS3Verifier.verify({
+      appId: DEFAULT_APP_ID,
+      namespace: DEFAULT_NAMESPACE,
+      isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE,
+      signedMessage: DEFAULT_SIGNATURE_REQUEST.message,
+      sismoConnectProof: invalidResponse.proofs[0]
     });
   }
 
