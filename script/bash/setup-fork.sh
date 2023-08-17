@@ -28,22 +28,14 @@ elif [[ ! -f "$config_file" ]]; then
 fi
 
 # Define the contract names
-declare -a contract_keys=("authRequestBuilder"
-                          "availableRootsRegistry"
-                          "claimRequestBuilder"
+declare -a contract_keys=("availableRootsRegistry"
                           "commitmentMapperRegistry"
                           "hydraS3Verifier"
-                          "requestBuilder"
-                          "signatureBuilder"
                           "sismoConnectVerifier")
 
-declare -a contract_values=("authRequestBuilder-v1.1"
-                            "sismoConnectAvailableRootsRegistry"
-                            "claimRequestBuilder-v1.1"
+declare -a contract_values=("sismoConnectAvailableRootsRegistry"
                             "sismoConnectCommitmentMapperRegistry"
                             "hydraS3Verifier"
-                            "requestBuilder-v1.1"
-                            "signatureBuilder-v1.1"
                             "sismoConnectVerifier-v1.2")
 
 # Loop over contract names

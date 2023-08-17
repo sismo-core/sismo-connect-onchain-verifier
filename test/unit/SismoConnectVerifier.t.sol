@@ -5,8 +5,6 @@ import "forge-std/console.sol";
 import {ResponseBuilder, ResponseWithoutProofs} from "test/utils/ResponseBuilderLib.sol";
 import {VerifierMockBaseTest} from "test/verifiers/mocks/VerifierMockBaseTest.t.sol";
 import {BaseDeploymentConfig} from "script/BaseConfig.sol";
-import {RequestBuilder} from "src/utils/RequestBuilder.sol";
-import {ClaimRequestBuilder} from "src/utils/ClaimRequestBuilder.sol";
 import {AuthBuilder} from "src/utils/AuthBuilder.sol";
 import {ClaimBuilder} from "src/utils/ClaimBuilder.sol";
 import "src/utils/Structs.sol";
@@ -44,11 +42,28 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
   function setUp() public virtual override {
     VerifierMockBaseTest.setUp();
 
-    DEFAULT_AUTH_REQUEST = authRequestBuilder.build({authType: AuthType.VAULT});
-    DEFAULT_CLAIM_REQUEST = claimRequestBuilder.build({
-      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e
+    DEFAULT_AUTH_REQUEST = AuthRequest({
+      authType: AuthType.VAULT,
+      userId: 0,
+      isAnon: false,
+      isOptional: false,
+      isSelectableByUser: false,
+      extraData: ""
     });
-    DEFAULT_SIGNATURE_REQUEST = signatureBuilder.build({message: abi.encode(user)});
+    DEFAULT_CLAIM_REQUEST = ClaimRequest({
+      groupId: 0xe9ed316946d3d98dfcd829a53ec9822e,
+      groupTimestamp: bytes16("latest"),
+      claimType: ClaimType.GTE,
+      value: 1,
+      isOptional: false,
+      isSelectableByUser: true,
+      extraData: ""
+    });
+    DEFAULT_SIGNATURE_REQUEST = SignatureRequest({
+      message: abi.encode(user),
+      isSelectableByUser: false,
+      extraData: ""
+    });
     DEFAULT_SISMO_CONNECT_CONFIG = SismoConnectConfig({
       appId: DEFAULT_APP_ID,
       vault: VaultConfig({isImpersonationMode: DEFAULT_IS_IMPERSONATION_MODE})
@@ -62,7 +77,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       .withVersion(bytes32("wrong-version"))
       .build();
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: DEFAULT_AUTH_REQUEST,
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
@@ -88,7 +103,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       .withNamespace(bytes16(keccak256("wrong-namespace")))
       .build();
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: DEFAULT_AUTH_REQUEST,
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
@@ -114,7 +129,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       .withAppId("wrong-app-id")
       .build();
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: DEFAULT_AUTH_REQUEST,
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
@@ -140,7 +155,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       .withSignedMessage("wrong-signed-message")
       .build();
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: DEFAULT_AUTH_REQUEST,
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
@@ -165,7 +180,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
     // we expect a revert since no proofs are provided in the response
     SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.build();
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: DEFAULT_AUTH_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -195,14 +210,16 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
     // we also need to set the userId different from zero since isSelectableByUser is false
     // it means that we are waiting for a userId in the response that actually means something so different from zero
     // we set userId of the request to 0xf00 to be different from the one in the response
-    AuthRequest memory githubAuth = authRequestBuilder.build({
+    AuthRequest memory githubAuth = AuthRequest({
       authType: AuthType.GITHUB,
+      userId: uint256(0xf00),
+      isAnon: false,
       isOptional: false,
       isSelectableByUser: false,
-      userId: uint256(0xf00)
+      extraData: ""
     });
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: githubAuth,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -229,13 +246,17 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
     });
     // we need to choose a different AuthType than AUthType.VAULT to be able to test if the userId error is thrown
     // we set userId of the request to 0xf00 to be different from the one in the response
-    AuthRequest memory githubAuth = authRequestBuilder.build({
+    AuthRequest memory githubAuth = AuthRequest({
       authType: AuthType.GITHUB,
       // wrong userId
-      userId: uint256(0xf00)
+      userId: uint256(0xf00),
+      isAnon: false,
+      isOptional: false,
+      isSelectableByUser: false,
+      extraData: ""
     });
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: githubAuth,
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
@@ -263,12 +284,16 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
     });
     // we need to choose a different AuthType than AUthType.VAULT to be able to test if the userId error is thrown
     // we set userId of the request to 0xf00 to be different from the one in the response
-    AuthRequest memory githubAuth = authRequestBuilder.build({
+    AuthRequest memory githubAuth = AuthRequest({
       authType: AuthType.GITHUB,
       // wrong userId
-      userId: uint256(0xf00)
+      userId: uint256(0xf00),
+      isAnon: false,
+      isOptional: false,
+      isSelectableByUser: false,
+      extraData: ""
     });
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: githubAuth,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -287,11 +312,15 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       auth: AuthBuilder.build({authType: AuthType.VAULT, isAnon: true})
     });
 
-    AuthRequest memory githubAuth = authRequestBuilder.build({
+    AuthRequest memory githubAuth = AuthRequest({
       authType: AuthType.GITHUB,
-      isAnon: false
+      userId: 0,
+      isAnon: false,
+      isOptional: false,
+      isSelectableByUser: true,
+      extraData: ""
     });
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: githubAuth,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -316,11 +345,15 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       auth: AuthBuilder.build({authType: AuthType.VAULT, isAnon: true})
     });
 
-    AuthRequest memory vaultAuth = authRequestBuilder.build({
+    AuthRequest memory vaultAuth = AuthRequest({
       authType: AuthType.VAULT,
-      isAnon: false
+      userId: 0,
+      isAnon: false,
+      isOptional: false,
+      isSelectableByUser: false,
+      extraData: ""
     });
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: vaultAuth,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -339,8 +372,15 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       auth: AuthBuilder.build({authType: AuthType.VAULT})
     });
 
-    AuthRequest memory githubAuth = authRequestBuilder.build({authType: AuthType.GITHUB});
-    SismoConnectRequest memory request = requestBuilder.build({
+    AuthRequest memory githubAuth = AuthRequest({
+      authType: AuthType.GITHUB,
+      userId: 0,
+      isAnon: false,
+      isOptional: false,
+      isSelectableByUser: true,
+      extraData: ""
+    });
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: githubAuth,
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
@@ -359,7 +399,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
     // we expect a revert since no proofs are provided in the response
     SismoConnectResponse memory invalidResponse = DEFAULT_RESPONSE.build();
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -390,7 +430,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       })
     });
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -419,7 +459,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       })
     });
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -448,7 +488,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
     });
     invalidResponse.proofs[0].claims[0].groupTimestamp = bytes16("fake-timestamp");
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -472,7 +512,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       claim: ClaimBuilder.build({groupId: "wrong-id", claimType: ClaimType.LTE})
     });
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -497,7 +537,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       claim: ClaimBuilder.build({groupId: bytes16("wrong-group-id")})
     });
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -518,7 +558,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
       claim: ClaimBuilder.build({groupId: DEFAULT_CLAIM_REQUEST.groupId, claimType: ClaimType.LTE})
     });
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
       namespace: DEFAULT_NAMESPACE
@@ -545,7 +585,7 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
         provingScheme: DEFAULT_PROVING_SCHEME
       });
 
-    SismoConnectRequest memory request = requestBuilder.build({
+    SismoConnectRequest memory request = buildSismoConnectRequest({
       auth: DEFAULT_AUTH_REQUEST,
       claim: DEFAULT_CLAIM_REQUEST,
       signature: DEFAULT_SIGNATURE_REQUEST,
@@ -563,5 +603,56 @@ contract SismoConnectVerifierTest is VerifierMockBaseTest {
 
   function emptyResponse() private pure returns (SismoConnectResponse memory) {
     return ResponseBuilder.empty();
+  }
+
+  function buildSismoConnectRequest(
+    AuthRequest memory auth,
+    ClaimRequest memory claim,
+    SignatureRequest memory signature,
+    bytes16 namespace
+  ) private pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
+    return
+      SismoConnectRequest({
+        auths: auths,
+        claims: claims,
+        signature: signature,
+        namespace: namespace
+      });
+  }
+
+  function buildSismoConnectRequest(
+    AuthRequest memory auth,
+    SignatureRequest memory signature,
+    bytes16 namespace
+  ) private pure returns (SismoConnectRequest memory) {
+    AuthRequest[] memory auths = new AuthRequest[](1);
+    auths[0] = auth;
+    return
+      SismoConnectRequest({
+        auths: auths,
+        claims: new ClaimRequest[](0),
+        signature: signature,
+        namespace: namespace
+      });
+  }
+
+  function buildSismoConnectRequest(
+    ClaimRequest memory claim,
+    SignatureRequest memory signature,
+    bytes16 namespace
+  ) private pure returns (SismoConnectRequest memory) {
+    ClaimRequest[] memory claims = new ClaimRequest[](1);
+    claims[0] = claim;
+    return
+      SismoConnectRequest({
+        auths: new AuthRequest[](0),
+        claims: claims,
+        signature: signature,
+        namespace: namespace
+      });
   }
 }

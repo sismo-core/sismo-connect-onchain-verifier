@@ -6,17 +6,13 @@ import "forge-std/console.sol";
 
 // struct fields are sorted by alphabetical order to be able to parse the config from the deployment files
 struct DeploymentConfig {
-  address authRequestBuilder;
   address availableRootsRegistry;
-  address claimRequestBuilder;
   uint256[2] commitmentMapperEdDSAPubKey;
   address commitmentMapperRegistry;
   address hydraS3Verifier;
   address owner;
   address proxyAdmin;
-  address requestBuilder;
   address rootsOwner;
-  address signatureBuilder;
   address sismoAddressesProviderV2;
   address sismoConnectVerifier;
 }
@@ -139,12 +135,7 @@ contract BaseDeploymentConfig is Script {
         ".sismoAddressesProviderV2"
       ),
       sismoConnectVerifier: ZERO_ADDRESS,
-      hydraS3Verifier: ZERO_ADDRESS,
-      // external libraries
-      authRequestBuilder: ZERO_ADDRESS,
-      claimRequestBuilder: ZERO_ADDRESS,
-      signatureBuilder: ZERO_ADDRESS,
-      requestBuilder: ZERO_ADDRESS
+      hydraS3Verifier: ZERO_ADDRESS
     });
 
     return config;
@@ -345,12 +336,6 @@ contract BaseDeploymentConfig is Script {
       ".sismoConnectVerifier"
     );
     address hydraS3Verifier = _tryReadingAddressFromDeploymentConfigAtKey(".hydraS3Verifier");
-    address authRequestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".authRequestBuilder");
-    address claimRequestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(
-      ".claimRequestBuilder"
-    );
-    address signatureBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".signatureBuilder");
-    address requestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".requestBuilder");
 
     config = DeploymentConfig({
       proxyAdmin: proxyAdmin,
@@ -361,12 +346,7 @@ contract BaseDeploymentConfig is Script {
       commitmentMapperRegistry: commitmentMapperRegistry,
       sismoAddressesProviderV2: sismoAddressesProviderV2,
       sismoConnectVerifier: sismoConnectVerifier,
-      hydraS3Verifier: hydraS3Verifier,
-      // external libraries
-      authRequestBuilder: authRequestBuilder,
-      claimRequestBuilder: claimRequestBuilder,
-      signatureBuilder: signatureBuilder,
-      requestBuilder: requestBuilder
+      hydraS3Verifier: hydraS3Verifier
     });
   }
 
@@ -449,18 +429,6 @@ contract BaseDeploymentConfig is Script {
       "sismoConnectVerifier",
       address(deploymentConfig.sismoConnectVerifier)
     );
-    vm.serializeAddress(
-      chainName,
-      "authRequestBuilder",
-      address(deploymentConfig.authRequestBuilder)
-    );
-    vm.serializeAddress(
-      chainName,
-      "claimRequestBuilder",
-      address(deploymentConfig.claimRequestBuilder)
-    );
-    vm.serializeAddress(chainName, "signatureBuilder", address(deploymentConfig.signatureBuilder));
-    vm.serializeAddress(chainName, "requestBuilder", address(deploymentConfig.requestBuilder));
     vm.serializeAddress(chainName, "proxyAdmin", address(deploymentConfig.proxyAdmin));
     vm.serializeAddress(chainName, "owner", address(deploymentConfig.owner));
     vm.serializeAddress(chainName, "rootsOwner", address(deploymentConfig.rootsOwner));

@@ -5,6 +5,7 @@ libs = ["lib"]
 fs_permissions = [{ access = "read-write", path = "./"}]
 
 bytecode_hash="none"
+solc_version="0.8.19"
 
 [fmt]
 ignore = ["test/libs/SimoConnectLib.t.sol"]
