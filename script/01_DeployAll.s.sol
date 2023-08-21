@@ -42,12 +42,15 @@ contract DeployAll is Script, BaseDeploymentConfig {
     );
     sismoConnectVerifier = _deploySismoConnectVerifier(msg.sender);
 
-    sismoConnectVerifier.registerVerifier(
-      hydraS3Verifier.HYDRA_S3_VERSION(),
-      address(hydraS3Verifier)
-    );
+    // only register and transfer ownership if the sismoConnectVerifier contract is not already deployed
+    if (config.sismoConnectVerifier == address(0)) {
+      sismoConnectVerifier.registerVerifier(
+        hydraS3Verifier.HYDRA_S3_VERSION(),
+        address(hydraS3Verifier)
+      );
 
-    sismoConnectVerifier.transferOwnership(config.owner);
+      sismoConnectVerifier.transferOwnership(config.owner);
+    }
 
     contracts.availableRootsRegistry = availableRootsRegistry;
     contracts.commitmentMapperRegistry = commitmentMapperRegistry;
@@ -146,6 +149,7 @@ contract DeployAll is Script, BaseDeploymentConfig {
     address sismoConnectVerifierAddress = config.sismoConnectVerifier;
     if (sismoConnectVerifierAddress != address(0)) {
       console.log("Using existing sismoConnectVerifier:", sismoConnectVerifierAddress);
+      console.log("Be careful to register the new HydraS3Verifier contract if there is one!");
       return SismoConnectVerifier(sismoConnectVerifierAddress);
     }
     SismoConnectVerifier sismoConnectVerifierImplem = new SismoConnectVerifier(owner);
