@@ -9,7 +9,7 @@ import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapp
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {HydraS3ProofData, HydraS3Lib, HydraS3ProofInput} from "./HydraS3Lib.sol";
-import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
+import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/utils/Structs.sol";
 
 contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifier, Initializable {
   using HydraS3Lib for HydraS3ProofData;
@@ -57,7 +57,7 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
     bool isImpersonationMode,
     bytes memory signedMessage,
     SismoConnectProof memory sismoConnectProof
-  ) external returns (VerifiedAuth memory, VerifiedClaim memory) {
+  ) external view returns (VerifiedAuth memory, VerifiedClaim memory) {
     // Verify the sismoConnectProof version corresponds to the current verifier.
     if (sismoConnectProof.provingScheme != HYDRA_S3_VERSION) {
       revert InvalidVersion(sismoConnectProof.provingScheme);
@@ -288,23 +288,13 @@ contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifie
     }
   }
 
-  function _checkSnarkProof(HydraS3ProofData memory snarkProofData) internal {
-    // low-level call to the `verifyProof` function
-    // since the function only accepts arguments located in calldata
-    (bool success, bytes memory result) = address(this).call(
-      abi.encodeWithSelector(
-        this.verifyProof.selector,
-        snarkProofData.proof.a,
-        snarkProofData.proof.b,
-        snarkProofData.proof.c,
-        snarkProofData.input
-      )
+  function _checkSnarkProof(HydraS3ProofData memory snarkProofData) internal view {
+    bool isVerified = this.verifyProof(
+      snarkProofData.proof.a,
+      snarkProofData.proof.b,
+      snarkProofData.proof.c,
+      snarkProofData.input
     );
-
-    if (!success) {
-      revert CallToVerifyProofFailed();
-    }
-    bool isVerified = abi.decode(result, (bool));
 
     if (!isVerified) {
       revert InvalidProof();

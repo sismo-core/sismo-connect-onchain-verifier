@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
 import {IBaseVerifier} from "src/interfaces/IBaseVerifier.sol";
-import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
+import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/utils/Structs.sol";
 
 contract VerifierMock is IBaseVerifier {
   bytes32 public immutable VERSION = "mock-scheme";

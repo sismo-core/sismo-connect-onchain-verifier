@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../libs/utils/Structs.sol";
+import "../utils/Structs.sol";
 
 interface ISismoConnectVerifier {
   event VerifierSet(bytes32, address);
@@ -15,7 +15,7 @@ interface ISismoConnectVerifier {
     SismoConnectResponse memory response,
     SismoConnectRequest memory request,
     SismoConnectConfig memory config
-  ) external returns (SismoConnectVerifiedResult memory);
+  ) external view returns (SismoConnectVerifiedResult memory);
 
   function SISMO_CONNECT_VERSION() external view returns (bytes32);
 }

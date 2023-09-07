@@ -6,17 +6,13 @@ import "forge-std/console.sol";
 
 // struct fields are sorted by alphabetical order to be able to parse the config from the deployment files
 struct DeploymentConfig {
-  address authRequestBuilder;
   address availableRootsRegistry;
-  address claimRequestBuilder;
   uint256[2] commitmentMapperEdDSAPubKey;
   address commitmentMapperRegistry;
   address hydraS3Verifier;
   address owner;
   address proxyAdmin;
-  address requestBuilder;
   address rootsOwner;
-  address signatureBuilder;
   address sismoAddressesProviderV2;
   address sismoConnectVerifier;
 }
@@ -46,6 +42,7 @@ contract BaseDeploymentConfig is Script {
   address immutable MAIN_POLYGON_ROOTS_OWNER = 0xF0a0B692e1c764281c211948D03edEeF5Fb57111;
   address immutable MAIN_OPTIMISM_ROOTS_OWNER = 0xf8640cE5532BCbc788489Bf5A786635ae585258B;
   address immutable MAIN_ARBITRUM_ONE_ROOTS_OWNER = 0x1BB9AD70F529e36B7Ffed0cfA44fA4cf0213Fa09;
+  address immutable MAIN_BASE_ROOTS_OWNER = 0x8f9c04d7bA132Fd0CbA124eFCE3936328d217458;
   address immutable MAIN_MAINNET_ROOTS_OWNER = 0x2a265b954B96d4940B94eb69E8Fc8E7346369D05;
 
   // Testnet Env
@@ -58,6 +55,7 @@ contract BaseDeploymentConfig is Script {
     0xe807B5153e3eD4767C3F4EB50b65Fab90c57596B;
   address immutable TESTNET_ARBITRUM_GOERLI_ROOTS_OWNER =
     0x8eAb4616d47F82C890fdb6eE311A4C0aE34ba7fb;
+  address immutable TESTNET_BASE_GOERLI_ROOTS_OWNER = 0x8f9c04d7bA132Fd0CbA124eFCE3936328d217458;
   address immutable TESTNET_SCROLL_GOERLI_ROOTS_OWNER = 0x8f9c04d7bA132Fd0CbA124eFCE3936328d217458;
 
   // Sismo Staging env (Sismo internal use only)
@@ -81,11 +79,13 @@ contract BaseDeploymentConfig is Script {
     Polygon,
     Optimism,
     ArbitrumOne,
+    Base,
     TestnetGoerli,
     TestnetSepolia,
     TestnetMumbai,
     OptimismGoerli,
     ArbitrumGoerli,
+    BaseGoerli,
     ScrollTestnetGoerli,
     StagingGoerli,
     StagingMumbai,
@@ -103,6 +103,8 @@ contract BaseDeploymentConfig is Script {
       return DeployChain.Optimism;
     } else if (_compareStrings(chainName, "arbitrum-one")) {
       return DeployChain.ArbitrumOne;
+    } else if (_compareStrings(chainName, "base")) {
+      return DeployChain.Base;
     } else if (_compareStrings(chainName, "testnet-goerli")) {
       return DeployChain.TestnetGoerli;
     } else if (_compareStrings(chainName, "testnet-sepolia")) {
@@ -113,6 +115,8 @@ contract BaseDeploymentConfig is Script {
       return DeployChain.OptimismGoerli;
     } else if (_compareStrings(chainName, "arbitrum-goerli")) {
       return DeployChain.ArbitrumGoerli;
+    } else if (_compareStrings(chainName, "base-goerli")) {
+      return DeployChain.BaseGoerli;
     } else if (_compareStrings(chainName, "scroll-testnet-goerli")) {
       return DeployChain.ScrollTestnetGoerli;
     } else if (_compareStrings(chainName, "staging-goerli")) {
@@ -139,12 +143,7 @@ contract BaseDeploymentConfig is Script {
         ".sismoAddressesProviderV2"
       ),
       sismoConnectVerifier: ZERO_ADDRESS,
-      hydraS3Verifier: ZERO_ADDRESS,
-      // external libraries
-      authRequestBuilder: ZERO_ADDRESS,
-      claimRequestBuilder: ZERO_ADDRESS,
-      signatureBuilder: ZERO_ADDRESS,
-      requestBuilder: ZERO_ADDRESS
+      hydraS3Verifier: ZERO_ADDRESS
     });
 
     return config;
@@ -201,6 +200,16 @@ contract BaseDeploymentConfig is Script {
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
         ]
       });
+    } else if (chain == DeployChain.Base) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: MAIN_PROXY_ADMIN,
+        owner: MAIN_OWNER,
+        rootsOwner: MAIN_BASE_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
     } else if (chain == DeployChain.TestnetGoerli) {
       minimalConfig = MinimalConfig({
         proxyAdmin: TESTNET_PROXY_ADMIN,
@@ -246,6 +255,16 @@ contract BaseDeploymentConfig is Script {
         proxyAdmin: TESTNET_PROXY_ADMIN,
         owner: TESTNET_OWNER,
         rootsOwner: TESTNET_ARBITRUM_GOERLI_ROOTS_OWNER,
+        commitmentMapperEdDSAPubKey: [
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
+          PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
+        ]
+      });
+    } else if (chain == DeployChain.BaseGoerli) {
+      minimalConfig = MinimalConfig({
+        proxyAdmin: TESTNET_PROXY_ADMIN,
+        owner: TESTNET_OWNER,
+        rootsOwner: TESTNET_BASE_GOERLI_ROOTS_OWNER,
         commitmentMapperEdDSAPubKey: [
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_X,
           PROD_BETA_COMMITMENT_MAPPER_PUB_KEY_Y
@@ -345,12 +364,6 @@ contract BaseDeploymentConfig is Script {
       ".sismoConnectVerifier"
     );
     address hydraS3Verifier = _tryReadingAddressFromDeploymentConfigAtKey(".hydraS3Verifier");
-    address authRequestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".authRequestBuilder");
-    address claimRequestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(
-      ".claimRequestBuilder"
-    );
-    address signatureBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".signatureBuilder");
-    address requestBuilder = _tryReadingAddressFromDeploymentConfigAtKey(".requestBuilder");
 
     config = DeploymentConfig({
       proxyAdmin: proxyAdmin,
@@ -361,23 +374,8 @@ contract BaseDeploymentConfig is Script {
       commitmentMapperRegistry: commitmentMapperRegistry,
       sismoAddressesProviderV2: sismoAddressesProviderV2,
       sismoConnectVerifier: sismoConnectVerifier,
-      hydraS3Verifier: hydraS3Verifier,
-      // external libraries
-      authRequestBuilder: authRequestBuilder,
-      claimRequestBuilder: claimRequestBuilder,
-      signatureBuilder: signatureBuilder,
-      requestBuilder: requestBuilder
+      hydraS3Verifier: hydraS3Verifier
     });
-  }
-
-  function _readAddressFromDeploymentConfigAtKey(
-    string memory key
-  ) internal view returns (address) {
-    bytes memory encodedAddress = vm.parseJson(vm.readFile(_deploymentConfigFilePath()), key);
-    return
-      abi.decode(encodedAddress, (address)) == address(0x20)
-        ? address(0)
-        : abi.decode(encodedAddress, (address));
   }
 
   function _tryReadingAddressFromDeploymentConfigAtKey(
@@ -387,7 +385,7 @@ contract BaseDeploymentConfig is Script {
       bytes memory encodedAddress
     ) {
       return
-        abi.decode(encodedAddress, (address)) == address(0x20)
+        keccak256(encodedAddress) == keccak256(abi.encodePacked(("")))
           ? address(0)
           : abi.decode(encodedAddress, (address));
     } catch {
@@ -449,18 +447,6 @@ contract BaseDeploymentConfig is Script {
       "sismoConnectVerifier",
       address(deploymentConfig.sismoConnectVerifier)
     );
-    vm.serializeAddress(
-      chainName,
-      "authRequestBuilder",
-      address(deploymentConfig.authRequestBuilder)
-    );
-    vm.serializeAddress(
-      chainName,
-      "claimRequestBuilder",
-      address(deploymentConfig.claimRequestBuilder)
-    );
-    vm.serializeAddress(chainName, "signatureBuilder", address(deploymentConfig.signatureBuilder));
-    vm.serializeAddress(chainName, "requestBuilder", address(deploymentConfig.requestBuilder));
     vm.serializeAddress(chainName, "proxyAdmin", address(deploymentConfig.proxyAdmin));
     vm.serializeAddress(chainName, "owner", address(deploymentConfig.owner));
     vm.serializeAddress(chainName, "rootsOwner", address(deploymentConfig.rootsOwner));
