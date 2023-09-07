@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 import "./interfaces/ISismoConnectVerifier.sol";
-import {AuthMatchingLib} from "./libs/utils/AuthMatchingLib.sol";
-import {ClaimMatchingLib} from "./libs/utils/ClaimMatchingLib.sol";
+import {AuthMatchingLib} from "./utils/AuthMatchingLib.sol";
+import {ClaimMatchingLib} from "./utils/ClaimMatchingLib.sol";
 import {IBaseVerifier} from "./interfaces/IBaseVerifier.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";

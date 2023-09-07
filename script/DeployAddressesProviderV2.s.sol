@@ -101,11 +101,7 @@ contract DeployAddressesProviderV2 is Script, BaseDeploymentConfig {
       availableRootsRegistry: config.availableRootsRegistry,
       commitmentMapperRegistry: config.commitmentMapperRegistry,
       hydraS3Verifier: config.hydraS3Verifier,
-      sismoConnectVerifier: config.sismoConnectVerifier,
-      authRequestBuilder: config.authRequestBuilder,
-      claimRequestBuilder: config.claimRequestBuilder,
-      signatureBuilder: config.signatureBuilder,
-      requestBuilder: config.requestBuilder
+      sismoConnectVerifier: config.sismoConnectVerifier
     });
 
     _saveDeploymentConfig(chainName, newDeploymentConfig);

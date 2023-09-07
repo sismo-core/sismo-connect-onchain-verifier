@@ -9,7 +9,7 @@ import {ICommitmentMapperRegistry} from "../periphery/interfaces/ICommitmentMapp
 import {IAvailableRootsRegistry} from "../periphery/interfaces/IAvailableRootsRegistry.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {HydraS3ProofData, HydraS3Lib, HydraS3ProofInput} from "./HydraS3Lib.sol";
-import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
+import {Auth, ClaimType, AuthType, Claim, SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/utils/Structs.sol";
 
 contract HydraS3Verifier is IHydraS3Verifier, IBaseVerifier, HydraS3SnarkVerifier, Initializable {
   using HydraS3Lib for HydraS3ProofData;

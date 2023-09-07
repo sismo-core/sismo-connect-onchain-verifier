@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.17;
 
-import {SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/libs/utils/Structs.sol";
+import {SismoConnectProof, VerifiedAuth, VerifiedClaim} from "src/utils/Structs.sol";
 
 interface IBaseVerifier {
   function verify(

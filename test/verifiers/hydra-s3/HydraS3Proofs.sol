@@ -1,13 +1,12 @@
-// SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 import "forge-std/console.sol";
-import "src/libs/utils/Structs.sol";
-import {AuthBuilder} from "src/libs/utils/AuthBuilder.sol";
-import {ClaimBuilder} from "src/libs/utils/ClaimBuilder.sol";
-import {ProofBuilder} from "src/libs/utils/SismoConnectProofBuilder.sol";
+import "src/utils/Structs.sol";
+import {AuthBuilder} from "src/utils/AuthBuilder.sol";
+import {ClaimBuilder} from "src/utils/ClaimBuilder.sol";
+import {ProofBuilder} from "src/utils/SismoConnectProofBuilder.sol";
 import {ResponseBuilder} from "test/utils/ResponseBuilderLib.sol";
-import {ICommitmentMapperRegistry} from "test/mocks/CommitmentMapperRegistryMock.sol";
 
 contract HydraS3Proofs {
   using ResponseBuilder for SismoConnectResponse;
